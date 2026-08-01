@@ -62,12 +62,57 @@ full CI.
 ## Deploying
 
 `.github/workflows/deploy.yml` deploys on push to `main`, on a CMS publish
-webhook (`repository_dispatch`), or manually (`workflow_dispatch`). The same
-sequence is available locally as the manual escape hatch:
+webhook (`repository_dispatch`), or manually (`workflow_dispatch`). One job per
+site does CMS-then-web, serialized per site and never cancelled mid-flight. The
+same sequence is available locally as the manual escape hatch:
 
 ```
 npm run release -- --site terminal
 ```
+
+## Previews
+
+Each PR gets its own Worker per site in `vars.PREVIEW_SITES`, named
+`blogstack-web-<site>-pr-<N>`, on workers.dev with no route and no custom
+domain. It is built against the dev CMS, so previews never render production
+content or embed a production hostname.
+
+Previews run in a per-PR GitHub Environment (`pr-<N>-<site>`), deliberately not
+the site's production Environment — a PR must never be handed production
+credentials or hostnames. `ci-gen-wrangler` enforces this: `PREVIEW=1` fails if
+any production host secret is in scope.
+
+When the PR closes, `preview.yml`'s cleanup job deletes the Worker, marks the
+deployments inactive, deletes them, and deletes the Environment.
+`preview-reconcile.yml` sweeps nightly for orphans, since a `closed` webhook can
+be dropped entirely.
+
+This is a per-PR Worker rather than `wrangler versions upload` because
+Cloudflare has no per-version or per-alias delete — a version-based preview
+outlives its PR — and because a preview version would otherwise sit in the
+production Worker's version history, one `wrangler versions deploy` away from
+serving live traffic. `preview_urls` is correspondingly `false` on the
+production env blocks, enforced by the config-drift check.
+
+### Required secrets
+
+Environment secrets, per deployed site (`terminal`, `folio`) — production only:
+
+| Secret | Purpose |
+|---|---|
+| `CF_API_TOKEN`, `CF_ACCOUNT_ID` | Deploy credentials for that site |
+| `CMS_HOST`, `WEB_HOST`, `WEB_ORIGIN` | That site's hostnames |
+
+Repository secrets — used by the preview, cleanup and reconcile jobs, which are
+not scoped to a production Environment. A same-named Environment secret wins for
+deploy jobs, so these do not weaken production scoping:
+
+| Secret | Purpose |
+|---|---|
+| `CF_API_TOKEN`, `CF_ACCOUNT_ID` | Preview deploy and teardown |
+| `DEV_CMS_URL` | Dev CMS that previews build against |
+| `CF_WORKERS_SUBDOMAIN` | Account workers.dev subdomain, to compute a preview's own `SITE_URL` |
+| `GH_ADMIN_TOKEN` | Fine-grained PAT, Administration: Read and write. `GITHUB_TOKEN` cannot delete Environments at any permission level |
 
 ## License
 
