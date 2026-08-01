@@ -109,10 +109,22 @@ deploy jobs, so these do not weaken production scoping:
 
 | Secret | Purpose |
 |---|---|
-| `CF_API_TOKEN`, `CF_ACCOUNT_ID` | Preview deploy and teardown |
+| `CF_API_TOKEN`, `CF_ACCOUNT_ID` | Deploy and teardown, for every workflow |
 | `DEV_CMS_URL` | Dev CMS that previews build against |
-| `CF_WORKERS_SUBDOMAIN` | Account workers.dev subdomain, to compute a preview's own `SITE_URL` |
 | `GH_ADMIN_TOKEN` | Fine-grained PAT, Administration: Read and write. `GITHUB_TOKEN` cannot delete Environments at any permission level |
+
+Repository **variables**:
+
+| Variable | Purpose |
+|---|---|
+| `SITES`, `PREVIEW_SITES` | Deploy and preview matrices |
+| `CF_WORKERS_SUBDOMAIN` | Account workers.dev subdomain, to compute a preview's own `SITE_URL` |
+
+`CF_WORKERS_SUBDOMAIN` must be a variable, not a secret. A secret is masked to
+`***` everywhere it appears, including inside the resolved `environment.url`,
+which then is not a valid URL — GitHub silently drops it and the deployments
+page loses its link. The value is not sensitive: it appears verbatim in the
+preview URL posted to every PR.
 
 ## License
 

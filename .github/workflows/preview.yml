@@ -36,16 +36,16 @@ jobs:
     env:
       WORKER_NAME: blogstack-web-${{ matrix.site }}-pr-${{ github.event.pull_request.number }}
     steps:
-      # These are repository secrets, because this job deliberately runs in a
-      # per-PR environment that holds none. Without this check a missing one
-      # surfaces far downstream as an opaque error — an empty CMS_URL fails as
-      # "Failed to parse URL from /api/blog_post" inside the Astro build, and an
-      # empty CF_WORKERS_SUBDOMAIN silently yields a malformed `host..workers.dev`.
+      # These live at repository level, because this job deliberately runs in a
+      # per-PR environment that holds no secrets. Without this check a missing
+      # one surfaces far downstream as an opaque error — an empty CMS_URL fails
+      # as "Failed to parse URL from /api/blog_post" inside the Astro build, and
+      # an empty subdomain silently yields a malformed `host..workers.dev`.
       - name: Check required secrets
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-          CF_WORKERS_SUBDOMAIN: ${{ secrets.CF_WORKERS_SUBDOMAIN }}
+          CF_WORKERS_SUBDOMAIN: ${{ vars.CF_WORKERS_SUBDOMAIN }}
           DEV_CMS_URL: ${{ secrets.DEV_CMS_URL }}
         run: |
           missing=''
@@ -77,10 +77,16 @@ jobs:
       # It used to be secrets.WEB_ORIGIN, which both handed the production
       # hostname to every PR job and put production canonical URLs into
       # throwaway preview builds.
+      #
+      # The subdomain is a *variable*, not a secret, and must stay one. As a
+      # secret it gets masked to *** everywhere, including inside the resolved
+      # `environment.url` below — which then isn't a valid URL, so GitHub drops
+      # it and the deployments page has no link. The value is not sensitive: it
+      # appears verbatim in the preview URL in every PR comment.
       - run: npm run build --workspace apps/web-${{ matrix.site }}
         env:
           CMS_URL: ${{ secrets.DEV_CMS_URL }}
-          SITE_URL: https://${{ env.WORKER_NAME }}.${{ secrets.CF_WORKERS_SUBDOMAIN }}.workers.dev
+          SITE_URL: https://${{ env.WORKER_NAME }}.${{ vars.CF_WORKERS_SUBDOMAIN }}.workers.dev
       - run: npm run ci-gen-wrangler
         env:
           CURRENT_SITE: ${{ matrix.site }}
