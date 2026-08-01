@@ -1,4 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>cjfinnell/renovate-config"]
+  "extends": ["github>cjfinnell/renovate-config"],
+  "packageRules": [
+    {
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7.0.0",
+      "description": "TypeScript 7's native (Go) compiler doesn't expose the programmatic API astro check needs yet (withastro/roadmap#1321). Remove this once Astro supports it."
+    }
+  ]
 }
