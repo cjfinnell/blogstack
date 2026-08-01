@@ -35,7 +35,11 @@ r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-terminal-medi
 [env.web_terminal]
 name = "blogstack-web-terminal"
 workers_dev = false
-preview_urls = true
+# preview_urls is deliberately off. It existed for `wrangler versions upload`
+# previews, which are gone (see the preview_* envs below). Leaving it on would
+# give every *production* version a public <hash>-blogstack-web-terminal.workers.dev
+# URL that bypasses the custom domain.
+preview_urls = false
 assets = { directory = "apps/web-terminal/dist" }
 routes = [{ pattern = "${TERMINAL_WEB_HOST}", custom_domain = true }]
 
@@ -52,5 +56,29 @@ r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-folio-media" 
 [env.web_folio]
 name = "blogstack-web-folio"
 workers_dev = false
+preview_urls = false
 assets = { directory = "apps/web-folio/dist" }
 routes = [{ pattern = "${FOLIO_WEB_HOST}", custom_domain = true }]
+
+# ---------- per-PR previews ----------
+# One block per deployed site. Assets-only, workers.dev, no routes and no
+# custom domain, so a preview can never answer on a production hostname.
+#
+# The `name` here is a placeholder: preview.yml always passes
+# `--name blogstack-web-<site>-pr-<N>`, giving each PR its own standalone
+# Worker. That is the whole point — a per-PR Worker can be `wrangler delete`d
+# when the PR closes, whereas the old `wrangler versions upload` approach put a
+# version on the *production* Worker and Cloudflare has no per-version delete,
+# so those preview URLs outlived the PR indefinitely.
+#
+# These blocks are deliberately placeholder-free: previews build against the
+# dev CMS and never see a production hostname.
+[env.preview_terminal]
+name = "blogstack-web-terminal-preview"
+workers_dev = true
+assets = { directory = "apps/web-terminal/dist" }
+
+[env.preview_folio]
+name = "blogstack-web-folio-preview"
+workers_dev = true
+assets = { directory = "apps/web-folio/dist" }
