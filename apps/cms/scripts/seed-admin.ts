@@ -4,7 +4,7 @@ import { getPlatformProxy } from 'wrangler';
 /**
  * Seed script to create the initial admin user.
  *
- * Email:    ADMIN_EMAIL, default contact@connorfinnell.com
+ * Email:    ADMIN_EMAIL, default admin@connorfinnell.com
  * Password: ADMIN_PASSWORD (required)
  * Env:      SEED_ENV, default "dev" — which wrangler.toml [env.*] block to
  *           read bindings from (there are no top-level bindings, only named
@@ -36,7 +36,7 @@ async function hashPassword(password: string) {
 
 async function seed() {
   const remote = process.env.SEED_REMOTE === '1';
-  const email = process.env.ADMIN_EMAIL || 'contact@connorfinnell.com';
+  const email = process.env.ADMIN_EMAIL || 'admin@connorfinnell.com';
   const environment = process.env.SEED_ENV || 'dev';
   const { env, dispose } = await getPlatformProxy(
     remote ? { environment, remoteBindings: true } : { environment }
