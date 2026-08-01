@@ -39,8 +39,22 @@ jobs:
       # env.web_terminal in wrangler.template.toml).
       - id: deploy
         run: |
+          set -o pipefail
+          # `output=$(cmd | tee ...)` alone swallows cmd's exit status — the
+          # substitution reflects tee's, which is always 0 — so a failed
+          # wrangler call would post a blank, silently "successful" comment.
+          # pipefail plus an explicit check makes the step actually fail.
           output=$(npx wrangler versions upload --env web_${{ matrix.site }} 2>&1 | tee /dev/stderr)
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "wrangler versions upload failed (exit $status)" >&2
+            exit "$status"
+          fi
           url=$(echo "$output" | grep -Eo 'https://[a-zA-Z0-9.-]+\.workers\.dev' | tail -1)
+          if [ -z "$url" ]; then
+            echo "wrangler succeeded but no preview URL was found in its output" >&2
+            exit 1
+          fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
