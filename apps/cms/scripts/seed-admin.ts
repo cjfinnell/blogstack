@@ -6,10 +6,12 @@ import { getPlatformProxy } from 'wrangler';
  *
  * Email:    ADMIN_EMAIL, default contact@connorfinnell.com
  * Password: ADMIN_PASSWORD (required)
+ * Env:      SEED_ENV, default "dev" — which wrangler.toml [env.*] block to
+ *           read bindings from (there are no top-level bindings, only named
+ *           envs, so getPlatformProxy needs to be told which one).
  *
  * Targets the local D1 database by default. Set SEED_REMOTE=1 to seed the
- * deployed database instead — run with `wrangler --env cms_<site>` context,
- * e.g. via `npm run release`.
+ * deployed database instead, e.g. SEED_REMOTE=1 SEED_ENV=cms_terminal.
  */
 
 async function hashPassword(password: string) {
@@ -35,7 +37,10 @@ async function hashPassword(password: string) {
 async function seed() {
   const remote = process.env.SEED_REMOTE === '1';
   const email = process.env.ADMIN_EMAIL || 'contact@connorfinnell.com';
-  const { env, dispose } = await getPlatformProxy(remote ? { remoteBindings: true } : {});
+  const environment = process.env.SEED_ENV || 'dev';
+  const { env, dispose } = await getPlatformProxy(
+    remote ? { environment, remoteBindings: true } : { environment }
+  );
   console.log(`Seeding ${remote ? 'REMOTE (deployed)' : 'LOCAL'} database`);
 
   const db = (env as { DB?: D1Database }).DB;
