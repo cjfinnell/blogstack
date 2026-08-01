@@ -13,8 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "types": ["node"],
-    "rootDir": ".",
-    "baseUrl": "."
+    "rootDir": "."
   },
   "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"]
