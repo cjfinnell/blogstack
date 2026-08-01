@@ -19,10 +19,10 @@ jobs:
       sites: ${{ steps.resolve.outputs.sites }}
       cms_changed: ${{ steps.resolve.outputs.cms_changed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@v4
       - run: npm ci
       - id: resolve
         run: npm run resolve-deploy-matrix
@@ -43,8 +43,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ matrix.site }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
+      - uses: actions/checkout@v5
+      - uses: jdx/mise-action@v4
       - run: npm ci
       - run: npm run ci-gen-wrangler
         env:
@@ -73,8 +73,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ matrix.site }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
+      - uses: actions/checkout@v5
+      - uses: jdx/mise-action@v4
       - run: npm ci
       - run: npm run ci-gen-wrangler
         env:
