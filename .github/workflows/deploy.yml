@@ -1,0 +1,89 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [cms-publish]
+  workflow_dispatch:
+    inputs:
+      site:
+        description: Site to deploy, or "all"
+        required: true
+        default: all
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      sites: ${{ steps.resolve.outputs.sites }}
+      cms_changed: ${{ steps.resolve.outputs.cms_changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v2
+      - run: npm ci
+      - id: resolve
+        run: npm run resolve-deploy-matrix
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          ALL_SITES: ${{ vars.SITES }}
+          DISPATCH_SITE: ${{ github.event.client_payload.site }}
+          INPUT_SITE: ${{ github.event.inputs.site }}
+          BASE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+
+  deploy-cms:
+    needs: resolve
+    if: needs.resolve.outputs.cms_changed == 'true' && needs.resolve.outputs.sites != '[]'
+    strategy:
+      matrix:
+        site: ${{ fromJSON(needs.resolve.outputs.sites) }}
+    runs-on: ubuntu-latest
+    environment: ${{ matrix.site }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: npm ci
+      - run: npm run ci-gen-wrangler
+        env:
+          CURRENT_SITE: ${{ matrix.site }}
+          CMS_HOST: ${{ secrets.CMS_HOST }}
+          WEB_HOST: ${{ secrets.WEB_HOST }}
+          WEB_ORIGIN: ${{ secrets.WEB_ORIGIN }}
+      - run: npx wrangler d1 migrations apply DB --remote --env cms_${{ matrix.site }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      - run: npx wrangler deploy --env cms_${{ matrix.site }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+
+  deploy-web:
+    needs: resolve
+    if: needs.resolve.outputs.sites != '[]'
+    strategy:
+      matrix:
+        site: ${{ fromJSON(needs.resolve.outputs.sites) }}
+    runs-on: ubuntu-latest
+    environment: ${{ matrix.site }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: npm ci
+      - run: npm run ci-gen-wrangler
+        env:
+          CURRENT_SITE: ${{ matrix.site }}
+          CMS_HOST: ${{ secrets.CMS_HOST }}
+          WEB_HOST: ${{ secrets.WEB_HOST }}
+          WEB_ORIGIN: ${{ secrets.WEB_ORIGIN }}
+      - run: npm run build --workspace apps/web-${{ matrix.site }}
+        env:
+          CMS_URL: https://${{ secrets.CMS_HOST }}
+          SITE_URL: ${{ secrets.WEB_ORIGIN }}
+      - run: npx wrangler deploy --env web_${{ matrix.site }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}

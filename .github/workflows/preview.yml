@@ -1,0 +1,70 @@
+name: Preview
+
+# Same-repo PRs only — fork PRs get no secrets (GitHub Environment secrets
+# aren't exposed to fork-originated pull_request runs, but this condition is
+# the explicit belt-and-suspenders check called out in PLAN.md#github-actions).
+on:
+  pull_request:
+
+jobs:
+  preview:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    strategy:
+      matrix:
+        site: ${{ fromJSON(vars.PREVIEW_SITES) }}
+    runs-on: ubuntu-latest
+    environment: ${{ matrix.site }}
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: npm ci
+      # Preview content is dev content, not production content — the tradeoff
+      # for not exposing prod data on PR builds. DEV_CMS_URL is the deployed
+      # env.dev CMS's workers.dev URL (no custom domain, so no anonymity
+      # concern committing it as a secret).
+      - run: npm run build --workspace apps/web-${{ matrix.site }}
+        env:
+          CMS_URL: ${{ secrets.DEV_CMS_URL }}
+          SITE_URL: ${{ secrets.WEB_ORIGIN }}
+      - run: npm run ci-gen-wrangler
+        env:
+          CURRENT_SITE: ${{ matrix.site }}
+          CMS_HOST: ${{ secrets.CMS_HOST }}
+          WEB_HOST: ${{ secrets.WEB_HOST }}
+          WEB_ORIGIN: ${{ secrets.WEB_ORIGIN }}
+      # `wrangler versions upload` uploads a version without shifting
+      # production traffic — requires preview_urls = true (set on
+      # env.web_terminal in wrangler.template.toml).
+      - id: deploy
+        run: |
+          set -o pipefail
+          # `output=$(cmd | tee ...)` alone swallows cmd's exit status — the
+          # substitution reflects tee's, which is always 0 — so a failed
+          # wrangler call would post a blank, silently "successful" comment.
+          # pipefail plus an explicit check makes the step actually fail.
+          output=$(npx wrangler versions upload --env web_${{ matrix.site }} 2>&1 | tee /dev/stderr)
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "wrangler versions upload failed (exit $status)" >&2
+            exit "$status"
+          fi
+          url=$(echo "$output" | grep -Eo 'https://[a-zA-Z0-9.-]+\.workers\.dev' | tail -1)
+          if [ -z "$url" ]; then
+            echo "wrangler succeeded but no preview URL was found in its output" >&2
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Preview (${{ matrix.site }}): ${{ steps.deploy.outputs.url }}`,
+            })

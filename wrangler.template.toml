@@ -1,0 +1,56 @@
+name = "blogstack"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+# main is deliberately NOT top-level. Assets-only workers must omit it,
+# and there is no way to un-inherit a key, so each cms_* env declares it.
+
+# ---------- local dev CMS ----------
+[env.dev]
+name = "blogstack-cms-dev"
+main = "apps/cms/src/index.ts"
+workers_dev = true
+vars = { ENVIRONMENT = "development", SITE_ID = "dev", CORS_ORIGINS = "http://localhost:4321,http://localhost:4322,http://localhost:4323" }
+d1_databases = [{ binding = "DB", database_name = "blogstack-dev-db", database_id = "37738d6b-bd70-4193-8a78-d5f187deb35d", migrations_dir = "./node_modules/@sonicjs-cms/core/migrations", remote = true }]
+r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-dev-media" }]
+
+[env.web_dev]
+name = "blogstack-web-dev"
+workers_dev = true
+assets = { directory = "apps/web-dev/dist" }
+
+# ---------- terminal ----------
+[env.cms_terminal]
+name = "blogstack-cms-terminal"
+main = "apps/cms/src/index.ts"
+workers_dev = false
+routes = [{ pattern = "${TERMINAL_CMS_HOST}", custom_domain = true }]
+vars = { ENVIRONMENT = "production", SITE_ID = "terminal", CORS_ORIGINS = "${TERMINAL_WEB_ORIGIN}", GITHUB_REPO = "cjfinnell/blogstack" }
+d1_databases = [{ binding = "DB", database_name = "blogstack-terminal-db", database_id = "5f0d7b21-2383-4500-8e56-6c574bd13955", migrations_dir = "./node_modules/@sonicjs-cms/core/migrations", remote = true }]
+r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-terminal-media" }]
+
+[env.web_terminal]
+name = "blogstack-web-terminal"
+workers_dev = false
+preview_urls = true
+assets = { directory = "apps/web-terminal/dist" }
+routes = [{ pattern = "${TERMINAL_WEB_HOST}", custom_domain = true }]
+
+# ---------- folio ----------
+[env.cms_folio]
+name = "blogstack-cms-folio"
+main = "apps/cms/src/index.ts"
+workers_dev = false
+routes = [{ pattern = "${FOLIO_CMS_HOST}", custom_domain = true }]
+vars = { ENVIRONMENT = "production", SITE_ID = "folio", CORS_ORIGINS = "${FOLIO_WEB_ORIGIN}", GITHUB_REPO = "cjfinnell/blogstack" }
+d1_databases = [{ binding = "DB", database_name = "blogstack-folio-db", database_id = "34cdc9d3-e897-4d85-aa8c-7ef8b664aa04", migrations_dir = "./node_modules/@sonicjs-cms/core/migrations", remote = true }]
+r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-folio-media" }]
+
+[env.web_folio]
+name = "blogstack-web-folio"
+workers_dev = false
+assets = { directory = "apps/web-folio/dist" }
+routes = [{ pattern = "${FOLIO_WEB_HOST}", custom_domain = true }]
