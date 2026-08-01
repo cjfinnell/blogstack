@@ -3,20 +3,61 @@ name: Preview
 # Same-repo PRs only — fork PRs get no secrets (GitHub Environment secrets
 # aren't exposed to fork-originated pull_request runs, but this condition is
 # the explicit belt-and-suspenders check called out in PLAN.md#github-actions).
+#
+# `closed` is in the trigger list so the cleanup job can tear the preview down.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
 
 jobs:
   preview:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
     strategy:
       matrix:
         site: ${{ fromJSON(vars.PREVIEW_SITES) }}
+      fail-fast: false
     runs-on: ubuntu-latest
-    environment: ${{ matrix.site }}
+    concurrency:
+      # Superseded pushes are pointless work — the newer commit wins anyway.
+      group: preview-${{ github.event.pull_request.number }}-${{ matrix.site }}
+      cancel-in-progress: true
+    # A per-PR Environment, NOT the site's production Environment. Previously
+    # this was `environment: ${{ matrix.site }}`, which meant every PR (Renovate
+    # included) filed a deployment against the real `terminal`/`folio`
+    # environment — previews and production kept marking each other inactive,
+    # and every PR branch was handed the production CF token and hostnames.
+    environment:
+      name: pr-${{ github.event.pull_request.number }}-${{ matrix.site }}
+      url: ${{ steps.deploy.outputs.url }}
     permissions:
+      contents: read
+      deployments: write
       pull-requests: write
+    env:
+      WORKER_NAME: blogstack-web-${{ matrix.site }}-pr-${{ github.event.pull_request.number }}
     steps:
+      # These live at repository level, because this job deliberately runs in a
+      # per-PR environment that holds no secrets. Without this check a missing
+      # one surfaces far downstream as an opaque error — an empty CMS_URL fails
+      # as "Failed to parse URL from /api/blog_post" inside the Astro build, and
+      # an empty subdomain silently yields a malformed `host..workers.dev`.
+      - name: Check required secrets
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_WORKERS_SUBDOMAIN: ${{ vars.CF_WORKERS_SUBDOMAIN }}
+          DEV_CMS_URL: ${{ secrets.DEV_CMS_URL }}
+        run: |
+          missing=''
+          for name in CF_API_TOKEN CF_ACCOUNT_ID CF_WORKERS_SUBDOMAIN DEV_CMS_URL; do
+            if [ -z "${!name}" ]; then
+              missing="$missing $name"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing — see README, Previews > Required secrets."
+            exit 1
+          fi
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v4
       - uses: actions/cache@v6
@@ -30,19 +71,34 @@ jobs:
       # for not exposing prod data on PR builds. DEV_CMS_URL is the deployed
       # env.dev CMS's workers.dev URL (no custom domain, so no anonymity
       # concern committing it as a secret).
+      #
+      # SITE_URL is the preview's *own* workers.dev origin — the deployed
+      # Worker name is deterministic, so it can be computed before the deploy.
+      # It used to be secrets.WEB_ORIGIN, which both handed the production
+      # hostname to every PR job and put production canonical URLs into
+      # throwaway preview builds.
+      #
+      # The subdomain is a *variable*, not a secret, and must stay one. As a
+      # secret it gets masked to *** everywhere, including inside the resolved
+      # `environment.url` below — which then isn't a valid URL, so GitHub drops
+      # it and the deployments page has no link. The value is not sensitive: it
+      # appears verbatim in the preview URL in every PR comment.
       - run: npm run build --workspace apps/web-${{ matrix.site }}
         env:
           CMS_URL: ${{ secrets.DEV_CMS_URL }}
-          SITE_URL: ${{ secrets.WEB_ORIGIN }}
+          SITE_URL: https://${{ env.WORKER_NAME }}.${{ vars.CF_WORKERS_SUBDOMAIN }}.workers.dev
       - run: npm run ci-gen-wrangler
         env:
           CURRENT_SITE: ${{ matrix.site }}
-          CMS_HOST: ${{ secrets.CMS_HOST }}
-          WEB_HOST: ${{ secrets.WEB_HOST }}
-          WEB_ORIGIN: ${{ secrets.WEB_ORIGIN }}
-      # `wrangler versions upload` uploads a version without shifting
-      # production traffic — requires preview_urls = true (set on
-      # env.web_terminal in wrangler.template.toml).
+          # No CMS_HOST/WEB_HOST/WEB_ORIGIN: env.preview_<site> declares no
+          # placeholders, and ci-gen-wrangler rejects PREVIEW=1 if production
+          # host secrets are present at all.
+          PREVIEW: '1'
+      # A standalone per-PR Worker, not `wrangler versions upload`. Cloudflare
+      # has no per-version or per-alias delete, so a version-based preview
+      # outlives its PR; a Worker can simply be deleted (see the cleanup job).
+      # It also keeps dev-content builds out of the production Worker's version
+      # history, where a stray `wrangler versions deploy` could promote one.
       - id: deploy
         run: |
           set -o pipefail
@@ -50,10 +106,10 @@ jobs:
           # substitution reflects tee's, which is always 0 — so a failed
           # wrangler call would post a blank, silently "successful" comment.
           # pipefail plus an explicit check makes the step actually fail.
-          output=$(npx wrangler versions upload --env web_${{ matrix.site }} 2>&1 | tee /dev/stderr)
+          output=$(npx wrangler deploy --env preview_${{ matrix.site }} --name "$WORKER_NAME" 2>&1 | tee /dev/stderr)
           status=$?
           if [ "$status" -ne 0 ]; then
-            echo "wrangler versions upload failed (exit $status)" >&2
+            echo "wrangler deploy failed (exit $status)" >&2
             exit "$status"
           fi
           url=$(echo "$output" | grep -Eo 'https://[a-zA-Z0-9.-]+\.workers\.dev' | tail -1)
@@ -65,12 +121,104 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      # One sticky comment per site, updated in place. This used to post a fresh
+      # comment on every synchronize, so a long-running PR accumulated one per push.
       - uses: actions/github-script@v9
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+          SITE: ${{ matrix.site }}
         with:
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `Preview (${{ matrix.site }}): ${{ steps.deploy.outputs.url }}`,
-            })
+            const { SITE, PREVIEW_URL } = process.env;
+            const marker = `<!-- preview:${SITE} -->`;
+            const body = [
+              marker,
+              `Preview (**${SITE}**): ${PREVIEW_URL}`,
+              '',
+              '<sub>Built against the dev CMS. Torn down when this PR closes.</sub>',
+            ].join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number,
+            });
+            const existing = comments.find((c) => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+  cleanup:
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    strategy:
+      matrix:
+        site: ${{ fromJSON(vars.PREVIEW_SITES) }}
+      # One site failing to clean up must not abandon the others.
+      fail-fast: false
+    runs-on: ubuntu-latest
+    concurrency:
+      # Never cancel a teardown — a cancelled one leaks the Worker.
+      group: preview-cleanup-${{ github.event.pull_request.number }}-${{ matrix.site }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      deployments: write
+    env:
+      WORKER_NAME: blogstack-web-${{ matrix.site }}-pr-${{ github.event.pull_request.number }}
+      ENV_NAME: pr-${{ github.event.pull_request.number }}-${{ matrix.site }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4
+      - uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+      - run: npm ci
+      # `|| true`: a PR whose preview never deployed (CI failed before the
+      # deploy step, or the site was added to PREVIEW_SITES mid-PR) has no
+      # Worker to delete, and that must not block the GitHub-side cleanup below.
+      - name: Delete preview Worker
+        run: echo y | npx wrangler delete --name "$WORKER_NAME" || true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      # Deactivate before delete: an environment whose deployments are still
+      # "Active" renders as a live deploy on the repo's deployments page.
+      - name: Deactivate and delete deployments
+        # Transient GitHub API 5xx here must not skip the environment deletion
+        # below — an orphaned environment is the leftover state that actually
+        # matters. Retry, then get out of the way.
+        continue-on-error: true
+        run: |
+          for attempt in 1 2 3; do
+            IDS=$(gh api "repos/${{ github.repository }}/deployments" --paginate \
+              --jq ".[] | select(.environment == \"$ENV_NAME\") | .id") && break
+            sleep 5
+          done
+          for id in $IDS; do
+            gh api --method POST "repos/${{ github.repository }}/deployments/$id/statuses" -f state=inactive
+            gh api --method DELETE "repos/${{ github.repository }}/deployments/$id"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Delete environment
+        if: always()
+        # GITHUB_TOKEN can never delete environments — no "administration" scope
+        # exists for it, regardless of workflow or repo permission settings.
+        # GH_ADMIN_TOKEN is a fine-grained PAT with Administration: Read and write.
+        #
+        # Warn rather than fail: the Worker is already gone by this point, so the
+        # preview is not live either way. But this must not no-op silently, or
+        # pr-N environments accumulate unnoticed until the nightly reconcile —
+        # which needs the same token and would fail the same way.
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::GH_ADMIN_TOKEN is not set — environment $ENV_NAME left in place. See README, Previews > Required secrets."
+            exit 0
+          fi
+          gh api --method DELETE "repos/${{ github.repository }}/environments/$ENV_NAME" || true
+        env:
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}

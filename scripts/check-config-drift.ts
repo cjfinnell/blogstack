@@ -47,6 +47,9 @@ interface WranglerEnvBlock {
   d1_databases?: Array<{ database_name?: string }>;
   r2_buckets?: Array<{ bucket_name?: string }>;
   vars?: Record<string, string>;
+  routes?: Array<{ pattern?: string; custom_domain?: boolean }>;
+  workers_dev?: boolean;
+  preview_urls?: boolean;
 }
 
 interface WranglerDoc {
@@ -93,18 +96,51 @@ export function checkConfigDrift(): string[] {
   for (const siteId of deployedSiteIds) {
     const cmsKey = `cms_${siteId}`;
     const webKey = `web_${siteId}`;
+    const previewKey = `preview_${siteId}`;
     const cmsBlock = doc.env?.[cmsKey];
     const webBlock = doc.env?.[webKey];
+    const previewBlock = doc.env?.[previewKey];
 
     if (!cmsBlock) errors.push(`missing [env.${cmsKey}] block for deployed site "${siteId}"`);
     if (!webBlock) errors.push(`missing [env.${webKey}] block for deployed site "${siteId}"`);
+    if (!previewBlock) errors.push(`missing [env.${previewKey}] block for deployed site "${siteId}"`);
+
+    const expectedDir = `${sites[siteId].app}/dist`;
 
     if (webBlock) {
-      const expectedDir = `${sites[siteId].app}/dist`;
       if (webBlock.assets?.directory !== expectedDir) {
         errors.push(
           `[env.${webKey}] assets.directory is "${webBlock.assets?.directory}", expected "${expectedDir}"`
         );
+      }
+      // preview_urls must stay off on production Workers: previews are their own
+      // per-PR Workers, so versioned <hash>-<worker>.workers.dev URLs on the
+      // production Worker would only be an unmonitored way around the custom domain.
+      if (webBlock.preview_urls !== false) {
+        errors.push(`[env.${webKey}] preview_urls is ${webBlock.preview_urls}, expected false`);
+      }
+    }
+
+    if (previewBlock) {
+      // Previews serve the same bundle the production Worker would...
+      if (previewBlock.assets?.directory !== expectedDir) {
+        errors.push(
+          `[env.${previewKey}] assets.directory is "${previewBlock.assets?.directory}", expected "${expectedDir}"`
+        );
+      }
+      // ...but must never be reachable on a production hostname. preview.yml
+      // overrides the Worker name per PR; a stray route here would be shared by
+      // every PR's Worker and would hijack the real site.
+      if (previewBlock.routes !== undefined) {
+        errors.push(`[env.${previewKey}] must not declare routes`);
+      }
+      if (previewBlock.workers_dev !== true) {
+        errors.push(`[env.${previewKey}] workers_dev is ${previewBlock.workers_dev}, expected true`);
+      }
+      // Preview Workers are assets-only clones. A binding here would be a real
+      // per-PR resource that `wrangler delete` on PR close is not accounted for.
+      if (previewBlock.d1_databases || previewBlock.r2_buckets) {
+        errors.push(`[env.${previewKey}] must not declare d1_databases or r2_buckets`);
       }
     }
 

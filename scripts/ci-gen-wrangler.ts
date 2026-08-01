@@ -6,19 +6,44 @@
 // site's placeholder with an inert dummy — this job only ever runs
 // `wrangler ... --env {cms,web}_<CURRENT_SITE>`, so those other blocks are
 // rendered but never read.
+//
+// PREVIEW=1 is the preview.yml path. Previews deploy `--env preview_<site>`,
+// which is assets-only and contains no ${...} placeholders at all, and they
+// build against the dev CMS — so a preview job holds no production hostnames
+// and every site (including CURRENT_SITE) gets the dummy. Requiring the flag
+// explicitly means a *deploy* job that is missing a real secret fails loudly
+// instead of silently rendering "unused.invalid" into a production route.
 
 import { deployedSiteIds } from '../config/sites.ts';
 
 const currentSite = process.env.CURRENT_SITE;
 if (!currentSite) throw new Error('ci-gen-wrangler: CURRENT_SITE is required');
 
+const preview = process.env.PREVIEW === '1';
 const currentPrefix = currentSite.toUpperCase();
-if (process.env.CMS_HOST) process.env[`${currentPrefix}_CMS_HOST`] = process.env.CMS_HOST;
-if (process.env.WEB_HOST) process.env[`${currentPrefix}_WEB_HOST`] = process.env.WEB_HOST;
-if (process.env.WEB_ORIGIN) process.env[`${currentPrefix}_WEB_ORIGIN`] = process.env.WEB_ORIGIN;
+
+if (preview) {
+  if (process.env.CMS_HOST || process.env.WEB_HOST || process.env.WEB_ORIGIN) {
+    throw new Error(
+      'ci-gen-wrangler: PREVIEW=1 but production host secrets are present. ' +
+        'Preview jobs must not be scoped to a production GitHub Environment.'
+    );
+  }
+} else {
+  const missing = (['CMS_HOST', 'WEB_HOST', 'WEB_ORIGIN'] as const).filter((k) => !process.env[k]);
+  if (missing.length > 0) {
+    throw new Error(
+      `ci-gen-wrangler: missing ${missing.join(', ')} for site "${currentSite}". ` +
+        'Deploy jobs need the real values from that site\'s GitHub Environment; ' +
+        'set PREVIEW=1 if this is a preview build.'
+    );
+  }
+  process.env[`${currentPrefix}_CMS_HOST`] = process.env.CMS_HOST;
+  process.env[`${currentPrefix}_WEB_HOST`] = process.env.WEB_HOST;
+  process.env[`${currentPrefix}_WEB_ORIGIN`] = process.env.WEB_ORIGIN;
+}
 
 for (const site of deployedSiteIds) {
-  if (site === currentSite) continue;
   const prefix = site.toUpperCase();
   process.env[`${prefix}_CMS_HOST`] ??= 'unused.invalid';
   process.env[`${prefix}_WEB_HOST`] ??= 'unused.invalid';

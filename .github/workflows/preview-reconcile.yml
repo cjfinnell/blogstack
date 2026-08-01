@@ -1,0 +1,82 @@
+name: Preview reconcile
+
+# Safety net for preview.yml's cleanup job. A PR's `closed` webhook can be
+# dropped outright (no workflow run at all), and a cleanup run can fail after
+# deleting the Worker but before deleting the environment. Either way the repo
+# is left with a `pr-N-<site>` environment, and possibly a live Worker, for a
+# PR that is no longer open. This sweeps both, nightly.
+on:
+  schedule:
+    - cron: '17 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4
+      - uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+      - run: npm ci
+
+      - name: Delete orphaned preview environments and Workers
+        run: |
+          # Deliberately no errexit: one unreachable Worker or flaky API call must
+          # not abandon the remaining orphans. Failures are collected into $failed.
+          set +e
+          set -uo pipefail
+
+          # Open PRs are the source of truth. Anything else with a pr-* env is orphaned.
+          OPEN_PRS=$(gh pr list --state open --limit 500 --json number --jq '.[].number')
+
+          ENVS=$(gh api "repos/${{ github.repository }}/environments" --paginate \
+            --jq '.environments[].name | select(startswith("pr-"))')
+
+          failed=0
+          for env_name in $ENVS; do
+            # pr-<number>-<site>
+            if ! [[ "$env_name" =~ ^pr-([0-9]+)-(.+)$ ]]; then
+              echo "Skipping unrecognised environment name: $env_name"
+              continue
+            fi
+            n="${BASH_REMATCH[1]}"
+            site="${BASH_REMATCH[2]}"
+
+            if echo "$OPEN_PRS" | grep -qx "$n"; then
+              continue
+            fi
+
+            echo "Orphaned: $env_name (PR #$n not open) — cleaning up"
+
+            echo y | npx wrangler delete --name "blogstack-web-${site}-pr-${n}" || true
+
+            for id in $(gh api "repos/${{ github.repository }}/deployments" --paginate \
+                          --jq ".[] | select(.environment == \"$env_name\") | .id"); do
+              gh api --method POST "repos/${{ github.repository }}/deployments/$id/statuses" -f state=inactive || true
+              gh api --method DELETE "repos/${{ github.repository }}/deployments/$id" || true
+            done
+
+            # GITHUB_TOKEN can't delete environments (no administration scope) —
+            # see the matching note in preview.yml's cleanup job.
+            if ! GH_TOKEN="$GH_ADMIN_TOKEN" gh api --method DELETE \
+                 "repos/${{ github.repository }}/environments/$env_name"; then
+              echo "::error::failed to delete environment $env_name"
+              failed=1
+            fi
+          done
+
+          # Surface a persistent failure instead of silently no-op'ing every night.
+          exit "$failed"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
