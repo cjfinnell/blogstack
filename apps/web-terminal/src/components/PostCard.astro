@@ -1,0 +1,48 @@
+---
+import type { Post } from '@blogstack/blog-client';
+import { postPublishedAt, postSlug, postTitle } from '@blogstack/blog-client';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const publishedAt = postPublishedAt(post);
+---
+
+<article class="card">
+	<h2><a href={`/blog/${postSlug(post)}/`}>{postTitle(post)}</a></h2>
+	{
+		publishedAt && (
+			<time datetime={publishedAt} class="date">
+				{new Date(publishedAt).toISOString().slice(0, 10)}
+			</time>
+		)
+	}
+</article>
+
+<style>
+	.card {
+		padding: 1rem 0;
+		border-bottom: 1px dashed var(--border);
+	}
+	.card h2 {
+		margin: 0 0 0.25rem;
+		font-size: 1.05rem;
+	}
+	.card h2::before {
+		content: '> ';
+		color: var(--muted);
+	}
+	.card a {
+		text-decoration: none;
+		color: var(--fg);
+	}
+	.card a:hover {
+		color: var(--accent);
+	}
+	.date {
+		color: var(--muted);
+		font-size: 0.8rem;
+	}
+</style>

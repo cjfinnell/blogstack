@@ -1,0 +1,8 @@
+// @ts-check
+import { defineConfig } from 'astro/config';
+
+// SITE_URL is set per-deploy target; local dev falls back to localhost.
+// See PLAN.md#anonymity — no hostname is hardcoded here.
+export default defineConfig({
+  site: process.env.SITE_URL ?? 'http://localhost:4322',
+});
