@@ -2,10 +2,16 @@ import { bootstrapDocumentTypes, RbacService } from '@sonicjs-cms/core';
 import { getPlatformProxy } from 'wrangler';
 
 /**
- * Seed script to create the initial admin user.
+ * Seed script to create the initial admin user, or re-sync its password if
+ * it already exists.
  *
  * Email:    ADMIN_EMAIL, default admin@connorfinnell.com
- * Password: ADMIN_PASSWORD (required)
+ * Password: ADMIN_PASSWORD — required to create the user; if the user
+ *           already exists and ADMIN_PASSWORD is set, its password is
+ *           re-hashed and updated to match on every run. ADMIN_PASSWORD is
+ *           the source of truth: this runs on every CMS deploy/preview
+ *           build, so a rotated secret must actually take effect instead of
+ *           silently no-op'ing forever after the first seed.
  * Env:      SEED_ENV, default "dev" — which wrangler.toml [env.*] block to
  *           read bindings from (there are no top-level bindings, only named
  *           envs, so getPlatformProxy needs to be told which one).
@@ -50,14 +56,28 @@ async function seed() {
   }
 
   try {
-    const existing = await db.prepare('SELECT id FROM auth_user WHERE email = ?').bind(email).first();
+    const existing = await db
+      .prepare('SELECT id FROM auth_user WHERE email = ?')
+      .bind(email)
+      .first<{ id: string }>();
+    const password = process.env.ADMIN_PASSWORD;
+
     if (existing) {
-      console.log('Admin user already exists');
+      if (!password) {
+        console.log('Admin user already exists; ADMIN_PASSWORD not set, leaving credentials unchanged');
+        await dispose();
+        return;
+      }
+      const passwordHash = await hashPassword(password);
+      await db
+        .prepare('UPDATE auth_account SET password = ?, updated_at = ? WHERE user_id = ? AND provider_id = ?')
+        .bind(passwordHash, Date.now(), existing.id, 'credential')
+        .run();
+      console.log('Admin user already existed — password re-synced from ADMIN_PASSWORD');
       await dispose();
       return;
     }
 
-    const password = process.env.ADMIN_PASSWORD;
     if (!password) {
       console.error('Error: set ADMIN_PASSWORD before running. Example:');
       console.error('   ADMIN_PASSWORD=... npm run seed');
