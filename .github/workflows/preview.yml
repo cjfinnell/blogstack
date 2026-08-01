@@ -141,13 +141,18 @@ jobs:
         env:
           PREVIEW_URL: ${{ steps.deploy.outputs.url }}
           SITE: ${{ matrix.site }}
+          # The same shared dev CMS every preview builds against, not a
+          # per-PR instance — but there was previously no link to it in the
+          # PR at all, leaving reviewers to hunt for or derive the URL.
+          CMS_URL: ${{ secrets.DEV_CMS_URL }}
         with:
           script: |
-            const { SITE, PREVIEW_URL } = process.env;
+            const { SITE, PREVIEW_URL, CMS_URL } = process.env;
             const marker = `<!-- preview:${SITE} -->`;
             const body = [
               marker,
               `Preview (**${SITE}**): ${PREVIEW_URL}`,
+              `CMS admin (shared dev CMS): ${CMS_URL}/admin`,
               '',
               '<sub>Built against the dev CMS. Torn down when this PR closes.</sub>',
             ].join('\n');
