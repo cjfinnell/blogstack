@@ -1,5 +1,5 @@
 [tools]
-node = "22.12.0"          # satisfies web engines >=22.12.0 and cms >=18
+node = "24.18.1"          # satisfies web engines >=22.12.0 and cms >=18
 
 [env]
 _.file = ".env.local"     # gitignored hostnames, auto-loaded for local dev
