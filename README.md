@@ -102,6 +102,7 @@ Environment secrets, per deployed site (`terminal`, `folio`) — production only
 |---|---|
 | `CF_API_TOKEN`, `CF_ACCOUNT_ID` | Deploy credentials for that site |
 | `CMS_HOST`, `WEB_HOST`, `WEB_ORIGIN` | That site's hostnames |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | That site's CMS admin login, (re)seeded after every CMS deploy |
 
 Repository secrets — used by the preview, cleanup and reconcile jobs, which are
 not scoped to a production Environment. A same-named Environment secret wins for
@@ -111,6 +112,7 @@ deploy jobs, so these do not weaken production scoping:
 |---|---|
 | `CF_API_TOKEN`, `CF_ACCOUNT_ID` | Deploy and teardown, for every workflow |
 | `DEV_CMS_URL` | Dev CMS that previews build against |
+| `DEV_ADMIN_EMAIL`, `DEV_ADMIN_PASSWORD` | Dev CMS admin login, (re)seeded on every preview build |
 | `GH_ADMIN_TOKEN` | Fine-grained PAT, Administration: Read and write. `GITHUB_TOKEN` cannot delete Environments at any permission level |
 
 Repository **variables**:

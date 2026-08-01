@@ -47,9 +47,11 @@ jobs:
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CF_WORKERS_SUBDOMAIN: ${{ vars.CF_WORKERS_SUBDOMAIN }}
           DEV_CMS_URL: ${{ secrets.DEV_CMS_URL }}
+          DEV_ADMIN_EMAIL: ${{ secrets.DEV_ADMIN_EMAIL }}
+          DEV_ADMIN_PASSWORD: ${{ secrets.DEV_ADMIN_PASSWORD }}
         run: |
           missing=''
-          for name in CF_API_TOKEN CF_ACCOUNT_ID CF_WORKERS_SUBDOMAIN DEV_CMS_URL; do
+          for name in CF_API_TOKEN CF_ACCOUNT_ID CF_WORKERS_SUBDOMAIN DEV_CMS_URL DEV_ADMIN_EMAIL DEV_ADMIN_PASSWORD; do
             if [ -z "${!name}" ]; then
               missing="$missing $name"
             fi
@@ -94,6 +96,18 @@ jobs:
           # placeholders, and ci-gen-wrangler rejects PREVIEW=1 if production
           # host secrets are present at all.
           PREVIEW: '1'
+      # Idempotent — seed-admin.ts no-ops if the user already exists — so it's
+      # safe to run once per matrix leg even though every site's preview job
+      # targets the same shared dev CMS.
+      - name: Seed dev CMS admin
+        run: npm run seed
+        env:
+          SEED_REMOTE: '1'
+          SEED_ENV: dev
+          ADMIN_EMAIL: ${{ secrets.DEV_ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.DEV_ADMIN_PASSWORD }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
       # A standalone per-PR Worker, not `wrangler versions upload`. Cloudflare
       # has no per-version or per-alias delete, so a version-based preview
       # outlives its PR; a Worker can simply be deleted (see the cleanup job).
