@@ -27,35 +27,60 @@ function validated(site: string | undefined): string[] {
   return [site];
 }
 
-switch (eventName) {
-  case 'repository_dispatch': {
-    // A content publish, not a code change — only the web build needs
-    // refreshing with the new content, not the CMS worker itself.
-    writeOutput(validated(process.env.DISPATCH_SITE), false);
-    break;
-  }
-  case 'workflow_dispatch': {
-    const input = process.env.INPUT_SITE;
-    const sites = input === 'all' ? allSites : validated(input);
-    writeOutput(sites, true);
-    break;
-  }
-  case 'push': {
-    const base = process.env.BASE_SHA;
-    const head = process.env.HEAD_SHA;
-    const diff = execSync(`git diff --name-only ${base} ${head}`, { encoding: 'utf8' });
-    const changed = diff.split('\n').filter(Boolean);
+// Shared by the `push` and `pull_request` cases below — one definition of
+// "does this set of changed files touch the CMS" for both deploy.yml and
+// preview.yml to agree on.
+export function isCmsChanged(changedFiles: string[]): boolean {
+  return changedFiles.some((f) => f.startsWith('apps/cms/') || f === 'wrangler.template.toml');
+}
 
-    const cmsChanged = changed.some((f) => f.startsWith('apps/cms/') || f === 'wrangler.template.toml');
-    const globalChange = cmsChanged || changed.some((f) => f.startsWith('packages/'));
+function main() {
+  switch (eventName) {
+    case 'repository_dispatch': {
+      // A content publish, not a code change — only the web build needs
+      // refreshing with the new content, not the CMS worker itself.
+      writeOutput(validated(process.env.DISPATCH_SITE), false);
+      break;
+    }
+    case 'workflow_dispatch': {
+      const input = process.env.INPUT_SITE;
+      const sites = input === 'all' ? allSites : validated(input);
+      writeOutput(sites, true);
+      break;
+    }
+    case 'push': {
+      const base = process.env.BASE_SHA;
+      const head = process.env.HEAD_SHA;
+      const diff = execSync(`git diff --name-only ${base} ${head}`, { encoding: 'utf8' });
+      const changed = diff.split('\n').filter(Boolean);
 
-    const sites = globalChange
-      ? allSites
-      : allSites.filter((site) => changed.some((f) => f.startsWith(`apps/web-${site}/`)));
+      const cmsChanged = isCmsChanged(changed);
+      const globalChange = cmsChanged || changed.some((f) => f.startsWith('packages/'));
 
-    writeOutput(sites, cmsChanged);
-    break;
+      const sites = globalChange
+        ? allSites
+        : allSites.filter((site) => changed.some((f) => f.startsWith(`apps/web-${site}/`)));
+
+      writeOutput(sites, cmsChanged);
+      break;
+    }
+    case 'pull_request': {
+      // Three-dot (merge-base to head), not two-dot — "did this PR ever
+      // touch CMS files relative to where it branched," not an incremental
+      // diff between consecutive pushes. preview.yml only reads
+      // `cms_changed` from this path; `sites` is unused.
+      const base = process.env.PR_BASE_SHA;
+      const head = process.env.PR_HEAD_SHA;
+      const diff = execSync(`git diff --name-only ${base}...${head}`, { encoding: 'utf8' });
+      const changed = diff.split('\n').filter(Boolean);
+      writeOutput([], isCmsChanged(changed));
+      break;
+    }
+    default:
+      throw new Error(`Unhandled event: ${eventName}`);
   }
-  default:
-    throw new Error(`Unhandled event: ${eventName}`);
+}
+
+if (import.meta.filename === process.argv[1]) {
+  main();
 }

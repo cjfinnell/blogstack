@@ -94,6 +94,19 @@ production Worker's version history, one `wrangler versions deploy` away from
 serving live traffic. `preview_urls` is correspondingly `false` on the
 production env blocks, enforced by the config-drift check.
 
+The dev CMS itself is a single durable shared instance (`env.dev`), not
+per-PR. A `resolve` job three-dot-diffs each PR against its merge base
+(`scripts/resolve-deploy-matrix.ts`, same file-path check `deploy.yml` uses
+for production); if the PR touched `apps/cms/` or `wrangler.template.toml`,
+the `preview-cms` job applies D1 migrations, deploys `--env dev`, seeds the
+admin user, and posts a sticky `/admin`-link comment — all before the web
+preview matrix builds, so a PR's own schema changes land before the site
+that renders them. Web-only PRs skip `preview-cms` entirely and build
+against whatever `env.dev` already has deployed. `preview-cms` runs are
+serialized across PRs (not per-PR) since they share one instance; there is
+no per-PR isolation and no nightly reset — fix-forward only, same posture as
+production.
+
 ### Required secrets
 
 Environment secrets, per deployed site (`terminal`, `folio`) — production only:
@@ -102,6 +115,7 @@ Environment secrets, per deployed site (`terminal`, `folio`) — production only
 |---|---|
 | `CF_API_TOKEN`, `CF_ACCOUNT_ID` | Deploy credentials for that site |
 | `CMS_HOST`, `WEB_HOST`, `WEB_ORIGIN` | That site's hostnames |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | That site's CMS admin login, (re)seeded after every CMS deploy |
 
 Repository secrets — used by the preview, cleanup and reconcile jobs, which are
 not scoped to a production Environment. A same-named Environment secret wins for
@@ -111,6 +125,7 @@ deploy jobs, so these do not weaken production scoping:
 |---|---|
 | `CF_API_TOKEN`, `CF_ACCOUNT_ID` | Deploy and teardown, for every workflow |
 | `DEV_CMS_URL` | Dev CMS that previews build against |
+| `DEV_ADMIN_EMAIL`, `DEV_ADMIN_PASSWORD` | Dev CMS admin login, (re)seeded by `preview-cms` on every CMS-touching PR |
 | `GH_ADMIN_TOKEN` | Fine-grained PAT, Administration: Read and write. `GITHUB_TOKEN` cannot delete Environments at any permission level |
 
 Repository **variables**:
