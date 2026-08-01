@@ -316,14 +316,32 @@ inside a CMS Worker running beta software behind a public admin login.
   before using it. That does not contain a stolen token, but it stops a
   malformed or spoofed payload from steering the deploy matrix.
 
-### Unverified assumption
+### Spike findings (confirmed)
 
-**Whether `@sonicjs-cms/core@3.0.0-beta.26` exposes a content-lifecycle hook
-is unconfirmed.** The example plugin's docstring claims hooks exist, which is
-suggestive, not proof. Task 0 is a spike into
-`node_modules/@sonicjs-cms/core`. If no usable hook exists, the fallback is
-running `npm run release -- --site terminal` by hand, and every other part of
-this design stands unchanged.
+`@sonicjs-cms/core@3.0.0-beta.26` exposes `content:after:publish`, a
+publish-specific hook distinct from `content:after:update`. Confirmed via
+`dist/types-DT7XN5TX.d.ts` (`HookEventPayloads` catalog) and the dispatch
+site in `dist/chunk-OJFIQGZB.js`, both public exports off the package root
+(`export … from './define-plugin-DDe8a_bh.js'` in `dist/index.d.ts`).
+
+- **Publish-specific event:** yes. The core route computes
+  `wasPublished`/`nowPublished` itself (checking for an existing published
+  row before the write) and only dispatches `content:after:publish` when a
+  draft transitions to published — the plugin does not need to do its own
+  transition filtering.
+- **Previous-record access:** not needed — see above. Core already resolves
+  the draft→published transition before dispatch.
+- **`ExecutionContext`:** yes. `dispatchHookEvent(c, event, payload,
+  "fire-and-forget")` (`src/plugins/hooks/dispatch-event.ts`) pulls
+  `c.executionCtx` and calls `executionCtx.waitUntil(...)` on the dispatch
+  promise, so the GitHub call never blocks the admin save.
+- **Failure handling:** async, and failures are swallowed —
+  `hooks.dispatch(...).catch(err => console.error(...))`. A failed dispatch
+  never surfaces to the admin UI; it only shows up in Workers observability.
+
+Result: Plan step 7 proceeds unchanged (`hooks: { 'content:after:publish':
+... }` on the plugin, per the example plugin's declarative `hooks` map at
+`src/plugins/example/index.ts`).
 
 ## GitHub Actions
 
@@ -443,8 +461,8 @@ Environment.
 
 Each step is one commit on the implementation branch.
 
-0. **Spike:** does `@sonicjs-cms/core` expose a content-lifecycle hook?
-   Gates the publish webhook only.
+0. **Spike (done):** `@sonicjs-cms/core` exposes `content:after:publish`.
+   Publish webhook proceeds as designed.
 1. Scaffold: `mise.toml`, npm workspaces, `.env.example`, `.gitignore`.
 2. CMS in; D1/R2 renamed; template + `gen-wrangler.ts`; deploy `env.dev`.
 3. Extract `blog-client` from `sonicjs-blog-web`; add tests.
