@@ -1,7 +1,8 @@
 import { createSonicJSApp, registerCollections } from '@sonicjs-cms/core';
-import type { SonicJSConfig } from '@sonicjs-cms/core';
+import type { Bindings, SonicJSConfig } from '@sonicjs-cms/core';
 
 import blogPostsCollection from './collections/blog-posts.collection';
+import { hoistLexicalImportMap } from './lexical-importmap';
 import { publishHookPlugin } from './plugins/publish-hook';
 
 // Trigger preview-cms: exercises the new PR-preview dev CMS deploy/migrate/seed path.
@@ -18,4 +19,12 @@ const config: SonicJSConfig = {
   },
 };
 
-export default createSonicJSApp(config);
+const app = createSonicJSApp(config);
+
+export default {
+  async fetch(request: Request, env: Bindings, ctx: ExecutionContext): Promise<Response> {
+    // See lexical-importmap.ts — without this the rich text editor never boots
+    // in Firefox/Safari and every save fails with "Content is required".
+    return hoistLexicalImportMap(request, await app.fetch(request, env, ctx));
+  },
+};
