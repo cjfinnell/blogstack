@@ -76,7 +76,19 @@ function renderNode(node: LexicalNode): string {
 
 export function renderLexicalToHtml(content: unknown): string {
   if (!content) return '';
-  const doc: LexicalDoc | null = typeof content === 'string' ? JSON.parse(content) : (content as LexicalDoc);
+  let doc: LexicalDoc | null;
+  if (typeof content === 'string') {
+    try {
+      doc = JSON.parse(content);
+    } catch {
+      // Some rows predate the Lexical editor and hold raw HTML instead of a
+      // Lexical JSON tree (e.g. seeded/legacy posts) — pass it through as-is
+      // rather than failing the whole build over one bad row.
+      return content;
+    }
+  } else {
+    doc = content as LexicalDoc;
+  }
   if (!doc?.root) return '';
   return renderNode(doc.root);
 }

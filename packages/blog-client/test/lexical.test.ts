@@ -57,4 +57,9 @@ describe('renderLexicalToHtml', () => {
     expect(renderLexicalToHtml(null)).toBe('');
     expect(renderLexicalToHtml(undefined)).toBe('');
   });
+
+  it('passes through raw HTML content that is not valid Lexical JSON', () => {
+    const html = '<p dir="ltr">already HTML</p>';
+    expect(renderLexicalToHtml(html)).toBe(html);
+  });
 });
