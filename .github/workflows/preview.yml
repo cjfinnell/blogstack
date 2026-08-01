@@ -57,7 +57,6 @@ jobs:
       cancel-in-progress: false
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v4
@@ -99,21 +98,42 @@ jobs:
           ADMIN_PASSWORD: ${{ secrets.DEV_ADMIN_PASSWORD }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+
+  # Posts the shared dev CMS admin link unconditionally — every PR's web
+  # preview builds against this CMS whether or not the PR itself redeployed
+  # it, so the link belongs on every PR, not just the ones that touched
+  # apps/cms/. Split out from preview-cms (which cms_changed skips entirely)
+  # so this job runs regardless.
+  preview-cms-comment:
+    needs: [resolve, preview-cms]
+    if: >
+      always() &&
+      github.event.action != 'closed' &&
+      (needs.preview-cms.result == 'success' || needs.preview-cms.result == 'skipped') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
       # One sticky comment per PR for the CMS admin link, separate from each
       # site's preview-URL comment — posted here instead of once per matrix
       # leg, so it's not duplicated across terminal/folio comments.
       - uses: actions/github-script@v9
         env:
           CMS_URL: ${{ secrets.DEV_CMS_URL }}
+          CMS_CHANGED: ${{ needs.resolve.outputs.cms_changed }}
         with:
           script: |
-            const { CMS_URL } = process.env;
+            const { CMS_URL, CMS_CHANGED } = process.env;
             const marker = '<!-- preview-cms -->';
+            const note = CMS_CHANGED === 'true'
+              ? "<sub>Migrated and seeded for this PR's CMS changes.</sub>"
+              : "<sub>Shared dev CMS — this PR doesn't touch apps/cms/.</sub>";
             const body = [
               marker,
               `CMS admin (shared dev CMS): ${CMS_URL}/admin`,
               '',
-              "<sub>Migrated and seeded for this PR's CMS changes.</sub>",
+              note,
             ].join('\n');
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
