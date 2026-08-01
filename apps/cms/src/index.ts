@@ -4,6 +4,7 @@ import type { SonicJSConfig } from '@sonicjs-cms/core';
 import blogPostsCollection from './collections/blog-posts.collection';
 import { publishHookPlugin } from './plugins/publish-hook';
 
+// Trigger preview-cms: exercises the new PR-preview dev CMS deploy/migrate/seed path.
 registerCollections([blogPostsCollection]);
 
 const config: SonicJSConfig = {
