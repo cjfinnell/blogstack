@@ -17,8 +17,8 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
+      - uses: actions/checkout@v5
+      - uses: jdx/mise-action@v4
       - run: npm ci
       # Preview content is dev content, not production content — the tradeoff
       # for not exposing prod data on PR builds. DEV_CMS_URL is the deployed
