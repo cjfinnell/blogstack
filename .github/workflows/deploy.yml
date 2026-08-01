@@ -62,8 +62,11 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
 
   deploy-web:
-    needs: resolve
-    if: needs.resolve.outputs.sites != '[]'
+    needs: [resolve, deploy-cms]
+    if: |
+      always() &&
+      needs.resolve.outputs.sites != '[]' &&
+      (needs.deploy-cms.result == 'success' || needs.deploy-cms.result == 'skipped')
     strategy:
       matrix:
         site: ${{ fromJSON(needs.resolve.outputs.sites) }}
