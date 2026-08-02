@@ -26,7 +26,7 @@ if (preview) {
   if (process.env.CMS_HOST || process.env.WEB_HOST || process.env.WEB_ORIGIN) {
     throw new Error(
       'ci-gen-wrangler: PREVIEW=1 but production host secrets are present. ' +
-        'Preview jobs must not be scoped to a production GitHub Environment.'
+        'Preview jobs must not be scoped to a production GitHub Environment.',
     );
   }
 } else {
@@ -34,8 +34,8 @@ if (preview) {
   if (missing.length > 0) {
     throw new Error(
       `ci-gen-wrangler: missing ${missing.join(', ')} for site "${currentSite}". ` +
-        'Deploy jobs need the real values from that site\'s GitHub Environment; ' +
-        'set PREVIEW=1 if this is a preview build.'
+        "Deploy jobs need the real values from that site's GitHub Environment; " +
+        'set PREVIEW=1 if this is a preview build.',
     );
   }
   process.env[`${currentPrefix}_CMS_HOST`] = process.env.CMS_HOST;

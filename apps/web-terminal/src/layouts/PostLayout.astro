@@ -10,39 +10,37 @@ const { title, publishedAt } = Astro.props;
 ---
 
 <BaseLayout title={title}>
-	<article>
-		<header>
-			<h1>{title}</h1>
-			<p style="color: var(--muted); font-size: 0.85rem;">
-				{
-					publishedAt && (
-						<time datetime={publishedAt}>
-							{new Date(publishedAt).toISOString().slice(0, 10)}
-						</time>
-					)
-				}
-			</p>
-		</header>
-		<div class="content">
-			<slot />
-		</div>
-	</article>
+  <article>
+    <header>
+      <h1>{title}</h1>
+      <p style="color: var(--muted); font-size: 0.85rem;">
+        {
+          publishedAt && (
+            <time datetime={publishedAt}>{new Date(publishedAt).toISOString().slice(0, 10)}</time>
+          )
+        }
+      </p>
+    </header>
+    <div class="content">
+      <slot />
+    </div>
+  </article>
 </BaseLayout>
 
 <style>
-	.content :global(p) {
-		margin: 1em 0;
-	}
-	.content :global(blockquote) {
-		border-left: 3px solid var(--accent);
-		margin: 1em 0;
-		padding-left: 1em;
-		color: var(--muted);
-	}
-	.content :global(code) {
-		background: var(--border);
-		padding: 0.15em 0.4em;
-		border-radius: 2px;
-		font-size: 0.9em;
-	}
+  .content :global(p) {
+    margin: 1em 0;
+  }
+  .content :global(blockquote) {
+    border-left: 3px solid var(--accent);
+    margin: 1em 0;
+    padding-left: 1em;
+    color: var(--muted);
+  }
+  .content :global(code) {
+    background: var(--border);
+    padding: 0.15em 0.4em;
+    border-radius: 2px;
+    font-size: 0.9em;
+  }
 </style>

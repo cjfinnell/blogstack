@@ -32,8 +32,9 @@ export const publishHookPlugin = definePlugin({
   description: 'Dispatches a GitHub Actions rebuild when a blog post is published.',
   sonicjsVersionRange: '^3.0.0',
 
-  async onBoot(ctx) {
-    const env = ctx.env as { SITE_ID?: string; GITHUB_REPO?: string; GITHUB_DISPATCH_TOKEN?: string } | undefined;
+  onBoot(ctx) {
+    const env = ctx.env as
+      { SITE_ID?: string; GITHUB_REPO?: string; GITHUB_DISPATCH_TOKEN?: string } | undefined;
     github.repo = env?.GITHUB_REPO;
     github.token = env?.GITHUB_DISPATCH_TOKEN;
     github.siteId = env?.SITE_ID;

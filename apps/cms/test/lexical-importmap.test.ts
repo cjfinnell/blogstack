@@ -30,16 +30,22 @@ describe('lexical import map hoist', () => {
     const versions = new Set<string>();
     for (const file of coreDistFiles()) {
       for (const m of readFileSync(file, 'utf8').matchAll(/LEXICAL_VERSION = "([^"]+)"/g)) {
-        versions.add(m[1]!);
+        versions.add(m[1]);
       }
     }
-    expect(versions.size, 'core no longer declares LEXICAL_VERSION — recheck the workaround').toBe(1);
+    expect(versions.size, 'core no longer declares LEXICAL_VERSION — recheck the workaround').toBe(
+      1,
+    );
     expect([...versions][0]).toBe(LEXICAL_VERSION);
   });
 
   it('remaps every specifier core imports', () => {
     const json = buildLexicalImportMap();
-    const { imports } = JSON.parse(json.replace(/^<script[^>]*>/, '').replace(/<\/script>$/, ''));
+    const { imports } = JSON.parse(
+      json.replace(/^<script[^>]*>/, '').replace(/<\/script>$/, ''),
+    ) as {
+      imports: Record<string, string>;
+    };
     expect(Object.keys(imports).sort()).toEqual([...LOADER_SPECIFIERS].sort());
     for (const [specifier, url] of Object.entries(imports)) {
       expect(url, specifier).toMatch(/^https:\/\/esm\.sh\//);
@@ -56,11 +62,14 @@ describe('lexical import map hoist', () => {
     expect(
       shouldHoist(
         new Request('https://cms.example/admin/content/new'),
-        new Response('{}', { headers: { 'content-type': 'application/json' } })
-      )
+        new Response('{}', { headers: { 'content-type': 'application/json' } }),
+      ),
     ).toBe(false);
     expect(
-      shouldHoist(new Request('https://cms.example/admin/nope'), admin({ status: 404, headers: html }))
+      shouldHoist(
+        new Request('https://cms.example/admin/nope'),
+        admin({ status: 404, headers: html }),
+      ),
     ).toBe(false);
   });
 });

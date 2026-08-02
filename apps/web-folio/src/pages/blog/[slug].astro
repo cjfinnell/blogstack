@@ -16,5 +16,5 @@ const html = renderLexicalToHtml(post.data?.content);
 ---
 
 <PostLayout title={postTitle(post)} publishedAt={postPublishedAt(post)}>
-	<Fragment set:html={html} />
+  <Fragment set:html={html} />
 </PostLayout>

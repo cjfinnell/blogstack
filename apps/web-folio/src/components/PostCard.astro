@@ -11,40 +11,40 @@ const publishedAt = postPublishedAt(post);
 ---
 
 <article class="card">
-	<h2><a href={`/blog/${postSlug(post)}/`}>{postTitle(post)}</a></h2>
-	{
-		publishedAt && (
-			<time datetime={publishedAt} class="date">
-				{new Date(publishedAt).toLocaleDateString('en-US', {
-					year: 'numeric',
-					month: 'long',
-					day: 'numeric',
-				})}
-			</time>
-		)
-	}
+  <h2><a href={`/blog/${postSlug(post)}/`}>{postTitle(post)}</a></h2>
+  {
+    publishedAt && (
+      <time datetime={publishedAt} class="date">
+        {new Date(publishedAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
+      </time>
+    )
+  }
 </article>
 
 <style>
-	.card {
-		padding: 1.75rem 0;
-		border-bottom: 1px solid var(--border);
-	}
-	.card h2 {
-		margin: 0 0 0.35rem;
-		font-size: 1.4rem;
-		font-weight: 400;
-	}
-	.card a {
-		text-decoration: none;
-		color: var(--fg);
-	}
-	.card a:hover {
-		color: var(--accent);
-	}
-	.date {
-		color: var(--muted);
-		font-size: 0.85rem;
-		font-style: italic;
-	}
+  .card {
+    padding: 1.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .card h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.4rem;
+    font-weight: 400;
+  }
+  .card a {
+    text-decoration: none;
+    color: var(--fg);
+  }
+  .card a:hover {
+    color: var(--accent);
+  }
+  .date {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-style: italic;
+  }
 </style>

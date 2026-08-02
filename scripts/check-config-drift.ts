@@ -35,7 +35,12 @@ function renderTemplate(env: Record<string, string>): string {
 function satisfiesMinNode(version: string, range: string): boolean {
   const m = range.match(/^>=\s*(\d+)\.(\d+)\.(\d+)/);
   if (!m) return true; // unrecognized range shape — don't fail the check on it
-  const [, rMaj, rMin, rPatch] = m.map(Number.parseFloat.bind(Number)) as unknown as [number, number, number, number];
+  const [, rMaj, rMin, rPatch] = m.map(Number.parseFloat.bind(Number)) as unknown as [
+    number,
+    number,
+    number,
+    number,
+  ];
   const [vMaj, vMin, vPatch] = version.split('.').map(Number);
   if (vMaj !== rMaj) return vMaj > rMaj;
   if (vMin !== rMin) return vMin > rMin;
@@ -85,10 +90,11 @@ export function checkConfigDrift(): string[] {
       .filter(Boolean);
     const expectedPorts = Object.values(sites).map((s) => `http://localhost:${s.devPort}`);
     const sameSet =
-      corsOrigins.length === expectedPorts.length && expectedPorts.every((p) => corsOrigins.includes(p));
+      corsOrigins.length === expectedPorts.length &&
+      expectedPorts.every((p) => corsOrigins.includes(p));
     if (!sameSet) {
       errors.push(
-        `[env.dev] CORS_ORIGINS is "${corsOrigins.join(',')}", expected exactly "${expectedPorts.join(',')}"`
+        `[env.dev] CORS_ORIGINS is "${corsOrigins.join(',')}", expected exactly "${expectedPorts.join(',')}"`,
       );
     }
   }
@@ -103,14 +109,15 @@ export function checkConfigDrift(): string[] {
 
     if (!cmsBlock) errors.push(`missing [env.${cmsKey}] block for deployed site "${siteId}"`);
     if (!webBlock) errors.push(`missing [env.${webKey}] block for deployed site "${siteId}"`);
-    if (!previewBlock) errors.push(`missing [env.${previewKey}] block for deployed site "${siteId}"`);
+    if (!previewBlock)
+      errors.push(`missing [env.${previewKey}] block for deployed site "${siteId}"`);
 
     const expectedDir = `${sites[siteId].app}/dist`;
 
     if (webBlock) {
       if (webBlock.assets?.directory !== expectedDir) {
         errors.push(
-          `[env.${webKey}] assets.directory is "${webBlock.assets?.directory}", expected "${expectedDir}"`
+          `[env.${webKey}] assets.directory is "${webBlock.assets?.directory}", expected "${expectedDir}"`,
         );
       }
       // preview_urls must stay off on production Workers: previews are their own
@@ -125,7 +132,7 @@ export function checkConfigDrift(): string[] {
       // Previews serve the same bundle the production Worker would...
       if (previewBlock.assets?.directory !== expectedDir) {
         errors.push(
-          `[env.${previewKey}] assets.directory is "${previewBlock.assets?.directory}", expected "${expectedDir}"`
+          `[env.${previewKey}] assets.directory is "${previewBlock.assets?.directory}", expected "${expectedDir}"`,
         );
       }
       // ...but must never be reachable on a production hostname. preview.yml
@@ -135,7 +142,9 @@ export function checkConfigDrift(): string[] {
         errors.push(`[env.${previewKey}] must not declare routes`);
       }
       if (previewBlock.workers_dev !== true) {
-        errors.push(`[env.${previewKey}] workers_dev is ${previewBlock.workers_dev}, expected true`);
+        errors.push(
+          `[env.${previewKey}] workers_dev is ${previewBlock.workers_dev}, expected true`,
+        );
       }
       // Preview Workers are assets-only clones. A binding here would be a real
       // per-PR resource that `wrangler delete` on PR close is not accounted for.
@@ -148,17 +157,23 @@ export function checkConfigDrift(): string[] {
       const expectedDbName = `blogstack-${siteId}-db`;
       const d1Name = cmsBlock.d1_databases?.[0]?.database_name;
       if (d1Name !== expectedDbName) {
-        errors.push(`[env.${cmsKey}] d1 database_name is "${d1Name}", expected "${expectedDbName}"`);
+        errors.push(
+          `[env.${cmsKey}] d1 database_name is "${d1Name}", expected "${expectedDbName}"`,
+        );
       }
       const expectedBucket = `blogstack-${siteId}-media`;
       const bucketName = cmsBlock.r2_buckets?.[0]?.bucket_name;
       if (bucketName !== expectedBucket) {
-        errors.push(`[env.${cmsKey}] r2 bucket_name is "${bucketName}", expected "${expectedBucket}"`);
+        errors.push(
+          `[env.${cmsKey}] r2 bucket_name is "${bucketName}", expected "${expectedBucket}"`,
+        );
       }
     }
   }
 
-  const mise = parseToml(readFileSync(resolve(root, 'mise.toml'), 'utf8')) as { tools?: { node?: string } };
+  const mise = parseToml(readFileSync(resolve(root, 'mise.toml'), 'utf8')) as {
+    tools?: { node?: string };
+  };
   const nodeVersion = mise.tools?.node;
   if (!nodeVersion) {
     errors.push('mise.toml missing [tools] node version');
@@ -175,7 +190,9 @@ export function checkConfigDrift(): string[] {
       const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as { engines?: { node?: string } };
       const range = pkg.engines?.node;
       if (range && !satisfiesMinNode(nodeVersion, range)) {
-        errors.push(`mise.toml node ${nodeVersion} does not satisfy ${dir}/package.json engines.node "${range}"`);
+        errors.push(
+          `mise.toml node ${nodeVersion} does not satisfy ${dir}/package.json engines.node "${range}"`,
+        );
       }
     }
   }

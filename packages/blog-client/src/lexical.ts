@@ -79,7 +79,7 @@ export function renderLexicalToHtml(content: unknown): string {
   let doc: LexicalDoc | null;
   if (typeof content === 'string') {
     try {
-      doc = JSON.parse(content);
+      doc = JSON.parse(content) as LexicalDoc;
     } catch {
       // Some rows predate the Lexical editor and hold raw HTML instead of a
       // Lexical JSON tree (e.g. seeded/legacy posts) — pass it through as-is
