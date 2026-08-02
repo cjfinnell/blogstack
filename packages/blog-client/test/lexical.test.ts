@@ -67,3 +67,46 @@ describe('renderLexicalToHtml', () => {
     expect(renderLexicalToHtml(html)).toBe(html);
   });
 });
+
+describe('image nodes', () => {
+  it('renders an image with alt text', () => {
+    const doc = {
+      root: {
+        type: 'root',
+        children: [{ type: 'image', src: 'https://example.test/a.jpg', altText: 'A table' }],
+      },
+    };
+    const html = renderLexicalToHtml(doc);
+    expect(html).toContain('<img src="https://example.test/a.jpg"');
+    expect(html).toContain('alt="A table"');
+  });
+
+  it('renders an empty alt attribute when alt text is missing', () => {
+    const doc = {
+      root: { type: 'root', children: [{ type: 'image', src: 'https://example.test/a.jpg' }] },
+    };
+    expect(renderLexicalToHtml(doc)).toContain('alt=""');
+  });
+
+  it('escapes the src attribute', () => {
+    const doc = {
+      root: { type: 'root', children: [{ type: 'image', src: 'a.jpg" onerror="x' }] },
+    };
+    expect(renderLexicalToHtml(doc)).not.toContain('onerror="x"');
+  });
+
+  it('renders a caption when present', () => {
+    const doc = {
+      root: {
+        type: 'root',
+        children: [{ type: 'image', src: 'a.jpg', altText: 'A', caption: 'The bar' }],
+      },
+    };
+    expect(renderLexicalToHtml(doc)).toContain('<figcaption>The bar</figcaption>');
+  });
+
+  it('drops an image with no src', () => {
+    const doc = { root: { type: 'root', children: [{ type: 'image', altText: 'A' }] } };
+    expect(renderLexicalToHtml(doc)).toBe('');
+  });
+});
