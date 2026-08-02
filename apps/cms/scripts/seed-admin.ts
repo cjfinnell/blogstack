@@ -25,11 +25,17 @@ async function hashPassword(password: string) {
   const salt = new Uint8Array(16);
   crypto.getRandomValues(salt);
   const encoder = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits'],
+  );
   const hashBuffer = await crypto.subtle.deriveBits(
     { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
     keyMaterial,
-    256
+    256,
   );
   const saltHex = Array.from(salt)
     .map((b) => b.toString(16).padStart(2, '0'))
@@ -45,7 +51,7 @@ async function seed() {
   const email = process.env.ADMIN_EMAIL || 'admin@connorfinnell.com';
   const environment = process.env.SEED_ENV || 'dev';
   const { env, dispose } = await getPlatformProxy(
-    remote ? { environment, remoteBindings: true } : { environment }
+    remote ? { environment, remoteBindings: true } : { environment },
   );
   console.log(`Seeding ${remote ? 'REMOTE (deployed)' : 'LOCAL'} database`);
 
@@ -64,13 +70,17 @@ async function seed() {
 
     if (existing) {
       if (!password) {
-        console.log('Admin user already exists; ADMIN_PASSWORD not set, leaving credentials unchanged');
+        console.log(
+          'Admin user already exists; ADMIN_PASSWORD not set, leaving credentials unchanged',
+        );
         await dispose();
         return;
       }
       const passwordHash = await hashPassword(password);
       await db
-        .prepare('UPDATE auth_account SET password = ?, updated_at = ? WHERE user_id = ? AND provider_id = ?')
+        .prepare(
+          'UPDATE auth_account SET password = ?, updated_at = ? WHERE user_id = ? AND provider_id = ?',
+        )
         .bind(passwordHash, Date.now(), existing.id, 'credential')
         .run();
       console.log('Admin user already existed — password re-synced from ADMIN_PASSWORD');
@@ -91,12 +101,12 @@ async function seed() {
     await db.batch([
       db
         .prepare(
-          'INSERT INTO auth_user (id, email, first_name, last_name, role, is_active, created_at, updated_at, name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          'INSERT INTO auth_user (id, email, first_name, last_name, role, is_active, created_at, updated_at, name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         )
         .bind(odid, email, 'Admin', 'User', 'admin', 1, nowMs, nowMs, 'Admin User'),
       db
         .prepare(
-          'INSERT INTO auth_account (id, user_id, account_id, provider_id, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+          'INSERT INTO auth_account (id, user_id, account_id, provider_id, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
         )
         .bind(crypto.randomUUID(), odid, odid, 'credential', passwordHash, nowMs, nowMs),
     ]);

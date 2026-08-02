@@ -9,7 +9,7 @@ import { execSync } from 'node:child_process';
 import { appendFileSync } from 'node:fs';
 
 const eventName = process.env.GITHUB_EVENT_NAME;
-const allSites: string[] = JSON.parse(process.env.ALL_SITES ?? '[]');
+const allSites = JSON.parse(process.env.ALL_SITES ?? '[]') as string[];
 
 function writeOutput(sites: string[], cmsChanged: boolean) {
   const lines = [`sites=${JSON.stringify(sites)}`, `cms_changed=${cmsChanged}`];

@@ -28,7 +28,7 @@ const rendered = template.replace(/\$\{([A-Z_][A-Z0-9_]*)\}/g, (match, name: str
 if (missing.size > 0) {
   throw new Error(
     `gen-wrangler: missing env vars: ${[...missing].join(', ')}. ` +
-      `Set them in .env.local (local dev) or the GitHub Environment secrets (CI).`
+      `Set them in .env.local (local dev) or the GitHub Environment secrets (CI).`,
   );
 }
 

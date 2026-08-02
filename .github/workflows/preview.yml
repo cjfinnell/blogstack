@@ -21,14 +21,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: jdx/mise-action@v4
-      - uses: actions/cache@v6
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-
-      - run: npm ci
+      - uses: ./.github/actions/setup-node
       - id: resolve
         run: npm run resolve-deploy-matrix
         env:
@@ -38,14 +31,23 @@ jobs:
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
   # Deploys, migrates, and seeds the single shared env.dev CMS Worker when a
-  # PR touches apps/cms/. Not matrixed by site — there is one dev CMS, not one
-  # per site. Gated on cms_changed so a web-only PR skips this entirely and
-  # its web preview builds against whatever env.dev already has deployed.
+  # PR touches apps/cms/, then posts the shared CMS admin link comment on
+  # every PR regardless — every PR's web preview builds against this CMS
+  # whether or not the PR itself redeployed it. Not matrixed by site — there
+  # is one dev CMS, not one per site.
+  #
+  # The deploy/migrate/seed steps are individually gated on cms_changed
+  # (rather than gating the whole job, which used to live in a second
+  # `preview-cms-comment` job purely so the comment could still post on
+  # web-only PRs) so a web-only PR skips straight to the comment step without
+  # paying for a checkout/npm-ci it doesn't need. If a gated step actually
+  # fails, the comment step is skipped too — GitHub Actions' default
+  # step-failure behavior — so the link still isn't posted against a broken
+  # CMS deploy.
   preview-cms:
     needs: resolve
     if: >
       github.event.action != 'closed' &&
-      needs.resolve.outputs.cms_changed == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     concurrency:
@@ -57,39 +59,39 @@ jobs:
       cancel-in-progress: false
     permissions:
       contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v4
-      - uses: actions/cache@v6
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-
-      - run: npm ci
+        if: needs.resolve.outputs.cms_changed == 'true'
+      - uses: ./.github/actions/setup-node
+        if: needs.resolve.outputs.cms_changed == 'true'
       # Non-preview mode: env.dev is static in wrangler.template.toml (no
       # ${...} placeholders), so CURRENT_SITE and these dummy host values
       # don't affect the rendered [env.dev] block — they only satisfy
       # ci-gen-wrangler's required-arg check for its *other* env blocks,
       # none of which this job ever deploys.
       - run: npm run ci-gen-wrangler
+        if: needs.resolve.outputs.cms_changed == 'true'
         env:
           CURRENT_SITE: dev
           CMS_HOST: unused.invalid
           WEB_HOST: unused.invalid
           WEB_ORIGIN: https://unused.invalid
       - name: Apply D1 migrations
+        if: needs.resolve.outputs.cms_changed == 'true'
         run: npx wrangler d1 migrations apply DB --remote --env dev
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
       - name: Deploy CMS
+        if: needs.resolve.outputs.cms_changed == 'true'
         run: npx wrangler deploy --env dev
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
       # Idempotent — seed-admin.ts no-ops if the user already exists.
       - name: Seed dev CMS admin
+        if: needs.resolve.outputs.cms_changed == 'true'
         run: npm run seed
         env:
           SEED_REMOTE: '1'
@@ -98,27 +100,13 @@ jobs:
           ADMIN_PASSWORD: ${{ secrets.DEV_ADMIN_PASSWORD }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-
-  # Posts the shared dev CMS admin link unconditionally — every PR's web
-  # preview builds against this CMS whether or not the PR itself redeployed
-  # it, so the link belongs on every PR, not just the ones that touched
-  # apps/cms/. Split out from preview-cms (which cms_changed skips entirely)
-  # so this job runs regardless.
-  preview-cms-comment:
-    needs: [resolve, preview-cms]
-    if: >
-      always() &&
-      github.event.action != 'closed' &&
-      (needs.preview-cms.result == 'success' || needs.preview-cms.result == 'skipped') &&
-      github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
       # One sticky comment per PR for the CMS admin link, separate from each
       # site's preview-URL comment — posted here instead of once per matrix
-      # leg, so it's not duplicated across terminal/folio comments.
-      - uses: actions/github-script@v9
+      # leg, so it's not duplicated across terminal/folio comments. Doesn't
+      # need node/wrangler at all, so it still runs fast on a web-only PR
+      # where the steps above were skipped.
+      - name: Post CMS admin link comment
+        uses: actions/github-script@v9
         env:
           CMS_URL: ${{ secrets.DEV_CMS_URL }}
           CMS_CHANGED: ${{ needs.resolve.outputs.cms_changed }}
@@ -149,13 +137,14 @@ jobs:
 
   preview:
     needs: [resolve, preview-cms]
-    # `always()` plus an explicit preview-cms.result check, not a plain
-    # `needs:` dependency — preview-cms is legitimately skipped on web-only
-    # PRs, and a plain `needs:` would skip this job too whenever anything it
-    # depends on didn't succeed, skip included. `action != 'closed'` is kept
-    # from this job's existing condition — dropping it would let this job
-    # attempt to build/deploy on PR-close events, which only cleanup should
-    # handle.
+    # `always()` so a `resolve` failure doesn't silently skip this job via the
+    # default `needs:` gating — the explicit preview-cms.result check takes
+    # over from there instead. preview-cms itself is now only job-skipped in
+    # the same fork-PR/closed cases this job's own conditions already rule
+    # out, so `result == 'skipped'` mostly guards against future drift rather
+    # than a case that fires today. `action != 'closed'` is kept from this
+    # job's existing condition — dropping it would let this job attempt to
+    # build/deploy on PR-close events, which only cleanup should handle.
     if: >
       always() &&
       github.event.action != 'closed' &&
@@ -208,14 +197,7 @@ jobs:
             exit 1
           fi
       - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v4
-      - uses: actions/cache@v6
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-
-      - run: npm ci
+      - uses: ./.github/actions/setup-node
       # Preview content is dev content, not production content — the tradeoff
       # for not exposing prod data on PR builds. DEV_CMS_URL is the deployed
       # env.dev CMS's workers.dev URL (no custom domain, so no anonymity
@@ -318,14 +300,7 @@ jobs:
       ENV_NAME: pr-${{ github.event.pull_request.number }}-${{ matrix.site }}
     steps:
       - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v4
-      - uses: actions/cache@v6
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-
-      - run: npm ci
+      - uses: ./.github/actions/setup-node
       # `|| true`: a PR whose preview never deployed (CI failed before the
       # deploy step, or the site was added to PREVIEW_SITES mid-PR) has no
       # Worker to delete, and that must not block the GitHub-side cleanup below.

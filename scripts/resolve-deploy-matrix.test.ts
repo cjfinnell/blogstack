@@ -15,7 +15,9 @@ describe('isCmsChanged', () => {
   });
 
   it('ignores files outside apps/cms/ and wrangler.template.toml', () => {
-    expect(isCmsChanged(['apps/web-terminal/src/index.astro', 'packages/blog-client/src/index.ts'])).toBe(false);
+    expect(
+      isCmsChanged(['apps/web-terminal/src/index.astro', 'packages/blog-client/src/index.ts']),
+    ).toBe(false);
   });
 
   it('ignores an empty changeset', () => {
@@ -45,7 +47,13 @@ function runResolve(dir: string, base: string, head: string): string {
   return execFileSync(tsxBin, [scriptPath], {
     cwd: dir,
     encoding: 'utf8',
-    env: { ...process.env, GITHUB_EVENT_NAME: 'pull_request', ALL_SITES: '[]', PR_BASE_SHA: base, PR_HEAD_SHA: head },
+    env: {
+      ...process.env,
+      GITHUB_EVENT_NAME: 'pull_request',
+      ALL_SITES: '[]',
+      PR_BASE_SHA: base,
+      PR_HEAD_SHA: head,
+    },
   });
 }
 

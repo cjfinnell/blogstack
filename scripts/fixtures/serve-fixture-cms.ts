@@ -6,7 +6,9 @@ import { createServer, type Server } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const posts = JSON.parse(readFileSync(resolve(import.meta.dirname, 'blog-posts.json'), 'utf8'));
+const posts = JSON.parse(
+  readFileSync(resolve(import.meta.dirname, 'blog-posts.json'), 'utf8'),
+) as unknown[];
 
 export function startFixtureServer(port: number): Promise<Server> {
   const server = createServer((req, res) => {

@@ -36,7 +36,7 @@ describe('createBlogClient', () => {
     await client.getPublishedPosts();
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
-    const [path] = fetchSpy.mock.calls[0]!;
+    const [path] = fetchSpy.mock.calls[0];
     expect(path.startsWith('/api/blog_post?')).toBe(true);
     expect(path).not.toContain('/api/collections/blog-posts/content');
   });
@@ -47,8 +47,8 @@ describe('createBlogClient', () => {
 
     await client.getPublishedPosts();
 
-    const [path] = fetchSpy.mock.calls[0]!;
-    const where = JSON.parse(new URL(path, 'http://x').searchParams.get('where')!);
+    const [path] = fetchSpy.mock.calls[0];
+    const where: unknown = JSON.parse(new URL(path, 'http://x').searchParams.get('where')!);
     expect(where).toEqual({ and: [{ field: 'status', operator: 'equals', value: 'published' }] });
   });
 
@@ -58,9 +58,9 @@ describe('createBlogClient', () => {
 
     await client.getPostBySlug('my-post');
 
-    const [path] = fetchSpy.mock.calls[0]!;
+    const [path] = fetchSpy.mock.calls[0];
     const url = new URL(path, 'http://x');
-    const where = JSON.parse(url.searchParams.get('where')!);
+    const where: unknown = JSON.parse(url.searchParams.get('where')!);
     expect(where).toEqual({
       and: [
         { field: 'status', operator: 'equals', value: 'published' },
@@ -71,18 +71,24 @@ describe('createBlogClient', () => {
   });
 
   it('returns an empty array for an empty result set', async () => {
-    const client = createBlogClient({ fetch: async () => jsonResponse({ data: [], meta: { count: 0 } }) });
+    const client = createBlogClient({
+      fetch: async () => jsonResponse({ data: [], meta: { count: 0 } }),
+    });
     expect(await client.getPublishedPosts()).toEqual([]);
   });
 
   it('returns null from getPostBySlug when no post matches', async () => {
-    const client = createBlogClient({ fetch: async () => jsonResponse({ data: [], meta: { count: 0 } }) });
+    const client = createBlogClient({
+      fetch: async () => jsonResponse({ data: [], meta: { count: 0 } }),
+    });
     expect(await client.getPostBySlug('missing')).toBeNull();
   });
 
   it('returns posts as-is on success', async () => {
     const post = makePost();
-    const client = createBlogClient({ fetch: async () => jsonResponse({ data: [post], meta: { count: 1 } }) });
+    const client = createBlogClient({
+      fetch: async () => jsonResponse({ data: [post], meta: { count: 1 } }),
+    });
     expect(await client.getPublishedPosts()).toEqual([post]);
   });
 

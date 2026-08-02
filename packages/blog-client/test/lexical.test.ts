@@ -28,7 +28,11 @@ const fixture = {
       {
         type: 'paragraph',
         children: [
-          { type: 'link', url: 'https://example.com', children: [{ type: 'text', text: 'a link' }] },
+          {
+            type: 'link',
+            url: 'https://example.com',
+            children: [{ type: 'text', text: 'a link' }],
+          },
           { type: 'linebreak' },
           { type: 'text', text: '<script>' },
         ],
@@ -45,7 +49,7 @@ describe('renderLexicalToHtml', () => {
         '<p>Hello <strong>bold</strong> and <code>code</code></p>' +
         '<blockquote><em>A quote</em></blockquote>' +
         '<ol><li>one</li><li>two</li></ol>' +
-        '<p><a href="https://example.com">a link</a><br />&lt;script&gt;</p>'
+        '<p><a href="https://example.com">a link</a><br />&lt;script&gt;</p>',
     );
   });
 

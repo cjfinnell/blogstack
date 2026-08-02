@@ -10,14 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v4
-      - uses: actions/cache@v6
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-
-      - run: npm ci
+      - uses: ./.github/actions/setup-node
+      - run: npm run lint
+      - run: npm run format:check
       - run: npm run typecheck
       - run: npm run test
       - run: npm run build:web-dev

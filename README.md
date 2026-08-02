@@ -39,17 +39,17 @@ npm run dev:web -- terminal    # astro dev, :4322
 
 ## Scripts
 
-| Command | Does |
-|---|---|
-| `npm run dev:cms` | Local CMS dev server |
-| `npm run dev:web -- <site>` | Local Astro dev server for a site |
-| `npm run gen-wrangler` | Renders `wrangler.toml` from the template |
-| `npm run db:migrate:local` | Applies D1 migrations to the local dev DB |
-| `npm run seed` | Creates the local admin user (`ADMIN_PASSWORD=...`) |
-| `npm run typecheck` | Typechecks every workspace |
-| `npm run test` | Runs the vitest suite, including the config-drift check |
-| `npm run build:web-dev` | Builds `web-dev` against a fixture CMS (what CI runs) |
-| `npm run release -- --site <site>` | Full gen → migrate → deploy sequence for one site |
+| Command                            | Does                                                    |
+| ---------------------------------- | ------------------------------------------------------- |
+| `npm run dev:cms`                  | Local CMS dev server                                    |
+| `npm run dev:web -- <site>`        | Local Astro dev server for a site                       |
+| `npm run gen-wrangler`             | Renders `wrangler.toml` from the template               |
+| `npm run db:migrate:local`         | Applies D1 migrations to the local dev DB               |
+| `npm run seed`                     | Creates the local admin user (`ADMIN_PASSWORD=...`)     |
+| `npm run typecheck`                | Typechecks every workspace                              |
+| `npm run test`                     | Runs the vitest suite, including the config-drift check |
+| `npm run build:web-dev`            | Builds `web-dev` against a fixture CMS (what CI runs)   |
+| `npm run release -- --site <site>` | Full gen → migrate → deploy sequence for one site       |
 
 ## Testing
 
@@ -111,29 +111,29 @@ production.
 
 Environment secrets, per deployed site (`terminal`, `folio`) — production only:
 
-| Secret | Purpose |
-|---|---|
-| `CF_API_TOKEN`, `CF_ACCOUNT_ID` | Deploy credentials for that site |
-| `CMS_HOST`, `WEB_HOST`, `WEB_ORIGIN` | That site's hostnames |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | That site's CMS admin login, (re)seeded after every CMS deploy |
+| Secret                               | Purpose                                                        |
+| ------------------------------------ | -------------------------------------------------------------- |
+| `CF_API_TOKEN`, `CF_ACCOUNT_ID`      | Deploy credentials for that site                               |
+| `CMS_HOST`, `WEB_HOST`, `WEB_ORIGIN` | That site's hostnames                                          |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`      | That site's CMS admin login, (re)seeded after every CMS deploy |
 
 Repository secrets — used by the preview, cleanup and reconcile jobs, which are
 not scoped to a production Environment. A same-named Environment secret wins for
 deploy jobs, so these do not weaken production scoping:
 
-| Secret | Purpose |
-|---|---|
-| `CF_API_TOKEN`, `CF_ACCOUNT_ID` | Deploy and teardown, for every workflow |
-| `DEV_CMS_URL` | Dev CMS that previews build against |
-| `DEV_ADMIN_EMAIL`, `DEV_ADMIN_PASSWORD` | Dev CMS admin login, (re)seeded by `preview-cms` on every CMS-touching PR |
-| `GH_ADMIN_TOKEN` | Fine-grained PAT, Administration: Read and write. `GITHUB_TOKEN` cannot delete Environments at any permission level |
+| Secret                                  | Purpose                                                                                                             |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `CF_API_TOKEN`, `CF_ACCOUNT_ID`         | Deploy and teardown, for every workflow                                                                             |
+| `DEV_CMS_URL`                           | Dev CMS that previews build against                                                                                 |
+| `DEV_ADMIN_EMAIL`, `DEV_ADMIN_PASSWORD` | Dev CMS admin login, (re)seeded by `preview-cms` on every CMS-touching PR                                           |
+| `GH_ADMIN_TOKEN`                        | Fine-grained PAT, Administration: Read and write. `GITHUB_TOKEN` cannot delete Environments at any permission level |
 
 Repository **variables**:
 
-| Variable | Purpose |
-|---|---|
-| `SITES`, `PREVIEW_SITES` | Deploy and preview matrices |
-| `CF_WORKERS_SUBDOMAIN` | Account workers.dev subdomain, to compute a preview's own `SITE_URL` |
+| Variable                 | Purpose                                                              |
+| ------------------------ | -------------------------------------------------------------------- |
+| `SITES`, `PREVIEW_SITES` | Deploy and preview matrices                                          |
+| `CF_WORKERS_SUBDOMAIN`   | Account workers.dev subdomain, to compute a preview's own `SITE_URL` |
 
 `CF_WORKERS_SUBDOMAIN` must be a variable, not a secret. A secret is masked to
 `***` everywhere it appears, including inside the resolved `environment.url`,

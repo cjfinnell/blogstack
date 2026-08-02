@@ -12,16 +12,18 @@ function publishedFilter(extra: Record<string, unknown>[] = []) {
   return encodeURIComponent(
     JSON.stringify({
       and: [{ field: 'status', operator: 'equals', value: 'published' }, ...extra],
-    })
+    }),
   );
 }
 
 export function createBlogClient(transport: Transport) {
   async function getPublishedPosts(limit = 10, offset = 0): Promise<Post[]> {
     const where = publishedFilter();
-    const res = await transport.fetch(`/api/${COLLECTION_PATH}?where=${where}&limit=${limit}&offset=${offset}`);
+    const res = await transport.fetch(
+      `/api/${COLLECTION_PATH}?where=${where}&limit=${limit}&offset=${offset}`,
+    );
     if (!res.ok) throw new Error(`Failed to fetch posts: ${res.status}`);
-    const { data }: ContentResponse = await res.json();
+    const { data } = (await res.json()) as ContentResponse;
     return data;
   }
 
@@ -29,7 +31,7 @@ export function createBlogClient(transport: Transport) {
     const where = publishedFilter([{ field: 'data.slug', operator: 'equals', value: slug }]);
     const res = await transport.fetch(`/api/${COLLECTION_PATH}?where=${where}&limit=1`);
     if (!res.ok) throw new Error(`Failed to fetch post: ${res.status}`);
-    const { data }: ContentResponse = await res.json();
+    const { data } = (await res.json()) as ContentResponse;
     return data[0] ?? null;
   }
 

@@ -29,7 +29,9 @@ if (!isSiteId(siteArg)) {
 
 const site = sites[siteArg];
 if (!site.deployed) {
-  console.error(`"${siteArg}" is not a deployed site (config/sites.ts has deployed: false). Nothing to release.`);
+  console.error(
+    `"${siteArg}" is not a deployed site (config/sites.ts has deployed: false). Nothing to release.`,
+  );
   process.exit(1);
 }
 
@@ -38,7 +40,9 @@ const cmsHost = process.env[`${prefix}_CMS_HOST`];
 const webOrigin = process.env[`${prefix}_WEB_ORIGIN`];
 
 if (!cmsHost || !webOrigin) {
-  console.error(`Missing ${prefix}_CMS_HOST / ${prefix}_WEB_ORIGIN. Set them in .env.local (or the shell env in CI).`);
+  console.error(
+    `Missing ${prefix}_CMS_HOST / ${prefix}_WEB_ORIGIN. Set them in .env.local (or the shell env in CI).`,
+  );
   process.exit(1);
 }
 
