@@ -24,14 +24,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: jdx/mise-action@v4
-      - uses: actions/cache@v6
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-
-      - run: npm ci
+      - uses: ./.github/actions/setup-node
       - id: resolve
         run: npm run resolve-deploy-matrix
         env:
@@ -71,14 +64,7 @@ jobs:
       deployments: write
     steps:
       - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v4
-      - uses: actions/cache@v6
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-
-      - run: npm ci
+      - uses: ./.github/actions/setup-node
       - run: npm run ci-gen-wrangler
         env:
           CURRENT_SITE: ${{ matrix.site }}

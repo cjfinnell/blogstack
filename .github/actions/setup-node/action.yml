@@ -1,0 +1,17 @@
+name: Set up Node
+description: >
+  Install the mise-pinned Node/npm, restore the npm cache, and run `npm ci`.
+  The caller must check out the repo first — a local composite action can't
+  do that for itself.
+runs:
+  using: composite
+  steps:
+    - uses: jdx/mise-action@v4
+    - uses: actions/cache@v6
+      with:
+        path: ~/.npm
+        key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          npm-${{ runner.os }}-
+    - run: npm ci
+      shell: bash
