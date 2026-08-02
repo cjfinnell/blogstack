@@ -2,6 +2,8 @@
 // The public content API returns this tree as-is (no server-side HTML
 // serializer is exported by @sonicjs-cms/core), so rendering happens here.
 
+import { applyFootnotes } from './footnotes';
+
 const FORMAT_BOLD = 1;
 const FORMAT_ITALIC = 2;
 const FORMAT_STRIKETHROUGH = 4;
@@ -101,5 +103,5 @@ export function renderLexicalToHtml(content: unknown): string {
     doc = content as LexicalDoc;
   }
   if (!doc?.root) return '';
-  return renderNode(doc.root);
+  return applyFootnotes(renderNode(doc.root));
 }
