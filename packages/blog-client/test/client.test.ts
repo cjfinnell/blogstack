@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createBlogClient } from '../src/client';
+import { createBlogClient, postType, reviewMeta } from '../src/client';
 import type { Transport } from '../src/transport';
 import type { Post } from '../src/types';
 
@@ -100,5 +100,43 @@ describe('createBlogClient', () => {
   it('throws on a non-2xx response from getPostBySlug', async () => {
     const client = createBlogClient({ fetch: async () => jsonResponse({ error: 'nope' }, 404) });
     await expect(client.getPostBySlug('x')).rejects.toThrow(/404/);
+  });
+});
+
+describe('postType', () => {
+  it('defaults to essay when the field is absent', () => {
+    expect(postType(makePost())).toBe('essay');
+  });
+
+  it('returns review when the field says review', () => {
+    const post = makePost();
+    post.data.postType = 'review';
+    expect(postType(post)).toBe('review');
+  });
+
+  it('falls back to essay for an unrecognised value', () => {
+    const post = makePost();
+    post.data.postType = 'recipe' as never;
+    expect(postType(post)).toBe('essay');
+  });
+});
+
+describe('reviewMeta', () => {
+  it('returns null for an essay', () => {
+    expect(reviewMeta(makePost())).toBeNull();
+  });
+
+  it('returns null for a review with no review group', () => {
+    const post = makePost();
+    post.data.postType = 'review';
+    expect(reviewMeta(post)).toBeNull();
+  });
+
+  it('returns the group for a review that has one', () => {
+    const post = makePost();
+    post.data.postType = 'review';
+    post.data.review = { restaurant: 'Somebody People', rating: 2.3 };
+    expect(reviewMeta(post)?.restaurant).toBe('Somebody People');
+    expect(reviewMeta(post)?.rating).toBe(2.3);
   });
 });

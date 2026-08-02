@@ -1,5 +1,5 @@
 import type { Transport } from './transport';
-import type { ContentResponse, Post } from './types';
+import type { ContentResponse, Post, PostType, ReviewMeta } from './types';
 
 // Reads go to /api/blog_post, *not* the documented
 // /api/collections/blog-posts/content. That documented path serves from a
@@ -50,4 +50,21 @@ export function postTitle(post: Post): string {
 
 export function postPublishedAt(post: Post): string | null {
   return post.data?.publishedAt || null;
+}
+
+const POST_TYPES: PostType[] = ['essay', 'review'];
+
+// Rows written before the review post type existed have no postType at all,
+// and a future CMS-side value could reach a frontend that predates it. Both
+// read as an essay rather than rendering nothing.
+export function postType(post: Post): PostType {
+  const value = post.data?.postType;
+  return value && POST_TYPES.includes(value) ? value : 'essay';
+}
+
+export function reviewMeta(post: Post): ReviewMeta | null {
+  if (postType(post) !== 'review') return null;
+  const review = post.data?.review;
+  if (!review || Object.keys(review).length === 0) return null;
+  return review;
 }
