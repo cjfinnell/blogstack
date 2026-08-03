@@ -17,7 +17,7 @@ export const GET: APIRoute = async ({ site }) => {
 
   const items = posts
     .map((post) => {
-      const url = `${siteUrl}/blog/${postSlug(post)}/`;
+      const url = `${siteUrl}/posts/${postSlug(post)}/`;
       const publishedAt = postPublishedAt(post);
       return `
     <item>
