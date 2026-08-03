@@ -1,8 +1,8 @@
 name: Set up Node
 description: >
-  Install the mise-pinned Node/npm, restore the npm cache, and run `npm ci`.
-  The caller must check out the repo first — a local composite action can't
-  do that for itself.
+  Install the mise-pinned Node/npm, restore the npm cache, and run
+  `make install`. The caller must check out the repo first — a local
+  composite action can't do that for itself.
 runs:
   using: composite
   steps:
@@ -13,5 +13,5 @@ runs:
         key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
         restore-keys: |
           npm-${{ runner.os }}-
-    - run: npm ci
+    - run: make install
       shell: bash
