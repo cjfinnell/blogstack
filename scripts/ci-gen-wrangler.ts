@@ -56,4 +56,13 @@ for (const site of deployedSiteIds) {
   process.env[`${prefix}_D1_ID`] ??= 'unused-invalid-d1-id';
 }
 
+// env.dev is excluded from deployedSiteIds (config/sites.ts marks it
+// deployed: false — it's the shared dev CMS, not a per-site deploy target),
+// so the loop above never fills DEV_D1_ID. Every job that renders the full
+// template needs it anyway. Only the preview-cms job's CURRENT_SITE=dev
+// branch above sets it for real; everyone else (deploy.yml's per-site
+// matrix, preview.yml's per-site preview matrix) gets the dummy, since none
+// of them ever deploy --env dev.
+process.env.DEV_D1_ID ??= 'unused-invalid-d1-id';
+
 await import('./gen-wrangler.ts');
