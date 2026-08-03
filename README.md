@@ -6,9 +6,9 @@ driven by a single wrangler config entrypoint. Static output only — readers
 never hit a Worker or a database.
 
 No committed file maps a theme to a domain. Sites are referred to by
-codename (`dev`, `terminal`, `folio`); the codename-to-hostname mapping lives
-in `.env.local` (gitignored) and GitHub Environment secrets, not in this
-repo.
+codename (`dev`, `terminal`, `folio`, `olive`); the codename-to-hostname
+mapping lives in `.env.local` (gitignored) and GitHub Environment secrets,
+not in this repo.
 
 ## Layout
 
@@ -18,6 +18,7 @@ apps/
   web-dev/            unbranded baseline frontend, CI fixture target
   web-terminal/        developer-blog theme
   web-folio/            portfolio theme
+  web-olive/            restaurant-review + essay theme
 packages/
   blog-client/       shared data client (fetch + lexical rendering), no UI
 config/sites.ts      theme registry
@@ -109,12 +110,13 @@ production.
 
 ### Required secrets
 
-Environment secrets, per deployed site (`terminal`, `folio`) — production only:
+Environment secrets, per deployed site (`terminal`, `folio`, `olive`) — production only:
 
 | Secret                               | Purpose                                                        |
 | ------------------------------------ | -------------------------------------------------------------- |
 | `CF_API_TOKEN`, `CF_ACCOUNT_ID`      | Deploy credentials for that site                               |
 | `CMS_HOST`, `WEB_HOST`, `WEB_ORIGIN` | That site's hostnames                                          |
+| `D1_ID`                              | That site's D1 database id, substituted into `wrangler.toml`   |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD`      | That site's CMS admin login, (re)seeded after every CMS deploy |
 
 Repository secrets — used by the preview, cleanup and reconcile jobs, which are

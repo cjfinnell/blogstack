@@ -27,6 +27,11 @@ export function applyFootnotes(html: string): string {
     return `<sup id="fnref-${n}"><a href="#fn-${n}">${n}</a></sup>`;
   });
 
+  // No marker actually linked — an ordinary "Notes" section (terminal/folio
+  // content predates this convention and can end on one), not footnotes.
+  // Rewriting it anyway would emit back-links to fnref ids that don't exist.
+  if (linkedBody === body) return html;
+
   const notes = items
     .map(
       (text, i) =>

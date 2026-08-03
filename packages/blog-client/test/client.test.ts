@@ -139,4 +139,16 @@ describe('reviewMeta', () => {
     expect(reviewMeta(post)?.restaurant).toBe('Somebody People');
     expect(reviewMeta(post)?.rating).toBe(2.3);
   });
+
+  it('returns null when every field in the review group is empty', () => {
+    const post = makePost();
+    post.data.postType = 'review';
+    post.data.review = {
+      restaurant: '',
+      city: undefined,
+      rating: undefined,
+      cuisineTags: [],
+    };
+    expect(reviewMeta(post)).toBeNull();
+  });
 });

@@ -41,4 +41,9 @@ describe('applyFootnotes', () => {
   it('is a no-op on empty input', () => {
     expect(applyFootnotes('')).toBe('');
   });
+
+  it('leaves an ordinary Notes section untouched when no marker links to it', () => {
+    const input = `<p>No markers here.</p>${NOTES}`;
+    expect(applyFootnotes(input)).toBe(input);
+  });
 });

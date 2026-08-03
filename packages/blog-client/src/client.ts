@@ -62,9 +62,19 @@ export function postType(post: Post): PostType {
   return value && POST_TYPES.includes(value) ? value : 'essay';
 }
 
+// SonicJS can persist the review object with every key present but empty
+// (e.g. the author flips postType to Review and saves before filling
+// anything in) — an object with keys but no real values is still "no
+// review" to the reader, same as a genuinely absent group.
+function hasReviewContent(review: ReviewMeta): boolean {
+  return Object.values(review).some(
+    (v) => v != null && v !== '' && !(Array.isArray(v) && v.length === 0),
+  );
+}
+
 export function reviewMeta(post: Post): ReviewMeta | null {
   if (postType(post) !== 'review') return null;
   const review = post.data?.review;
-  if (!review || Object.keys(review).length === 0) return null;
+  if (!review || !hasReviewContent(review)) return null;
   return review;
 }
