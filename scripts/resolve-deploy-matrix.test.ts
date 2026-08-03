@@ -57,6 +57,42 @@ function runResolve(dir: string, base: string, head: string): string {
   });
 }
 
+function runResolvePush(dir: string, base: string, head: string, allSites: string[]): string {
+  return execFileSync(tsxBin, [scriptPath], {
+    cwd: dir,
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      GITHUB_EVENT_NAME: 'push',
+      ALL_SITES: JSON.stringify(allSites),
+      BASE_SHA: base,
+      HEAD_SHA: head,
+    },
+  });
+}
+
+describe('push event', () => {
+  it('treats a root package.json/package-lock.json change (e.g. a Renovate PR) as global, deploying every site', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'resolve-deploy-matrix-'));
+    try {
+      const base = initRepoWithBranchPoint(dir);
+
+      writeFileSync(join(dir, 'package.json'), '{"name":"root","version":"0.0.2"}\n');
+      writeFileSync(join(dir, 'package-lock.json'), '{"lockfileVersion":3}\n');
+      git(dir, 'add', '.');
+      git(dir, 'commit', '-q', '-m', 'chore(deps): bump a root devDependency');
+      const head = git(dir, 'rev-parse', 'HEAD').trim();
+
+      const output = runResolvePush(dir, base, head, ['terminal', 'folio']);
+
+      expect(output).toContain('sites=["terminal","folio"]');
+      expect(output).toContain('cms_changed=false');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe('pull_request event', () => {
   it('reports cms_changed=true for a branch that touched apps/cms/, ignoring commits main gained afterward', () => {
     const dir = mkdtempSync(join(tmpdir(), 'resolve-deploy-matrix-'));
