@@ -128,6 +128,7 @@ deploy jobs, so these do not weaken production scoping:
 | `CF_API_TOKEN`, `CF_ACCOUNT_ID`         | Deploy and teardown, for every workflow                                                                             |
 | `DEV_CMS_URL`                           | Dev CMS that previews build against                                                                                 |
 | `DEV_ADMIN_EMAIL`, `DEV_ADMIN_PASSWORD` | Dev CMS admin login, (re)seeded by `preview-cms` on every CMS-touching PR                                           |
+| `DEV_D1_ID`                             | Shared dev CMS's D1 database id, substituted into `wrangler.toml`'s `env.dev` block                                 |
 | `GH_ADMIN_TOKEN`                        | Fine-grained PAT, Administration: Read and write. `GITHUB_TOKEN` cannot delete Environments at any permission level |
 
 Repository **variables**:

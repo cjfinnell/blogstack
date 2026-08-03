@@ -14,7 +14,7 @@ name = "blogstack-cms-dev"
 main = "apps/cms/src/index.ts"
 workers_dev = true
 vars = { ENVIRONMENT = "development", SITE_ID = "dev", CORS_ORIGINS = "http://localhost:4321,http://localhost:4322,http://localhost:4323,http://localhost:4324" }
-d1_databases = [{ binding = "DB", database_name = "blogstack-dev-db", database_id = "37738d6b-bd70-4193-8a78-d5f187deb35d", migrations_dir = "./node_modules/@sonicjs-cms/core/migrations", remote = true }]
+d1_databases = [{ binding = "DB", database_name = "blogstack-dev-db", database_id = "${DEV_D1_ID}", migrations_dir = "./node_modules/@sonicjs-cms/core/migrations", remote = true }]
 r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-dev-media" }]
 
 [env.web_dev]
