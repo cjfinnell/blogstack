@@ -11,8 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-node
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm run typecheck
-      - run: npm run test
-      - run: npm run build:web-dev
+      - run: make lint
+      - run: make format-check
+      - run: make typecheck
+      - run: make test
+      - run: make build
