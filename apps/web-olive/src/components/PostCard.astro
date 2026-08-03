@@ -1,6 +1,6 @@
 ---
 import type { Post } from '@blogstack/blog-client';
-import { postPublishedAt, postSlug, postTitle } from '@blogstack/blog-client';
+import { postPublishedAt, postSlug, postTitle, reviewMeta } from '@blogstack/blog-client';
 
 interface Props {
   post: Post;
@@ -8,21 +8,33 @@ interface Props {
 
 const { post } = Astro.props;
 const publishedAt = postPublishedAt(post);
+const review = reviewMeta(post);
 ---
 
 <article class="card">
-  <h2><a href={`/blog/${postSlug(post)}/`}>{postTitle(post)}</a></h2>
-  {
-    publishedAt && (
-      <time datetime={publishedAt} class="date">
-        {new Date(publishedAt).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })}
-      </time>
-    )
-  }
+  <h2><a href={`/posts/${postSlug(post)}/`}>{postTitle(post)}</a></h2>
+  <p class="meta">
+    {
+      publishedAt && (
+        <time datetime={publishedAt} class="date">
+          {new Date(publishedAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </time>
+      )
+    }
+    {
+      review?.rating != null && (
+        <span class="score">
+          {review.rating} / {review.ratingScaleMax ?? 4}
+        </span>
+      )
+    }
+    {review?.city && <span class="city">{review.city}</span>}
+  </p>
+  {review?.verdictSummary && <p class="verdict">{review.verdictSummary}</p>}
 </article>
 
 <style>
@@ -44,5 +56,20 @@ const publishedAt = postPublishedAt(post);
   .date {
     color: var(--muted);
     font-size: 0.85rem;
+  }
+  .meta {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin: 0;
+  }
+  .score,
+  .city {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .verdict {
+    margin: 0.4rem 0 0;
+    font-size: 0.95rem;
   }
 </style>
