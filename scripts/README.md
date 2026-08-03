@@ -1,0 +1,17 @@
+# scripts
+
+| Script                       | Command                            | Does                                                                        |
+| ----------------------------- | ----------------------------------- | ---------------------------------------------------------------------------- |
+| `gen-wrangler.ts`             | `npm run gen-wrangler`             | Renders `wrangler.toml` from `wrangler.template.toml`, substituting `${VAR}` placeholders from `process.env`. Wrangler has no config-level variable interpolation, so this is the injection mechanism. Local dev sources `process.env` from `.env.local` via mise's `_.file`; CI sources the same vars from GitHub Environment secrets — same code path either way. |
+| `ci-gen-wrangler.ts`          | `npm run ci-gen-wrangler`           | CI-only variant of `gen-wrangler`. A `deploy.yml` job is scoped to one GitHub Environment (`CURRENT_SITE`), so it only has that site's unprefixed `CMS_HOST`/`WEB_HOST`/`WEB_ORIGIN` secrets. This maps those onto the site's prefixed var name and fills every other deployed site's placeholder with an inert dummy — safe because the job only runs `wrangler ... --env {cms,web}_<CURRENT_SITE>`. `PREVIEW=1` is the `preview.yml` path: previews deploy `--env preview_<site>` (assets-only, no `${...}` placeholders) against the dev CMS, so every site including `CURRENT_SITE` gets the dummy. Requiring the flag explicitly means a real deploy job missing a secret fails loudly instead of silently rendering `unused.invalid` into a production route. |
+| `check-config-drift.ts`       | part of `npm run test`             | Parses the rendered `wrangler.toml` (against `.env.example` dummy values, so it needs no secrets and runs on fork PRs) and asserts the hand-authored env blocks stay consistent with `config/sites.ts` and `mise.toml`. Highest-value test in the repo — duplicated env blocks are this design's main failure mode. |
+| `resolve-deploy-matrix.ts`    | used by `deploy.yml`/`preview.yml` | Computes which sites `deploy.yml`'s matrix should cover, and whether the CMS needs redeploying alongside the web build. GitHub's `secrets` context is unavailable in `strategy.matrix`, so the matrix can only read `vars.SITES` (echoed unmasked into public logs — codenames only, never hostnames). |
+| `release.ts`                  | `npm run release -- --site <site>` | Runs the exact gen → migrate → deploy CMS → build → deploy web sequence `deploy.yml` runs in CI. Deliberately shared between the manual escape hatch and the automated path so they can't drift; also the fallback if a CMS publish hook stops firing. |
+| `dev-web.ts`                  | `npm run dev:web -- <site>`        | Runs `astro dev` for the given site's app, on its pinned port from `config/sites.ts`, pointed at the local dev CMS. |
+| `build-web-dev-fixture.ts`    | `npm run build:web-dev`            | CI build smoke test: builds `apps/web-dev` against the fixture CMS server in `fixtures/`, hermetically, with no live CMS. A `blog-client` regression fails here before any themed app is touched. |
+
+## Testing
+
+`vitest` at the workspace root runs two kinds of tests: `packages/blog-client`
+unit tests (mocked transport, no network) and the config-drift check above.
+Both run with no secrets, so fork PRs get full CI.
