@@ -13,7 +13,7 @@ enabled = true
 name = "blogstack-cms-dev"
 main = "apps/cms/src/index.ts"
 workers_dev = true
-vars = { ENVIRONMENT = "development", SITE_ID = "dev", CORS_ORIGINS = "http://localhost:4321,http://localhost:4322,http://localhost:4323" }
+vars = { ENVIRONMENT = "development", SITE_ID = "dev", CORS_ORIGINS = "http://localhost:4321,http://localhost:4322,http://localhost:4323,http://localhost:4324" }
 d1_databases = [{ binding = "DB", database_name = "blogstack-dev-db", database_id = "37738d6b-bd70-4193-8a78-d5f187deb35d", migrations_dir = "./node_modules/@sonicjs-cms/core/migrations", remote = true }]
 r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-dev-media" }]
 
@@ -60,6 +60,23 @@ preview_urls = false
 assets = { directory = "apps/web-folio/dist" }
 routes = [{ pattern = "${FOLIO_WEB_HOST}", custom_domain = true }]
 
+# ---------- olive ----------
+[env.cms_olive]
+name = "blogstack-cms-olive"
+main = "apps/cms/src/index.ts"
+workers_dev = false
+routes = [{ pattern = "${OLIVE_CMS_HOST}", custom_domain = true }]
+vars = { ENVIRONMENT = "production", SITE_ID = "olive", CORS_ORIGINS = "${OLIVE_WEB_ORIGIN}", GITHUB_REPO = "cjfinnell/blogstack" }
+d1_databases = [{ binding = "DB", database_name = "blogstack-olive-db", database_id = "REPLACE_IN_TASK_8", migrations_dir = "./node_modules/@sonicjs-cms/core/migrations", remote = true }]
+r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-olive-media" }]
+
+[env.web_olive]
+name = "blogstack-web-olive"
+workers_dev = false
+preview_urls = false
+assets = { directory = "apps/web-olive/dist" }
+routes = [{ pattern = "${OLIVE_WEB_HOST}", custom_domain = true }]
+
 # ---------- per-PR previews ----------
 # One block per deployed site. Assets-only, workers.dev, no routes and no
 # custom domain, so a preview can never answer on a production hostname.
@@ -82,3 +99,8 @@ assets = { directory = "apps/web-terminal/dist" }
 name = "blogstack-web-folio-preview"
 workers_dev = true
 assets = { directory = "apps/web-folio/dist" }
+
+[env.preview_olive]
+name = "blogstack-web-olive-preview"
+workers_dev = true
+assets = { directory = "apps/web-olive/dist" }

@@ -30,5 +30,35 @@
       "author": "fixture-author",
       "publishedAt": "2024-02-01T00:00:00.000Z"
     }
+  },
+  {
+    "id": "fixture-3",
+    "slug": "fixture-3",
+    "title": "Somebody People",
+    "status": "published",
+    "collectionId": "blog-posts",
+    "created_at": 1719792000000,
+    "updated_at": 1719792000000,
+    "data": {
+      "title": "Somebody People",
+      "slug": "somebody-people",
+      "content": "{\"root\":{\"type\":\"root\",\"children\":[{\"type\":\"heading\",\"tag\":\"h2\",\"children\":[{\"type\":\"text\",\"text\":\"Food\",\"format\":0}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"text\":\"The tasting menu leaned hard on acid[^1].\",\"format\":0}]},{\"type\":\"heading\",\"tag\":\"h2\",\"children\":[{\"type\":\"text\",\"text\":\"Notes\",\"format\":0}]},{\"type\":\"list\",\"listType\":\"number\",\"children\":[{\"type\":\"listitem\",\"children\":[{\"type\":\"text\",\"text\":\"Every course but dessert.\",\"format\":0}]}]}]}}",
+      "author": "fixture-author",
+      "publishedAt": "2024-07-01T00:00:00.000Z",
+      "postType": "review",
+      "review": {
+        "restaurant": "Somebody People",
+        "city": "Denver, CO",
+        "visitedAt": "2024-06-28",
+        "rating": 2.3,
+        "ratingScaleMax": 4,
+        "pricePerPerson": 145.15,
+        "verdictSummary": "Good, and it could be great.",
+        "recommendation": "Skip the tasting menu, order a dish or two to share.",
+        "bestOccasion": "Date night or a small group.",
+        "bestDishes": "House focaccia; the mushrooms from the mixed grill.",
+        "cuisineTags": ["vegan", "mediterranean"]
+      }
+    }
   }
 ]
