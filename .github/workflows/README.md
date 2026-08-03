@@ -1,11 +1,11 @@
 # .github/workflows
 
-| Workflow                  | Trigger                                                             | Does                                          |
-| -------------------------- | -------------------------------------------------------------------- | ------------------------------------------------ |
-| `ci.yml`                  | pull request, push to `main`                                       | lint, format-check, typecheck, test, build (via Makefile targets) |
-| `deploy.yml`               | push to `main`, CMS publish webhook (`repository_dispatch`), manual (`workflow_dispatch`) | Deploys production sites                       |
-| `preview.yml`              | pull request opened/synced/closed                                  | Builds/tears down per-PR preview Workers        |
-| `preview-reconcile.yml`    | nightly schedule                                                    | Sweeps orphaned preview Workers/Environments    |
+| Workflow                | Trigger                                                                                   | Does                                                              |
+| ----------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `ci.yml`                | pull request, push to `main`                                                              | lint, format-check, typecheck, test, build (via Makefile targets) |
+| `deploy.yml`            | push to `main`, CMS publish webhook (`repository_dispatch`), manual (`workflow_dispatch`) | Deploys production sites                                          |
+| `preview.yml`           | pull request opened/synced/closed                                                         | Builds/tears down per-PR preview Workers                          |
+| `preview-reconcile.yml` | nightly schedule                                                                          | Sweeps orphaned preview Workers/Environments                      |
 
 ## Deploying
 
@@ -72,7 +72,7 @@ not scoped to a production Environment. A same-named Environment secret wins for
 deploy jobs, so these do not weaken production scoping:
 
 | Secret                                  | Purpose                                                                                                             |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `CF_API_TOKEN`, `CF_ACCOUNT_ID`         | Deploy and teardown, for every workflow                                                                             |
 | `DEV_CMS_URL`                           | Dev CMS that previews build against                                                                                 |
 | `DEV_ADMIN_EMAIL`, `DEV_ADMIN_PASSWORD` | Dev CMS admin login, (re)seeded by `preview-cms` on every CMS-touching PR                                           |
@@ -82,7 +82,7 @@ deploy jobs, so these do not weaken production scoping:
 Repository **variables**:
 
 | Variable                 | Purpose                                                              |
-| ------------------------- | ---------------------------------------------------------------------- |
+| ------------------------ | -------------------------------------------------------------------- |
 | `SITES`, `PREVIEW_SITES` | Deploy and preview matrices                                          |
 | `CF_WORKERS_SUBDOMAIN`   | Account workers.dev subdomain, to compute a preview's own `SITE_URL` |
 
