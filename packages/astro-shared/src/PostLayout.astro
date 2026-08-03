@@ -1,0 +1,36 @@
+---
+import { themes, type ThemeName } from './themes';
+
+interface Props {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  layout: (props: any) => any;
+  theme: ThemeName;
+  title: string;
+  publishedAt: string | null;
+}
+
+const { layout: Layout, theme: themeName, title, publishedAt } = Astro.props;
+const p = themes[themeName].post;
+
+function formatDate(iso: string): string {
+  return p.dateFormat === 'iso'
+    ? new Date(iso).toISOString().slice(0, 10)
+    : new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+---
+
+<Layout title={title}>
+  <article>
+    <header>
+      <h1>{title}</h1>
+      <p style={p.dateStyle}>
+        {publishedAt && <time datetime={publishedAt}>{formatDate(publishedAt)}</time>}
+      </p>
+    </header>
+    <div class="content">
+      <slot />
+    </div>
+  </article>
+</Layout>
+
+<style is:global set:html={p.contentCss}></style>

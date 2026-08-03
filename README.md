@@ -21,6 +21,7 @@ apps/
   web-olive/            restaurant-review + essay theme
 packages/
   blog-client/       shared data client (fetch + lexical rendering), no UI
+  astro-shared/      shared Astro layouts/components + per-site theme presets
 config/sites.ts      theme registry, see config/README.md
 scripts/             gen-wrangler, config-drift check, release, CI helpers, see scripts/README.md
 wrangler.template.toml  single wrangler config, one env block per deploy target
@@ -31,7 +32,7 @@ wrangler.template.toml  single wrangler config, one env block per deploy target
 Requires [mise](https://mise.jdx.dev) for the pinned Node version.
 
 ```
-mise install && npm ci
+mise install && make install
 cp .env.example .env.local     # fill in real hostnames, gitignored
 npm run dev:cms                # wrangler dev --env dev, :8787
 npm run db:migrate:local && npm run seed

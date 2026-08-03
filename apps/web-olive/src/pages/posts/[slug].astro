@@ -8,7 +8,7 @@ import {
   renderLexicalToHtml,
   reviewMeta,
 } from '@blogstack/blog-client';
-import { blog } from '../../lib/blog';
+import { blog } from '@blogstack/astro-shared/blog';
 
 export async function getStaticPaths() {
   const posts = await blog.getPublishedPosts(100);
