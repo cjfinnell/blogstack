@@ -28,12 +28,12 @@
     "build:web-dev": "tsx scripts/build-web-dev-fixture.ts"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^24.10.1",
     "astro-eslint-parser": "^3.0.0",
-    "eslint": "^9.39.5",
+    "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-astro": "^1.7.0",
+    "eslint-plugin-astro": "^3.0.0",
     "globals": "^17.0.0",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
