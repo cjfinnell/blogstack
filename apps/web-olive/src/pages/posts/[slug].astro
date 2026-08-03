@@ -1,0 +1,36 @@
+---
+import PostLayout from '../../layouts/PostLayout.astro';
+import ReviewLayout from '../../layouts/ReviewLayout.astro';
+import {
+  postPublishedAt,
+  postSlug,
+  postTitle,
+  renderLexicalToHtml,
+  reviewMeta,
+} from '@blogstack/blog-client';
+import { blog } from '../../lib/blog';
+
+export async function getStaticPaths() {
+  const posts = await blog.getPublishedPosts(100);
+  return posts.map((post) => ({
+    params: { slug: postSlug(post) },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const html = renderLexicalToHtml(post.data?.content);
+const review = reviewMeta(post);
+---
+
+{
+  review ? (
+    <ReviewLayout title={postTitle(post)} publishedAt={postPublishedAt(post)} review={review}>
+      <Fragment set:html={html} />
+    </ReviewLayout>
+  ) : (
+    <PostLayout title={postTitle(post)} publishedAt={postPublishedAt(post)}>
+      <Fragment set:html={html} />
+    </PostLayout>
+  )
+}

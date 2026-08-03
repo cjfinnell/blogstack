@@ -1,3 +1,20 @@
+export type PostType = 'essay' | 'review';
+
+export interface ReviewMeta {
+  restaurant?: string;
+  city?: string;
+  visitedAt?: string;
+  rating?: number;
+  ratingScaleMax?: number;
+  pricePerPerson?: number;
+  verdictSummary?: string;
+  recommendation?: string;
+  bestOccasion?: string;
+  bestDishes?: string;
+  cuisineTags?: string[];
+  photos?: string[];
+}
+
 export interface Post {
   id: string;
   slug: string;
@@ -12,6 +29,9 @@ export interface Post {
     content: string; // JSON-encoded lexical tree — parse before rendering
     author: string;
     publishedAt: string;
+    // Absent on every row written before the review post type existed.
+    postType?: PostType;
+    review?: ReviewMeta;
   };
 }
 

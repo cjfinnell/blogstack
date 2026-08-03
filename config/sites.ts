@@ -2,6 +2,7 @@ export const sites = {
   dev: { app: 'apps/web-dev', devPort: 4321, deployed: false },
   terminal: { app: 'apps/web-terminal', devPort: 4322, deployed: true },
   folio: { app: 'apps/web-folio', devPort: 4323, deployed: true },
+  olive: { app: 'apps/web-olive', devPort: 4324, deployed: true },
 } as const;
 
 export type SiteId = keyof typeof sites;

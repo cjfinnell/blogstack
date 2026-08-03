@@ -1,0 +1,142 @@
+---
+import type { ReviewMeta } from '@blogstack/blog-client';
+
+interface Props {
+  review: ReviewMeta;
+}
+
+const { review } = Astro.props;
+const scaleMax = review.ratingScaleMax ?? 4;
+const ratingPercent =
+  review.rating != null ? Math.min(100, Math.max(0, (review.rating / scaleMax) * 100)) : null;
+const facts: [string, string][] = [];
+if (review.city) facts.push(['Where', review.city]);
+if (review.visitedAt)
+  facts.push([
+    'Visited',
+    new Date(review.visitedAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }),
+  ]);
+if (review.pricePerPerson != null)
+  facts.push(['Per person', `$${review.pricePerPerson.toFixed(2)}`]);
+if (review.bestDishes) facts.push(['Best dishes', review.bestDishes]);
+if (review.bestOccasion) facts.push(['Best occasion', review.bestOccasion]);
+---
+
+<section class="review-header">
+  {
+    ratingPercent !== null && (
+      <div class="rating">
+        <span class="score">
+          {review.rating} <span class="scale">/ {scaleMax}</span>
+        </span>
+        <div class="bar" role="img" aria-label={`Rated ${review.rating} out of ${scaleMax}`}>
+          <div class="fill" style={`width: ${ratingPercent}%`} />
+        </div>
+      </div>
+    )
+  }
+  {review.verdictSummary && <p class="verdict">{review.verdictSummary}</p>}
+  {
+    facts.length > 0 && (
+      <dl>
+        {facts.map(([label, value]) => (
+          <div class="fact">
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
+  {
+    review.recommendation && (
+      <p class="recommendation">
+        <strong>Recommendation:</strong> {review.recommendation}
+      </p>
+    )
+  }
+  {
+    review.cuisineTags && review.cuisineTags.length > 0 && (
+      <ul class="tags">
+        {review.cuisineTags.map((tag) => (
+          <li>{tag}</li>
+        ))}
+      </ul>
+    )
+  }
+</section>
+
+<style>
+  .review-header {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin: 1.5rem 0 2rem;
+  }
+  .score {
+    font-size: 1.75rem;
+    font-weight: 600;
+  }
+  .scale {
+    font-size: 1rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    margin: 0.5rem 0 1rem;
+    overflow: hidden;
+  }
+  .fill {
+    height: 100%;
+    background: var(--accent);
+  }
+  .verdict {
+    margin: 0 0 1rem;
+    font-size: 1.05rem;
+  }
+  dl {
+    display: grid;
+    gap: 0.5rem 1.5rem;
+    margin: 0;
+  }
+  .fact {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  dt {
+    color: var(--muted);
+    font-size: 0.85rem;
+    min-width: 7rem;
+  }
+  dd {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  .recommendation {
+    margin: 1rem 0 0;
+    font-size: 0.95rem;
+  }
+  .tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 1rem 0 0;
+  }
+  .tags li {
+    font-size: 0.75rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+  }
+</style>

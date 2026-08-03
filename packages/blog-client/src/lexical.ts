@@ -2,6 +2,8 @@
 // The public content API returns this tree as-is (no server-side HTML
 // serializer is exported by @sonicjs-cms/core), so rendering happens here.
 
+import { applyFootnotes } from './footnotes';
+
 const FORMAT_BOLD = 1;
 const FORMAT_ITALIC = 2;
 const FORMAT_STRIKETHROUGH = 4;
@@ -16,6 +18,9 @@ interface LexicalNode {
   tag?: string;
   url?: string;
   listType?: string;
+  src?: string;
+  altText?: string;
+  caption?: string;
 }
 
 interface LexicalDoc {
@@ -67,6 +72,14 @@ function renderNode(node: LexicalNode): string {
       return `<a href="${escapeHtml(node.url ?? '#')}">${renderChildren(node)}</a>`;
     case 'linebreak':
       return '<br />';
+    case 'image': {
+      // No src means nothing renderable — emit nothing rather than a broken
+      // <img> that shows as a torn-page icon on the reader's page.
+      if (!node.src) return '';
+      const alt = escapeHtml(node.altText ?? '');
+      const caption = node.caption ? `<figcaption>${escapeHtml(node.caption)}</figcaption>` : '';
+      return `<figure><img src="${escapeHtml(node.src)}" alt="${alt}" loading="lazy" />${caption}</figure>`;
+    }
     case 'text':
       return renderText(node);
     default:
@@ -90,5 +103,5 @@ export function renderLexicalToHtml(content: unknown): string {
     doc = content as LexicalDoc;
   }
   if (!doc?.root) return '';
-  return renderNode(doc.root);
+  return applyFootnotes(renderNode(doc.root));
 }

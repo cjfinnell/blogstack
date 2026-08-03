@@ -1,0 +1,92 @@
+---
+import type { ReviewMeta } from '@blogstack/blog-client';
+import BaseLayout from './BaseLayout.astro';
+import ReviewHeader from '../components/ReviewHeader.astro';
+
+interface Props {
+  title: string;
+  publishedAt: string | null;
+  review: ReviewMeta;
+}
+
+const { title, publishedAt, review } = Astro.props;
+---
+
+<BaseLayout title={title} description={review.verdictSummary ?? `A review of ${title}.`}>
+  <article>
+    <header>
+      <p class="kicker">Restaurant review</p>
+      <h1>{review.restaurant ?? title}</h1>
+      {
+        publishedAt && (
+          <time datetime={publishedAt} class="published">
+            {new Date(publishedAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+        )
+      }
+    </header>
+    <ReviewHeader review={review} />
+    <div class="content">
+      <slot />
+    </div>
+    {
+      review.photos && review.photos.length > 0 && (
+        <section class="gallery">
+          <h2>Photos</h2>
+          {review.photos.map((src) => (
+            <img src={src} alt="" loading="lazy" />
+          ))}
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin: 0;
+  }
+  .published {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .content :global(p) {
+    margin: 1em 0;
+  }
+  .content :global(blockquote) {
+    border-left: 3px solid var(--border);
+    margin: 1em 0;
+    padding-left: 1em;
+    color: var(--muted);
+  }
+  .content :global(figure) {
+    margin: 1.5em 0;
+  }
+  .content :global(figcaption) {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+  }
+  .content :global(.footnotes) {
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+    font-size: 0.9rem;
+  }
+  .gallery {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+  }
+  .gallery img {
+    width: 100%;
+    border-radius: 6px;
+  }
+</style>
