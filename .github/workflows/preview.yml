@@ -65,11 +65,12 @@ jobs:
         if: needs.resolve.outputs.cms_changed == 'true'
       - uses: ./.github/actions/setup-node
         if: needs.resolve.outputs.cms_changed == 'true'
-      # Non-preview mode: env.dev is static in wrangler.template.toml (no
-      # ${...} placeholders), so CURRENT_SITE and these dummy host values
-      # don't affect the rendered [env.dev] block — they only satisfy
-      # ci-gen-wrangler's required-arg check for its *other* env blocks,
-      # none of which this job ever deploys.
+      # Non-preview mode: env.dev has no ${...} placeholder for host/origin,
+      # so CURRENT_SITE and these dummy host values don't affect the rendered
+      # [env.dev] block — they only satisfy ci-gen-wrangler's required-arg
+      # check for its *other* env blocks, none of which this job ever
+      # deploys. database_id IS a real placeholder (${DEV_D1_ID}), so D1_ID
+      # is the actual shared dev database id, not a dummy.
       - run: npm run ci-gen-wrangler
         if: needs.resolve.outputs.cms_changed == 'true'
         env:
@@ -77,7 +78,7 @@ jobs:
           CMS_HOST: unused.invalid
           WEB_HOST: unused.invalid
           WEB_ORIGIN: https://unused.invalid
-          D1_ID: unused-invalid-d1-id
+          D1_ID: ${{ secrets.DEV_D1_ID }}
       - name: Apply D1 migrations
         if: needs.resolve.outputs.cms_changed == 'true'
         run: npx wrangler d1 migrations apply DB --remote --env dev
