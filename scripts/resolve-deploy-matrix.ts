@@ -55,7 +55,14 @@ function main() {
       const changed = diff.split('\n').filter(Boolean);
 
       const cmsChanged = isCmsChanged(changed);
-      const globalChange = cmsChanged || changed.some((f) => f.startsWith('packages/'));
+      // Root package.json/package-lock.json cover every workspace via a
+      // single hoisted node_modules — a dep bump there (e.g. a Renovate PR)
+      // can affect any site's build even though it touches no apps/ path.
+      const globalChange =
+        cmsChanged ||
+        changed.some((f) => f.startsWith('packages/')) ||
+        changed.includes('package.json') ||
+        changed.includes('package-lock.json');
 
       const sites = globalChange
         ? allSites
