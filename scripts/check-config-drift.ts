@@ -183,6 +183,7 @@ export function checkConfigDrift(): string[] {
       'apps/web-dev',
       'apps/web-terminal',
       'apps/web-folio',
+      'apps/web-olive',
       'packages/blog-client',
     ];
     for (const dir of workspaceDirs) {

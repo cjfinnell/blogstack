@@ -23,14 +23,16 @@ const preview = process.env.PREVIEW === '1';
 const currentPrefix = currentSite.toUpperCase();
 
 if (preview) {
-  if (process.env.CMS_HOST || process.env.WEB_HOST || process.env.WEB_ORIGIN) {
+  if (process.env.CMS_HOST || process.env.WEB_HOST || process.env.WEB_ORIGIN || process.env.D1_ID) {
     throw new Error(
       'ci-gen-wrangler: PREVIEW=1 but production host secrets are present. ' +
         'Preview jobs must not be scoped to a production GitHub Environment.',
     );
   }
 } else {
-  const missing = (['CMS_HOST', 'WEB_HOST', 'WEB_ORIGIN'] as const).filter((k) => !process.env[k]);
+  const missing = (['CMS_HOST', 'WEB_HOST', 'WEB_ORIGIN', 'D1_ID'] as const).filter(
+    (k) => !process.env[k],
+  );
   if (missing.length > 0) {
     throw new Error(
       `ci-gen-wrangler: missing ${missing.join(', ')} for site "${currentSite}". ` +
@@ -41,6 +43,7 @@ if (preview) {
   process.env[`${currentPrefix}_CMS_HOST`] = process.env.CMS_HOST;
   process.env[`${currentPrefix}_WEB_HOST`] = process.env.WEB_HOST;
   process.env[`${currentPrefix}_WEB_ORIGIN`] = process.env.WEB_ORIGIN;
+  process.env[`${currentPrefix}_D1_ID`] = process.env.D1_ID;
 }
 
 for (const site of deployedSiteIds) {
@@ -48,6 +51,9 @@ for (const site of deployedSiteIds) {
   process.env[`${prefix}_CMS_HOST`] ??= 'unused.invalid';
   process.env[`${prefix}_WEB_HOST`] ??= 'unused.invalid';
   process.env[`${prefix}_WEB_ORIGIN`] ??= 'https://unused.invalid';
+  // Never read by this job — other sites' cms_* blocks are rendered but not
+  // deployed here — but gen-wrangler still needs every placeholder filled.
+  process.env[`${prefix}_D1_ID`] ??= 'unused-invalid-d1-id';
 }
 
 await import('./gen-wrangler.ts');
