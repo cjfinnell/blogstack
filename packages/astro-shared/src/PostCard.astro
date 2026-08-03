@@ -4,18 +4,23 @@ import { postPublishedAt, postSlug, postTitle } from '@blogstack/blog-client';
 
 interface Props {
   post: Post;
+  basePath: string;
 }
 
-const { post } = Astro.props;
+const { post, basePath } = Astro.props;
 const publishedAt = postPublishedAt(post);
 ---
 
 <article class="card">
-  <h2><a href={`/blog/${postSlug(post)}/`}>{postTitle(post)}</a></h2>
+  <h2><a href={`${basePath}/${postSlug(post)}/`}>{postTitle(post)}</a></h2>
   {
     publishedAt && (
       <time datetime={publishedAt} class="date">
-        {new Date(publishedAt).toISOString().slice(0, 10)}
+        {new Date(publishedAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
       </time>
     )
   }
@@ -23,16 +28,12 @@ const publishedAt = postPublishedAt(post);
 
 <style>
   .card {
-    padding: 1rem 0;
-    border-bottom: 1px dashed var(--border);
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border);
   }
   .card h2 {
     margin: 0 0 0.25rem;
-    font-size: 1.05rem;
-  }
-  .card h2::before {
-    content: '> ';
-    color: var(--muted);
+    font-size: 1.25rem;
   }
   .card a {
     text-decoration: none;
@@ -43,6 +44,6 @@ const publishedAt = postPublishedAt(post);
   }
   .date {
     color: var(--muted);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
   }
 </style>

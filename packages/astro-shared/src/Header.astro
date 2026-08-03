@@ -1,0 +1,51 @@
+---
+import { themes, type ThemeName } from './themes';
+
+interface Props {
+  theme: ThemeName;
+  brand: string;
+  links: { href: string; label: string }[];
+}
+
+const { theme: themeName, brand, links } = Astro.props;
+const h = themes[themeName].header;
+
+const headerCss = `
+  header {
+    border-bottom: 1px solid var(--border);
+  }
+  nav {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: ${h.padding};
+    display: flex;
+    align-items: ${h.alignItems};
+    gap: ${h.gap};
+  }
+  .brand {
+    font-weight: ${h.brandFontWeight ?? 'inherit'};
+    text-decoration: none;
+    color: var(--${h.brandColor});
+    font-size: ${h.brandFontSize ?? 'inherit'};
+    letter-spacing: ${h.brandLetterSpacing ?? 'normal'};
+  }
+  nav a:not(.brand) {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: ${h.linkFontSize ?? 'inherit'};
+  }
+  ${h.linkPrefix ? `nav a:not(.brand)::before { content: '${h.linkPrefix}'; }` : ''}
+  nav a:not(.brand):hover {
+    color: var(--fg);
+  }
+`;
+---
+
+<header>
+  <nav>
+    <a href="/" class="brand">{brand}</a>
+    {links.map((link) => <a href={link.href}>{link.label}</a>)}
+  </nav>
+</header>
+
+<style is:global set:html={headerCss}></style>

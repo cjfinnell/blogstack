@@ -1,0 +1,27 @@
+{
+  "name": "@blogstack/astro-shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.16.0"
+  },
+  "exports": {
+    "./*.astro": "./src/*.astro",
+    "./blog": "./src/blog.ts",
+    "./themes": "./src/themes.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@blogstack/blog-client": "*"
+  },
+  "peerDependencies": {
+    "astro": "^7.1.6"
+  },
+  "devDependencies": {
+    "astro": "^7.1.6",
+    "typescript": "^6.0.3"
+  }
+}

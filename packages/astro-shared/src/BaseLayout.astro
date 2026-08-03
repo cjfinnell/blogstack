@@ -1,0 +1,88 @@
+---
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import { themes, type ThemeName } from './themes';
+
+interface Props {
+  title: string;
+  description?: string;
+  theme: ThemeName;
+  brand: string;
+  links: { href: string; label: string }[];
+  footerText: string;
+}
+
+const { title, description = 'A site.', theme: themeName, brand, links, footerText } = Astro.props;
+const theme = themes[themeName];
+const primary = theme.colors[theme.defaultMode];
+const overrideMode = theme.defaultMode === 'light' ? 'dark' : 'light';
+const override = theme.colors[overrideMode];
+
+const rootCss = `
+  :root {
+    color-scheme: ${theme.defaultMode} ${overrideMode};
+    --max-width: ${theme.maxWidth};
+    --fg: ${primary.fg};
+    --bg: ${primary.bg};
+    --muted: ${primary.muted};
+    --border: ${primary.border};
+    --accent: ${primary.accent};
+  }
+  @media (prefers-color-scheme: ${overrideMode}) {
+    :root {
+      --fg: ${override.fg};
+      --bg: ${override.bg};
+      --muted: ${override.muted};
+      --border: ${override.border};
+      --accent: ${override.accent};
+    }
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: ${theme.fontFamily};
+    font-size: ${theme.fontSize ?? 'inherit'};
+    color: var(--fg);
+    background: var(--bg);
+    line-height: ${theme.lineHeight};
+    letter-spacing: ${theme.letterSpacing ?? 'normal'};
+  }
+  main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: ${theme.mainPadding};
+  }
+  a {
+    color: var(--accent);
+  }
+  h1, h2, h3 {
+    line-height: 1.25;
+  }
+  img {
+    max-width: 100%;
+  }
+  ${theme.extraGlobalCss ?? ''}
+`;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <style is:global set:html={rootCss}></style>
+  </head>
+  <body>
+    <Header theme={themeName} brand={brand} links={links} />
+    <main>
+      <slot />
+    </main>
+    <Footer theme={themeName} text={footerText} />
+  </body>
+</html>

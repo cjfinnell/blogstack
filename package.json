@@ -8,7 +8,7 @@
     "packages/*"
   ],
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=24.16.0"
   },
   "scripts": {
     "gen-wrangler": "tsx scripts/gen-wrangler.ts",

@@ -1,0 +1,31 @@
+---
+import { themes, type ThemeName } from './themes';
+
+interface Props {
+  theme: ThemeName;
+  text: string;
+}
+
+const { theme: themeName, text } = Astro.props;
+const f = themes[themeName].footer;
+const year = new Date().getFullYear();
+
+const footerCss = `
+  footer {
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: ${f.fontSize};
+  }
+  footer p {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: ${f.padding};
+  }
+`;
+---
+
+<footer>
+  <p set:html={text.replace('{year}', String(year))} />
+</footer>
+
+<style is:global set:html={footerCss}></style>

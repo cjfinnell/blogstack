@@ -1,12 +1,15 @@
 .DEFAULT_GOAL := help
 
 # npm writes/updates this file after every successful install; using it (not
-# a hand-rolled marker) lets make skip `npm ci` when node_modules is already
-# current for the checked-in lockfile.
+# a hand-rolled marker) lets make skip installing when node_modules is already
+# current for the checked-in lockfile. Prefer `npm ci` (strict, reproducible);
+# fall back to `npm install` when a workspace package.json has drifted ahead
+# of the lockfile, so adding/editing a workspace never requires a manual
+# one-off `npm install` before `make` works again.
 NODE_MODULES := node_modules/.package-lock.json
 
 $(NODE_MODULES): package.json package-lock.json $(wildcard apps/*/package.json) $(wildcard packages/*/package.json)
-	npm ci
+	npm ci || npm install
 
 .PHONY: install
 install: $(NODE_MODULES) ## Install dependencies (only if package.json/lockfile changed)

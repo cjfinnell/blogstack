@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PostCard from '../components/PostCard.astro';
-import { blog } from '../lib/blog';
+import PostCard from '@blogstack/astro-shared/PostCard.astro';
+import { blog } from '@blogstack/astro-shared/blog';
+import { basePath } from '../site';
 
 const posts = await blog.getPublishedPosts(5);
 ---
@@ -9,11 +10,11 @@ const posts = await blog.getPublishedPosts(5);
 <BaseLayout title="Blog" description="Latest posts">
   <h1>Latest posts</h1>
   {posts.length === 0 && <p>No posts published yet.</p>}
-  {posts.map((post) => <PostCard post={post} />)}
+  {posts.map((post) => <PostCard post={post} basePath={basePath} />)}
   {
     posts.length > 0 && (
       <p style="margin-top: 1.5rem;">
-        <a href="/blog">View all posts &rarr;</a>
+        <a href={basePath}>View all posts &rarr;</a>
       </p>
     )
   }

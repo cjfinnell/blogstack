@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
-import { blog } from '../lib/blog';
+import { blog } from '@blogstack/astro-shared/blog';
 
 const posts = await blog.getPublishedPosts(5);
 ---
