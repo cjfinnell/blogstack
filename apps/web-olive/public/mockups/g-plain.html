@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Olive — Concept G: Plain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CONCEPT G — "Plain"
+   Bridges the essence nothing else carried: strip the chrome until
+   only the writing and the photographs are left.
+   Chef Chloe (Maria's #1): personality lives in copy, not decoration.
+   Zacchary Bird: seven words of tagline do the whole identity job.
+   The Infatuation's 2022 rebrand: ONE typeface, one loud accent
+   chosen to fight brown food photography rather than blend with it.
+   Rosewood: restraint and whitespace as the signal.
+   One family (Jost, 300–800). One accent. No filters. No sidebar.
+   ============================================================ */
+:root{
+  color-scheme: light dark;
+  --bg:          light-dark(#FFFFFF, #0C0C0D);
+  --surface:     light-dark(#F4F4F3, #161617);
+  --ink:         light-dark(#111112, #F2F2F0);
+  --muted:       light-dark(#5C5C5E, #A0A0A2);
+  --accent:      light-dark(#C42D14, #FF7A5C);
+  --accent-hover:light-dark(#96200C, #FF9E86);
+  --rule:        light-dark(#E4E4E2, #232325);
+  --rule-strong: light-dark(#8A8A8C, #59595C);
+
+  --font:"Jost", ui-sans-serif, system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--font); font-weight:400; font-size:1.125rem; line-height:1.65;
+}
+h1,h2,h3{text-wrap:balance; font-weight:600; letter-spacing:-.02em}
+p{text-wrap:pretty}
+a{color:var(--accent); text-underline-offset:.2em}
+a:hover{color:var(--accent-hover)}
+.wrap{max-width:46rem; margin:0 auto; padding:0 1.5rem}
+
+/* ---------- masthead: two links, a tagline, nothing else ---------- */
+.masthead{padding:4rem 0 0; text-align:center}
+.wordmark{
+  font-size:clamp(2.5rem,7vw,3.5rem); font-weight:700; letter-spacing:-.04em;
+  color:var(--ink); text-decoration:none; display:inline-block; line-height:1;
+}
+.wordmark em{color:var(--accent); font-style:normal}
+.tagline{
+  margin:.9rem 0 0; font-size:1.0625rem; color:var(--muted); font-weight:400;
+}
+.masthead nav{display:flex; gap:2rem; justify-content:center; margin-top:2rem}
+.masthead nav a{
+  font-size:.8125rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink); text-decoration:none; padding-bottom:.3rem;
+  border-bottom:2px solid transparent;
+}
+.masthead nav a:hover{border-color:var(--accent); color:var(--accent)}
+
+/* trust line — a single sentence, not a badge row */
+.trustline{
+  margin:3.5rem auto 0; padding:1rem 0; border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule); text-align:center;
+  font-size:.8125rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+}
+.trustline b{color:var(--accent); font-weight:600}
+
+/* ---------- the index is a list. no grid, no filters, no facets ---------- */
+.feed{padding:1rem 0 0}
+.post{padding:3.5rem 0; border-bottom:1px solid var(--rule)}
+.post .shot{
+  display:block; width:100%; aspect-ratio:4/3; margin-bottom:1.5rem;
+}
+.post .shot i{
+  display:block; width:100%; height:100%;
+  background:
+    radial-gradient(55% 62% at 38% 42%, #e6b071 0%, #a86a2c 40%, transparent 74%),
+    linear-gradient(155deg, #6f4a2c 0%, #241609 72%);
+}
+.post.p2 .shot i{
+  background:
+    radial-gradient(50% 60% at 60% 40%, #dfd5c2 0%, #9b8c72 44%, transparent 76%),
+    linear-gradient(200deg, #4e463a 0%, #191510 74%);
+}
+.post.p3 .shot i{
+  background:
+    radial-gradient(52% 58% at 44% 52%, #c4553a 0%, #7d2a17 46%, transparent 76%),
+    linear-gradient(130deg, #452c22 0%, #17100c 72%);
+}
+.post .stamp{
+  font-size:.75rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent);
+  font-weight:600; margin:0 0 .5rem;
+}
+.post h2{font-size:clamp(1.75rem,4.5vw,2.5rem); line-height:1.08; margin:0 0 .75rem}
+.post h2 a{color:inherit; text-decoration:none}
+.post h2 a:hover{color:var(--accent)}
+.post p{margin:0; color:var(--muted); font-size:1.125rem}
+.post .more{
+  display:inline-block; margin-top:1rem; font-size:.75rem; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; text-decoration:none;
+}
+
+.older{
+  display:block; text-align:center; margin:3rem 0 0; padding:1rem;
+  font-size:.75rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+  text-decoration:none; border:1px solid var(--rule-strong); color:var(--ink);
+}
+.older:hover{border-color:var(--accent); color:var(--accent)}
+
+/* ---------- article ---------- */
+.page-break{border:none; border-top:1px solid var(--ink); margin:5rem 0 0}
+.page-break-label{
+  font-size:.6875rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--muted); margin:.6rem 0 0; text-align:center;
+}
+.article{padding-top:3.5rem}
+.article .stamp{
+  font-size:.75rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent);
+  font-weight:600; margin:0 0 .75rem; text-align:center;
+}
+.article h1{
+  font-size:clamp(2.25rem,6vw,3.5rem); line-height:1.04; margin:0 0 1.25rem; text-align:center;
+}
+.article .byline{
+  text-align:center; font-size:.875rem; color:var(--muted); margin:0 0 2.5rem;
+  padding-bottom:1.5rem; border-bottom:1px solid var(--rule);
+}
+.article figure{margin:2.5rem 0}
+.article figure i{
+  display:block; width:100%; aspect-ratio:3/2;
+  background:
+    radial-gradient(55% 62% at 40% 44%, #e6b071 0%, #a86a2c 40%, transparent 74%),
+    linear-gradient(155deg, #6f4a2c 0%, #241609 72%);
+}
+.article figcaption{margin-top:.6rem; font-size:.875rem; color:var(--muted)}
+.article .prose p{margin:0 0 1.4em}
+.article .prose p.lede{font-size:1.3125rem; line-height:1.5; font-weight:500}
+.article blockquote{
+  margin:2.5rem 0; padding:0; border:none; text-align:center;
+  font-size:1.625rem; line-height:1.25; font-weight:600; letter-spacing:-.02em;
+  color:var(--accent);
+}
+.plainly{
+  margin:2.5rem 0; padding:1.5rem; background:var(--surface);
+}
+.plainly b{
+  display:block; font-size:.75rem; font-weight:600; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--accent); margin-bottom:.6rem;
+}
+.plainly p{margin:0}
+
+/* ---------- inline newsletter. never a popup ---------- */
+.keep{margin:4rem 0 0; padding:2.5rem 0; border-top:1px solid var(--ink); text-align:center}
+.keep h2{font-size:1.75rem; margin:0 0 .5rem}
+.keep p{margin:0 auto; max-width:38ch; color:var(--muted); font-size:1rem}
+.keep form{display:flex; gap:.5rem; justify-content:center; margin-top:1.5rem; flex-wrap:wrap}
+.keep input{
+  font-family:var(--font); font-size:1rem; padding:.7rem 1rem;
+  border:1px solid var(--rule-strong); background:var(--bg); color:var(--ink);
+  min-width:min(18rem,80vw);
+}
+.keep button{
+  font-family:var(--font); font-size:.75rem; font-weight:600; letter-spacing:.16em;
+  text-transform:uppercase; padding:.7rem 1.5rem; border:1px solid var(--accent);
+  background:var(--accent); color:#fff; cursor:pointer;
+}
+.keep button:hover{background:var(--accent-hover); border-color:var(--accent-hover)}
+
+footer.site{margin-top:4rem; border-top:1px solid var(--rule)}
+footer.site .wrap{
+  padding-top:2rem; padding-bottom:4rem; text-align:center;
+  font-size:.8125rem; color:var(--muted);
+}
+footer.site nav{display:flex; gap:1.5rem; justify-content:center; flex-wrap:wrap; margin-top:1rem}
+footer.site a{color:var(--muted); text-decoration:none}
+footer.site a:hover{color:var(--accent)}
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important} }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <a class="wordmark" href="#">Oliv<em>e</em></a>
+    <p class="tagline">Vegan eater, wine drinker, menace to anyone who says "Mediterranean"</p>
+    <nav>
+      <a href="#">Writing</a>
+      <a href="#">About</a>
+    </nav>
+    <p class="trustline">No ads. No sponsors. No affiliate links. <b>Every bill paid in full.</b></p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- the index is a list: no filters, no facets, no sidebar -->
+  <div class="feed">
+
+    <article class="post">
+      <a class="shot" href="#"><i></i></a>
+      <p class="stamp">3 August 2026 · Oakland</p>
+      <h2><a href="#">The kitchen at Tanuki finally stopped apologising</a></h2>
+      <p>Eighteen months ago the menu had a burger on it. I went back three times to be sure, and what replaced that is narrower, louder, and considerably better than anything I expected to write about this year.</p>
+      <a class="more" href="#">Read on →</a>
+    </article>
+
+    <article class="post p2">
+      <a class="shot" href="#"><i></i></a>
+      <p class="stamp">28 July 2026</p>
+      <h2><a href="#">An open letter to my fellow foodies</a></h2>
+      <p>Why this exists, what it will never do, and what "vote with your dollar" actually costs when the bill arrives and nobody else is paying it.</p>
+      <a class="more" href="#">Read on →</a>
+    </article>
+
+    <article class="post p3">
+      <a class="shot" href="#"><i></i></a>
+      <p class="stamp">21 July 2026 · Denver</p>
+      <h2><a href="#">Safta says it's Mediterranean. Safta is being polite.</a></h2>
+      <p>A beautiful room, a menu spanning four countries and committing to none of them, and one nine-dollar bowl of gigantes that made the whole evening make sense.</p>
+      <a class="more" href="#">Read on →</a>
+    </article>
+
+    <a class="older" href="#">Older writing</a>
+  </div>
+
+  <hr class="page-break">
+  <p class="page-break-label">An article</p>
+
+  <article class="article">
+    <p class="stamp">3 August 2026 · Oakland</p>
+    <h1>The kitchen at Tanuki finally stopped apologising</h1>
+    <p class="byline">Three visits, all unannounced. I paid every time.</p>
+
+    <figure>
+      <i></i>
+      <figcaption>Thigh skewers over binchotan, salted and turned once, just after service opens.</figcaption>
+    </figure>
+
+    <div class="prose">
+      <p class="lede">Eighteen months ago this room was trying to be four restaurants at once, and the menu read like an apology for not having chosen. There was a laminated section of rolls. There was, inexplicably, a burger.</p>
+      <p>That version of Tanuki is gone. What replaced it is a counter, a charcoal grill, forty seats and a card you can read in one breath. The burger has been shown the door. The rolls went with it, and nobody at the counter on a Thursday in July seemed to be mourning either.</p>
+    </div>
+
+    <blockquote>The tsukune arrives with a raw yolk and no instructions, which is its own kind of confidence.</blockquote>
+
+    <div class="prose">
+      <p>The binchotan runs hot from five and the skewers come in the order they finish rather than the order you asked for them, which is the correct way and still surprises people. The chicken is broken down in-house; you can taste it in the neck and the tail, the two cuts that punish anyone buying pre-portioned.</p>
+    </div>
+
+    <div class="plainly">
+      <b>Plainly</b>
+      <p>Go. Sit at the counter, before 6:15pm, or book a week out. Order the tsukune twice. Skip the sashimi board. About $55 a head with two drinks — <a href="#">1412 Webster St, Oakland</a>.</p>
+    </div>
+  </article>
+
+  <section class="keep">
+    <h2>Let's keep in touch</h2>
+    <p>One letter a month. Where I ate, what I drank, and what I'd send you to instead.</p>
+    <form>
+      <label for="e" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Email</label>
+      <input id="e" type="email" placeholder="your@email.com">
+      <button type="button">Subscribe</button>
+    </form>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    Written and photographed by Maria Eleni, with Connor.
+    <nav>
+      <a href="#">About</a><a href="#">Disclosure</a><a href="#">Tip jar</a><a href="#">RSS</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
