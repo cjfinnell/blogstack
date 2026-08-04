@@ -6,3 +6,4 @@ dist
 coverage
 package-lock.json
 wrangler.toml
+apps/web-olive/public/mockups/
