@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maria Eleni — Concept A: Table d'Olive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CONCEPT A — "Table d'Olive"
+   Fraunces + Hanken Grotesk · palette "Brine" · asymmetric 12-col grid
+   ============================================================ */
+:root{
+  color-scheme: light dark;
+  --bg:           light-dark(#FBF7EF, #12140D);
+  --surface:      light-dark(#F2EBDD, #1B1E14);
+  --ink:          light-dark(#1B1D14, #EDE8D9);
+  --muted:        light-dark(#5B5F4C, #9BA089);
+  --accent:       light-dark(#4C6B23, #B4CC6E);
+  --accent-hover: light-dark(#3A5219, #C9DE8C);
+  --rule:         light-dark(#DCD3C0, #2A2E20);
+  --rule-strong:  light-dark(#8A8E79, #6A6F55);
+  --accent-wash:  color-mix(in oklab, var(--accent) 8%, var(--bg));
+
+  --display: "Fraunces", Georgia, serif;
+  --body: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --measure: 68ch;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--body); font-size:1.0625rem; line-height:1.65;
+  font-optical-sizing:auto;
+}
+/* paper grain */
+body::after{
+  content:""; position:fixed; inset:0; z-index:9999; pointer-events:none;
+  opacity:.04; mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark){ body::after{ mix-blend-mode:screen; opacity:.05 } }
+
+h1,h2,h3,blockquote,figcaption{text-wrap:balance}
+.prose p{text-wrap:pretty}
+a{color:var(--accent); text-decoration-thickness:1px; text-underline-offset:.18em}
+a:hover{color:var(--accent-hover); text-decoration-thickness:2px}
+
+/* ---------- masthead ---------- */
+.masthead{border-bottom:1px solid var(--rule)}
+.masthead-inner{
+  max-width:78rem; margin:0 auto; padding:1.5rem 1.5rem 1.25rem;
+  display:flex; align-items:baseline; gap:2rem; flex-wrap:wrap;
+}
+.wordmark{
+  font-family:var(--display); font-variation-settings:"opsz" 144,"WONK" 1,"SOFT" 40;
+  font-weight:600; font-size:2rem; letter-spacing:-.01em; color:var(--ink);
+  text-decoration:none; line-height:1;
+}
+.wordmark span{color:var(--accent)}
+.masthead nav{display:flex; gap:1.5rem; margin-left:auto; flex-wrap:wrap}
+.masthead nav a{
+  color:var(--muted); text-decoration:none; text-transform:uppercase;
+  font-size:.8125rem; letter-spacing:.08em; font-weight:600;
+}
+.masthead nav a:hover{color:var(--ink)}
+.tagline{
+  max-width:78rem; margin:0 auto; padding:0 1.5rem 1.25rem;
+  font-family:var(--display); font-style:italic; font-variation-settings:"opsz" 40;
+  color:var(--muted); font-size:1.0625rem;
+}
+
+/* ---------- the 12-column stage ---------- */
+.stage{
+  max-width:78rem; margin:0 auto; padding:0 1.5rem 6rem;
+  display:grid; grid-template-columns:repeat(12,1fr); column-gap:1.5rem;
+}
+.stage > *{grid-column:3 / span 7}          /* text measure, offset right */
+.stage > .marginalia{grid-column:1 / span 2}
+.stage > .full{grid-column:1 / -1}
+.stage > .wide{grid-column:1 / span 9}
+
+/* ---------- identity card (above the hero) ---------- */
+.identity{margin-top:3.5rem}
+.kicker{
+  text-transform:uppercase; letter-spacing:.1em; font-size:.75rem;
+  font-weight:700; color:var(--accent); margin:0 0 .75rem;
+}
+.headline{
+  font-family:var(--display);
+  font-variation-settings:"opsz" 144,"WONK" 1,"SOFT" 40;
+  font-weight:500; font-size:clamp(2.25rem,5.5vw,3.75rem); line-height:1.02;
+  letter-spacing:-.015em; margin:0 0 .75rem;
+}
+.restaurant-name{
+  font-family:var(--body); font-weight:700; font-size:1.0625rem;
+  letter-spacing:.02em; margin:0 0 1.25rem; color:var(--ink);
+}
+.restaurant-name .sep{color:var(--rule-strong); margin:0 .5rem; font-weight:400}
+.restaurant-name .light{font-weight:400; color:var(--muted)}
+.facts{
+  display:flex; flex-wrap:wrap; gap:.5rem 1.25rem; margin:0 0 1.25rem;
+  padding:0; list-style:none;
+  font-size:.8125rem; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--muted); font-weight:600;
+}
+.facts a{color:var(--muted); text-decoration:none; border-bottom:1px solid var(--rule-strong)}
+.facts a:hover{color:var(--accent); border-color:var(--accent)}
+.byline{
+  font-size:.8125rem; color:var(--muted); margin:0 0 1.25rem;
+  padding-top:.75rem; border-top:1px solid var(--rule);
+}
+.byline b{color:var(--ink); font-weight:700}
+.actions{display:flex; flex-wrap:wrap; gap:.625rem; margin:0 0 2rem}
+.btn{
+  font-size:.8125rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  padding:.55rem 1rem; border:1px solid var(--rule-strong); color:var(--ink);
+  text-decoration:none; background:transparent;
+}
+.btn:hover{background:var(--accent-wash); border-color:var(--accent); color:var(--accent)}
+.btn--primary{background:var(--accent); border-color:var(--accent); color:var(--bg)}
+.btn--primary:hover{background:var(--accent-hover); border-color:var(--accent-hover); color:var(--bg)}
+
+/* ---------- oversized rating numeral in the left margin ---------- */
+.score-block{position:sticky; top:2rem; align-self:start; padding-top:.5rem}
+.score-num{
+  display:block; font-family:var(--display);
+  font-variation-settings:"opsz" 144,"WONK" 1,"SOFT" 0;
+  font-weight:600; color:var(--accent);
+  font-size:clamp(4rem,11vw,9rem); line-height:.82; letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums;
+}
+.score-den{
+  display:block; margin-top:.5rem; font-size:.75rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--muted);
+}
+.score-den a{color:var(--muted)}
+.marginalia .note{
+  margin-top:2rem; font-size:.8125rem; line-height:1.5; color:var(--muted);
+  border-top:1px solid var(--rule); padding-top:.75rem;
+}
+.marginalia .note b{display:block; color:var(--ink); font-size:.75rem;
+  text-transform:uppercase; letter-spacing:.08em; margin-bottom:.25rem}
+
+/* ---------- photography: matted, ruled, never shadowed ---------- */
+figure{margin:0 0 2.5rem}
+.plate{
+  display:block; width:100%; aspect-ratio:3/2; border:1px solid var(--rule);
+  background:var(--surface); padding:.5rem;
+}
+.plate i{
+  display:block; width:100%; height:100%;
+  background:
+    radial-gradient(60% 70% at 32% 34%, #d9a441 0%, #b8752b 38%, transparent 70%),
+    radial-gradient(45% 55% at 72% 62%, #7d8c3a 0%, #4e5c22 45%, transparent 75%),
+    linear-gradient(150deg, #7a5230 0%, #3d2a19 60%, #241811 100%);
+}
+.plate.p2 i{
+  background:
+    radial-gradient(55% 60% at 62% 30%, #e8c46a 0%, #b0762f 40%, transparent 72%),
+    linear-gradient(200deg, #55401f 0%, #2c2013 70%);
+}
+.plate.p3 i{
+  background:
+    radial-gradient(50% 60% at 40% 60%, #c04a2a 0%, #7a2a17 45%, transparent 75%),
+    linear-gradient(120deg, #4a3a22 0%, #221a10 70%);
+}
+figcaption{
+  margin-top:.625rem; font-size:.8125rem; line-height:1.45; color:var(--muted);
+  display:flex; gap:1rem; justify-content:space-between; flex-wrap:wrap;
+}
+figcaption .credit{
+  text-transform:uppercase; letter-spacing:.07em; font-size:.6875rem;
+  color:var(--rule-strong); white-space:nowrap;
+}
+
+/* ---------- verdict ---------- */
+.verdict{
+  border-top:2px solid var(--ink); border-bottom:1px solid var(--rule);
+  padding:1.25rem 0 1.5rem; margin:0 0 2.5rem;
+}
+.verdict h2{
+  font-family:var(--body); font-size:.75rem; font-weight:800;
+  text-transform:uppercase; letter-spacing:.12em; margin:0 0 .75rem; color:var(--muted);
+}
+.verdict ul{margin:0; padding-left:1.1rem}
+.verdict li{margin:.35rem 0; font-size:1.0625rem}
+.verdict li::marker{color:var(--accent)}
+
+/* ---------- prose ---------- */
+.prose p{margin:0 0 1.35em}
+.prose p:first-of-type::first-letter{
+  font-family:var(--display); font-variation-settings:"opsz" 144,"WONK" 1;
+  float:left; font-size:4.1rem; line-height:.82; padding:.08em .12em 0 0;
+  color:var(--accent); font-weight:600;
+}
+.pull{
+  grid-column:1 / span 9 !important;
+  font-family:var(--display); font-variation-settings:"opsz" 144,"WONK" 1,"SOFT" 40;
+  font-size:clamp(1.5rem,3.2vw,2.125rem); line-height:1.2; font-weight:400;
+  color:var(--ink); margin:2rem 0 2.5rem; padding-left:0;
+  border-left:none; text-indent:-.4em;
+}
+.pull footer{
+  display:block; margin-top:.75rem; font-family:var(--body); font-size:.8125rem;
+  text-transform:uppercase; letter-spacing:.08em; color:var(--muted); text-indent:0;
+}
+
+/* ---------- dish rundown ---------- */
+.rundown{margin:3.5rem 0 0}
+.section-label{
+  font-family:var(--body); font-size:.75rem; font-weight:800;
+  text-transform:uppercase; letter-spacing:.12em; color:var(--muted);
+  margin:0 0 1.25rem; padding-bottom:.5rem; border-bottom:1px solid var(--rule);
+}
+.dish{
+  display:grid; grid-template-columns:9rem 1fr; gap:1.25rem;
+  padding:1.25rem 0; border-bottom:1px solid var(--rule);
+}
+.dish .thumb{aspect-ratio:1; border:1px solid var(--rule); background:var(--surface); padding:.375rem}
+.dish .thumb i{display:block; width:100%; height:100%}
+.dish h3{
+  font-family:var(--display); font-variation-settings:"opsz" 40,"WONK" 0;
+  font-size:1.25rem; font-weight:600; margin:0 0 .25rem;
+}
+.dish p{margin:0; font-size:.9375rem; color:var(--muted); line-height:1.55}
+.must{
+  display:inline-block; margin-left:.5rem; vertical-align:.15em;
+  font-family:var(--body); font-size:.625rem; font-weight:800;
+  text-transform:uppercase; letter-spacing:.1em;
+  color:var(--bg); background:var(--accent); padding:.15rem .4rem;
+}
+
+/* ---------- location ---------- */
+.location{
+  margin-top:3.5rem; border:1px solid var(--rule); background:var(--surface);
+  display:grid; grid-template-columns:1fr 1fr;
+}
+.location .map{
+  background:
+    linear-gradient(0deg, var(--rule) 1px, transparent 1px) 0 0/100% 2.25rem,
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px) 0 0/2.25rem 100%,
+    var(--bg);
+  position:relative; min-height:13rem;
+}
+.location .map::after{
+  content:""; position:absolute; left:52%; top:46%; width:.75rem; height:.75rem;
+  background:var(--accent); border:2px solid var(--bg); border-radius:50%;
+  box-shadow:0 0 0 6px color-mix(in oklab, var(--accent) 25%, transparent);
+}
+.location .details{padding:1.5rem}
+.location dl{margin:0; display:grid; gap:.75rem}
+.location dt{
+  font-size:.6875rem; font-weight:800; text-transform:uppercase;
+  letter-spacing:.1em; color:var(--muted);
+}
+.location dd{margin:.15rem 0 0; font-size:.9375rem}
+
+/* ---------- related ---------- */
+.related{margin-top:4rem}
+.related-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem}
+.rcard{display:block; text-decoration:none; color:inherit}
+.rcard .plate{aspect-ratio:4/3; margin-bottom:.75rem}
+.rcard .rmeta{
+  display:flex; align-items:baseline; gap:.5rem; font-size:.75rem;
+  text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:700;
+}
+.rcard .rscore{
+  font-family:var(--display); font-variation-settings:"opsz" 40;
+  font-size:1.125rem; font-weight:700; color:var(--accent); letter-spacing:0;
+  font-variant-numeric:tabular-nums;
+}
+.rcard h3{
+  font-family:var(--display); font-variation-settings:"opsz" 72,"WONK" 1;
+  font-size:1.375rem; font-weight:500; margin:.25rem 0 .25rem; line-height:1.15;
+}
+.rcard p{margin:0; font-size:.9375rem; color:var(--muted)}
+.rcard:hover h3{color:var(--accent)}
+
+/* ---------- homepage ---------- */
+.home{margin-top:3rem}
+.home-grid{display:grid; grid-template-columns:1.85fr 1fr; gap:3rem}
+.feature{display:block; text-decoration:none; color:inherit}
+.feature .plate{aspect-ratio:16/9; margin-bottom:1rem}
+.feature h2{
+  font-family:var(--display); font-variation-settings:"opsz" 144,"WONK" 1,"SOFT" 40;
+  font-weight:500; font-size:clamp(1.75rem,4vw,2.75rem); line-height:1.05;
+  letter-spacing:-.015em; margin:.25rem 0 .5rem;
+}
+.feature:hover h2{color:var(--accent)}
+.feature .dek{margin:0; color:var(--muted); font-size:1.0625rem; max-width:46ch}
+.rail-label{
+  font-family:var(--body); font-size:.6875rem; font-weight:800; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--muted); margin:0 0 .75rem; padding-bottom:.4rem;
+  border-bottom:1px solid var(--rule);
+}
+.rail-label:not(:first-child){margin-top:2rem}
+.mini{
+  display:grid; grid-template-columns:2.5rem 1fr; gap:.65rem; align-items:baseline;
+  padding:.6rem 0; border-bottom:1px solid var(--rule); text-decoration:none; color:inherit;
+}
+.mini .ms{
+  font-family:var(--display); font-variation-settings:"opsz" 40; font-weight:700;
+  color:var(--accent); font-variant-numeric:tabular-nums; font-size:1rem;
+}
+.mini b{display:block; font-size:.9375rem; font-weight:600}
+.mini i{display:block; font-style:normal; font-size:.8125rem; color:var(--muted); margin-top:.1rem}
+.mini:hover b{color:var(--accent)}
+.mini.surprise{
+  grid-template-columns:1fr; border-bottom:none; color:var(--accent);
+  font-size:.8125rem; text-transform:uppercase; letter-spacing:.1em; font-weight:700;
+}
+.page-break{border:none; border-top:2px solid var(--ink); margin:4.5rem 0 0}
+.page-break-label{
+  font-size:.6875rem; font-weight:800; text-transform:uppercase; letter-spacing:.14em;
+  color:var(--muted); margin:.5rem 0 0;
+}
+@media (max-width:62rem){ .home-grid{grid-template-columns:1fr; gap:2rem} }
+
+/* ---------- credits masthead ---------- */
+.credits{
+  margin-top:3rem; border-top:1px solid var(--rule); padding-top:1.25rem;
+  font-size:.8125rem; color:var(--muted);
+}
+.credits b{
+  display:block; color:var(--ink); font-size:.6875rem; text-transform:uppercase;
+  letter-spacing:.12em; margin-bottom:.5rem;
+}
+.credits span{display:block; margin:.2rem 0}
+
+/* ---------- footer ---------- */
+footer.site{border-top:1px solid var(--rule); margin-top:2rem}
+.footer-inner{
+  max-width:78rem; margin:0 auto; padding:2.5rem 1.5rem 4rem;
+  display:flex; gap:2rem; flex-wrap:wrap; justify-content:space-between;
+  font-size:.8125rem; color:var(--muted);
+}
+.footer-inner a{color:var(--muted); text-decoration:none; display:block; margin:.3rem 0}
+.footer-inner a:hover{color:var(--accent)}
+.footer-inner b{
+  display:block; color:var(--ink); font-size:.6875rem; text-transform:uppercase;
+  letter-spacing:.1em; margin-bottom:.5rem;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 62rem){
+  .stage{grid-template-columns:1fr}
+  .stage > *, .stage > .marginalia, .stage > .full, .stage > .wide, .pull{grid-column:1 / -1 !important}
+  .score-block{position:static; display:flex; align-items:baseline; gap:1rem; padding:0; margin-bottom:1rem}
+  .score-num{font-size:4.5rem}
+  .score-den{margin:0}
+  .marginalia .note{border-top:none; padding-top:0}
+  .location{grid-template-columns:1fr}
+  .related-grid{grid-template-columns:1fr}
+  .dish{grid-template-columns:5.5rem 1fr}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="wordmark" href="#">Oliv<span>e</span></a>
+    <nav>
+      <a href="#">Reviews</a>
+      <a href="#">Guides</a>
+      <a href="#">Cities</a>
+      <a href="#">Ratings</a>
+      <a href="#">About</a>
+    </nav>
+  </div>
+  <p class="tagline">Eating out, written down. Unannounced visits, our own bill.</p>
+</header>
+
+<main class="stage">
+
+  <!-- ============ HOMEPAGE ============ -->
+  <section class="home full">
+    <div class="home-grid">
+      <a class="feature" href="#">
+        <span class="plate"><i></i></span>
+        <p class="kicker">Review · Oakland · 4.5</p>
+        <h2>The kitchen at Tanuki finally stopped apologising</h2>
+        <p class="dek">Eighteen months ago the menu had a burger on it. What replaced that is narrower, louder, and considerably better.</p>
+      </a>
+
+      <div class="home-side">
+        <h3 class="rail-label">Recently</h3>
+        <a class="mini" href="#"><span class="ms">4.5</span> <b>Ba Mien Deli</b><i>Nine dollars, eleven minutes, no notes.</i></a>
+        <a class="mini" href="#"><span class="ms">2.0</span> <b>The Standing Room</b><i>A wine bar that reheats things.</i></a>
+        <a class="mini" href="#"><span class="ms">4.0</span> <b>Marisol</b><i>Twelve tables, one cook, a market menu.</i></a>
+
+        <h3 class="rail-label">From the archives</h3>
+        <a class="mini" href="#"><span class="ms">—</span> <b>This week, 2023</b><i>The summer everyone opened a natural wine bar.</i></a>
+        <a class="mini" href="#"><span class="ms">—</span> <b>This week, 2021</b><i>Eating outdoors, under duress.</i></a>
+
+        <h3 class="rail-label">Most discussed</h3>
+        <a class="mini" href="#"><span class="ms">41</span> <b>On tipping</b><i>Service included, and what it cost.</i></a>
+        <a class="mini surprise" href="#">Surprise me →</a>
+      </div>
+    </div>
+  </section>
+
+  <hr class="page-break full">
+  <p class="page-break-label full">A review page</p>
+
+  <!-- identity card sits ABOVE the hero -->
+  <div class="identity">
+    <p class="kicker">Restaurant review · Oakland</p>
+    <h1 class="headline">The kitchen at Tanuki finally stopped apologising</h1>
+    <p class="restaurant-name">
+      Tanuki Izakaya <span class="sep">/</span>
+      <span class="light">1412 Webster St, Oakland</span>
+    </p>
+    <ul class="facts">
+      <li><a href="#">Japanese</a></li>
+      <li><a href="#">Izakaya</a></li>
+      <li><a href="#">Uptown</a></li>
+      <li>$$ · about $55 a head</li>
+      <li>Visited twice · Jan 2025, Jul 2026</li>
+    </ul>
+    <p class="byline">By Maria Eleni · <a href="#">41 comments</a> · Published 2 Nov 2025 · <b>Updated 28 Jul 2026</b></p>
+    <div class="actions">
+      <a class="btn btn--primary" href="#">Reserve</a>
+      <a class="btn" href="#">Directions — Google</a>
+      <a class="btn" href="#">Directions — Apple</a>
+      <a class="btn" href="#">Website</a>
+    </div>
+  </div>
+
+  <!-- oversized rating numeral lives in the left margin -->
+  <aside class="marginalia score-block">
+    <span class="score-num">4.5</span>
+    <span class="score-den">out&nbsp;of&nbsp;5 · <a href="#">how&nbsp;we&nbsp;rate</a></span>
+    <p class="note"><b>Food</b>5 / 5 — the grill is the whole argument.</p>
+    <p class="note"><b>Room</b>4 / 5 — loud by 8pm, and it suits the place.</p>
+    <p class="note"><b>Service</b>4 / 5 — warm, occasionally overwhelmed.</p>
+    <p class="note"><b>Value</b>4.5 / 5 — the yakitori is underpriced.</p>
+  </aside>
+
+  <figure class="full">
+    <span class="plate"><i></i></span>
+    <figcaption>
+      <span>Thigh skewers over binchotan, salted and turned once, at the pass just after service opens.</span>
+      <span class="credit">Photo — Maria Eleni</span>
+    </figcaption>
+  </figure>
+
+  <div class="verdict">
+    <h2>The short version</h2>
+    <ul>
+      <li>Go for the grill. Six skewers, two beers, out for forty dollars.</li>
+      <li>The new tsukune is the best single thing we ate in Oakland this year.</li>
+      <li>Skip the sashimi board — it is priced like a destination and served like an afterthought.</li>
+      <li>Walk-ins at the counter before 6:15pm. After that, book a week out.</li>
+    </ul>
+  </div>
+
+  <div class="prose">
+    <p>Eighteen months ago this room was trying to be four restaurants at once, and the menu read like an apology for not having chosen. There was a laminated section of rolls. There was, inexplicably, a burger. The charcoal grill — the reason the place had been worth writing about in the first place — was doing maybe a third of the covers, and the rest of the kitchen was hedging.</p>
+    <p>That version of Tanuki is gone. What replaced it is narrower, louder, and considerably better: a counter, a grill, forty seats, and a menu that fits on one card. The burger has been shown the door. The rolls went with it.</p>
+  </div>
+
+  <blockquote class="pull">
+    “The tsukune arrives with a raw yolk on the side and no instructions, which is its own kind of confidence.”
+  </blockquote>
+
+  <div class="prose">
+    <p>What remains is a kitchen that has decided what it is for. The binchotan runs hot from five o'clock and the skewers come in the order they finish rather than the order you asked for them, which is the correct way and still surprises people. Salt is used with an assurance that was not there in 2025. The chicken is broken down in-house; you can taste the difference in the neck and the tail, the two cuts that punish anyone buying pre-portioned.</p>
+    <p>The room has not been softened, and it should not be. It is a hard-surfaced rectangle that reaches full volume by eight and stays there. Sitting at the counter is not merely better, it is the only sensible choice — the tables along the wall get the same food ten degrees cooler and none of the reason you came.</p>
+  </div>
+
+  <section class="rundown wide">
+    <h2 class="section-label">What to order</h2>
+
+    <article class="dish">
+      <span class="thumb"><i style="background:radial-gradient(60% 60% at 40% 40%,#e0aa46,#8a5a1e 60%,#3a2510)"></i></span>
+      <div>
+        <h3>Tsukune <span class="must">Must order</span></h3>
+        <p>Chicken meatball, loosely packed, lacquered in tare and charred at the edges, with a raw yolk alongside. Order two per person. Nobody has ever regretted this.</p>
+      </div>
+    </article>
+
+    <article class="dish">
+      <span class="thumb"><i style="background:radial-gradient(55% 55% at 55% 45%,#c9d07a,#63702b 55%,#26300f)"></i></span>
+      <div>
+        <h3>Shishito, blistered</h3>
+        <p>Ten to a plate, one in ten volcanic, finished with katsuobushi that moves in the heat. Three dollars. The best value on the card.</p>
+      </div>
+    </article>
+
+    <article class="dish">
+      <span class="thumb"><i style="background:radial-gradient(60% 60% at 45% 55%,#d97a4a,#8b3418 55%,#2c1409)"></i></span>
+      <div>
+        <h3>Negima <span class="must">Must order</span></h3>
+        <p>Thigh and scallion, alternating, turned exactly once. The plainest thing here and the clearest evidence the grill cook knows what they are doing.</p>
+      </div>
+    </article>
+
+    <article class="dish">
+      <span class="thumb"><i style="background:linear-gradient(150deg,#7d8ba0,#3c4655 60%,#1a1f27)"></i></span>
+      <div>
+        <h3>Sashimi board</h3>
+        <p>Twenty-eight dollars for five competent slices of fish that have nothing to do with the rest of the meal. Give the money to the grill instead.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="location wide">
+    <div class="map" role="img" aria-label="Map showing Tanuki Izakaya at 1412 Webster Street, Oakland"></div>
+    <div class="details">
+      <dl>
+        <div><dt>Address</dt><dd>1412 Webster St, Oakland, CA 94612</dd></div>
+        <div><dt>Hours</dt><dd>Wed–Sat, 5:00pm — 11:30pm</dd></div>
+        <div><dt>Getting in</dt><dd>Counter seats are walk-in only and gone by 6:15pm. Tables book out roughly a week ahead.</dd></div>
+        <div><dt>Damage</dt><dd>About $55 a head with two drinks. Cash and cards.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="related wide">
+    <h2 class="section-label">If you liked this</h2>
+    <div class="related-grid">
+      <a class="rcard" href="#">
+        <span class="plate p2"><i></i></span>
+        <p class="rmeta"><span class="rscore">4.0</span> Japanese · Temescal</p>
+        <h3>Kappo Nine</h3>
+        <p>A tasting counter that is worth it exactly twice a year.</p>
+      </a>
+      <a class="rcard" href="#">
+        <span class="plate p3"><i></i></span>
+        <p class="rmeta"><span class="rscore">3.5</span> Yakitori · Berkeley</p>
+        <h3>Bird &amp; Ash</h3>
+        <p>Good skewers, hostile lighting, an unforgivable playlist.</p>
+      </a>
+      <a class="rcard" href="#">
+        <span class="plate"><i></i></span>
+        <p class="rmeta"><span class="rscore">4.5</span> Izakaya · SF</p>
+        <h3>Hachi on Bush</h3>
+        <p>The bar snack menu alone justifies the bridge toll.</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="credits wide">
+    <b>How this review was made</b>
+    <span>Words and photographs — Maria Eleni</span>
+    <span>Visits — 2 Nov 2025, 11 Mar 2026, 28 Jul 2026. All unannounced.</span>
+    <span>Bills — paid in full, every visit. No comped courses, no press dinner.</span>
+    <span>Next scheduled revisit — January 2027. This page is updated, not replaced.</span>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="footer-inner">
+    <div>
+      <b>Maria Eleni</b>
+      Unannounced visits. We pay our own bill, every time.<br>
+      <a href="#">Read the full disclosure →</a>
+    </div>
+    <div>
+      <b>Browse</b>
+      <a href="#">All reviews</a>
+      <a href="#">By city</a>
+      <a href="#">By cuisine</a>
+      <a href="#">Start here</a>
+    </div>
+    <div>
+      <b>Follow</b>
+      <a href="#">Newsletter</a>
+      <a href="#">RSS</a>
+      <a href="#">Archive, 2019—</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,333 @@
+---
+// Deliberately does not use BaseLayout or import `blog`: this shell must
+// not inherit the theme the mockups are proposing to replace, and it must
+// build even if the CMS is unreachable.
+const concepts = [
+  {
+    key: 'a',
+    file: 'a-table.html',
+    name: "Table d'Olive",
+    blurb:
+      'Warm print revival; asymmetric grid, oversized rating in the margin, archive resurfacing.',
+  },
+  {
+    key: 'b',
+    file: 'b-brine-ink.html',
+    name: 'Brine & Ink',
+    blurb: 'Editorial brutalism; the archive as a ruled numbered ledger with a glyph vocabulary.',
+  },
+  {
+    key: 'c',
+    file: 'c-service.html',
+    name: 'Service',
+    blurb: 'Dark, dinner-lit, all-serif; single column, full-bleed photography, standing columns.',
+  },
+  {
+    key: 'd',
+    file: 'd-maria.html',
+    name: 'Maria Eleni',
+    blurb: 'Her sketch, built: script wordmark, bow, ivory and navy, seven-axis ethics rubric.',
+  },
+  {
+    key: 'e',
+    file: 'e-unscored.html',
+    name: 'Unscored',
+    blurb: 'No numbers anywhere; cooking and room judged separately, in words.',
+  },
+  {
+    key: 'f',
+    file: 'f-map.html',
+    name: 'The Map',
+    blurb:
+      'The index is a map of every place she has eaten, with a keyboard-navigable list beside it.',
+  },
+  {
+    key: 'g',
+    file: 'g-plain.html',
+    name: 'Plain',
+    blurb:
+      'One typeface, one loud accent, two nav links; writing and photographs carry everything.',
+  },
+];
+
+const notes = [
+  { href: '/mockups/notes/source-essences.md', label: 'Source essences' },
+  { href: '/mockups/notes/mockup-audit.md', label: 'Mockup audit' },
+  { href: '/mockups/notes/maria-inspo-notes.md', label: "Maria's inspiration notes" },
+  { href: '/mockups/notes/olive-design-proposal.md', label: 'Design proposal' },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Olive mockup gallery</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --shell-bg: #f4f4f2;
+        --shell-fg: #2a2a28;
+        --shell-muted: #6b6b66;
+        --shell-border: #d8d8d2;
+        --shell-accent: #3a3a36;
+        --sidebar-w: 260px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        color: var(--shell-fg);
+        background: var(--shell-bg);
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: var(--sidebar-w) 1fr;
+        height: 100vh;
+      }
+      nav.sidebar {
+        border-right: 1px solid var(--shell-border);
+        overflow-y: auto;
+        padding: 1rem 0 2rem;
+      }
+      .sidebar h1 {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--shell-muted);
+        margin: 0 1rem 0.75rem;
+      }
+      .sidebar ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .sidebar a {
+        display: block;
+        padding: 0.6rem 1rem;
+        text-decoration: none;
+        color: var(--shell-fg);
+        border-left: 3px solid transparent;
+      }
+      .sidebar a:hover {
+        background: rgba(0, 0, 0, 0.04);
+      }
+      .sidebar a.active {
+        border-left-color: var(--shell-accent);
+        background: rgba(0, 0, 0, 0.05);
+      }
+      .sidebar .key {
+        display: inline-block;
+        width: 1.25rem;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        color: var(--shell-muted);
+      }
+      .sidebar .name {
+        font-weight: 600;
+      }
+      .sidebar .blurb {
+        display: block;
+        margin-top: 0.15rem;
+        margin-left: 1.25rem;
+        font-size: 0.78rem;
+        color: var(--shell-muted);
+        line-height: 1.3;
+      }
+      .sidebar .notes-group {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--shell-border);
+      }
+      .sidebar .notes-group a {
+        font-size: 0.85rem;
+        color: var(--shell-muted);
+        padding: 0.4rem 1rem;
+      }
+      main.pane {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      .pane-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid var(--shell-border);
+        font-size: 0.8rem;
+        color: var(--shell-muted);
+      }
+      .pane-header a {
+        color: var(--shell-accent);
+        text-decoration: none;
+      }
+      .pane-header a:hover {
+        text-decoration: underline;
+      }
+      #viewport-readout {
+        font-variant-numeric: tabular-nums;
+      }
+      iframe#mockup-frame {
+        flex: 1;
+        width: 100%;
+        border: 0;
+        background: #fff;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto 1fr;
+        }
+        nav.sidebar {
+          border-right: 0;
+          border-bottom: 1px solid var(--shell-border);
+          overflow-x: auto;
+          overflow-y: hidden;
+          white-space: nowrap;
+          padding: 0.75rem;
+        }
+        .sidebar h1 {
+          display: none;
+        }
+        .sidebar ul {
+          display: flex;
+          gap: 0.5rem;
+        }
+        .sidebar a {
+          border-left: none;
+          border-bottom: 3px solid transparent;
+          white-space: nowrap;
+        }
+        .sidebar a.active {
+          border-left-color: transparent;
+          border-bottom-color: var(--shell-accent);
+        }
+        .sidebar .blurb {
+          display: none;
+        }
+        .sidebar .notes-group {
+          display: flex;
+          margin-top: 0;
+          padding-top: 0;
+          border-top: 0;
+          border-left: 1px solid var(--shell-border);
+          margin-left: 0.5rem;
+          padding-left: 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <nav class="sidebar" aria-label="Mockup concepts">
+        <h1>Olive concepts</h1>
+        <ul>
+          {
+            concepts.map((c) => (
+              <li>
+                <a
+                  href={`/mockups/${c.file}`}
+                  data-key={c.key}
+                  data-file={c.file}
+                  data-name={c.name}
+                >
+                  <>
+                    <span class="key">{c.key}</span>
+                    <span class="name">{c.name}</span>
+                  </>
+                  <span class="blurb">{c.blurb}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="notes-group">
+          <ul>
+            {
+              notes.map((n) => (
+                <li>
+                  <a href={n.href} target="_blank" rel="noopener">
+                    {n.label}
+                  </a>
+                </li>
+              ))
+            }
+            <li><a href="/">↩ Live olive site</a></li>
+          </ul>
+        </div>
+      </nav>
+      <main class="pane">
+        <div class="pane-header">
+          <a id="standalone-link" href="/mockups/a-table.html" target="_blank" rel="noopener"
+            >Open standalone ↗</a
+          >
+          <span id="viewport-readout">— × —</span>
+        </div>
+        <iframe id="mockup-frame" title="Olive mockup" src="/mockups/a-table.html"></iframe>
+      </main>
+    </div>
+    <script>
+      type Concept = { key: string; file: string; name: string; el: HTMLAnchorElement };
+
+      const concepts: Concept[] = [];
+      document.querySelectorAll<HTMLAnchorElement>('.sidebar a[data-key]').forEach((a) => {
+        concepts.push({
+          key: a.dataset.key ?? '',
+          file: a.dataset.file ?? '',
+          name: a.dataset.name ?? '',
+          el: a,
+        });
+      });
+
+      const frame = document.getElementById('mockup-frame') as HTMLIFrameElement;
+      const standaloneLink = document.getElementById('standalone-link') as HTMLAnchorElement;
+      const readout = document.getElementById('viewport-readout') as HTMLSpanElement;
+
+      function selectKey(key: string) {
+        const match = concepts.find((c) => c.key === key) || concepts[0];
+        if (!match) return;
+        frame.src = `/mockups/${match.file}`;
+        frame.title = match.name;
+        standaloneLink.href = `/mockups/${match.file}`;
+        concepts.forEach((c) => c.el.classList.toggle('active', c.key === match.key));
+      }
+
+      function keyFromHash() {
+        const h = location.hash.replace('#', '');
+        return h || 'a';
+      }
+
+      function updateReadout() {
+        readout.textContent = `${window.innerWidth} × ${window.innerHeight}`;
+      }
+
+      // Rewrite plain standalone links into hash links now that JS is confirmed
+      // running; without this script, the anchors above still work as direct
+      // links to each standalone mockup.
+      concepts.forEach((c) => {
+        c.el.setAttribute('href', `#${c.key}`);
+        c.el.addEventListener('click', (e) => {
+          e.preventDefault();
+          location.hash = c.key;
+        });
+      });
+
+      window.addEventListener('hashchange', () => selectKey(keyFromHash()));
+      window.addEventListener('resize', updateReadout);
+
+      if (!location.hash) location.hash = 'a';
+      selectKey(keyFromHash());
+      updateReadout();
+    </script>
+  </body>
+</html>

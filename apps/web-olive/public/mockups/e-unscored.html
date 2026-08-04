@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maria Eleni — Concept E: Unscored</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CONCEPT E — "Unscored"
+   Bridges the essence nothing else carried: abolish the number.
+   Eater + Bon Appétit: no score, no ranking, the prose IS the verdict.
+   Michelin's other half: the food and the room are judged separately,
+   never averaged. Serious Eats: authority stated as design furniture.
+   EB Garamond + Space Mono · cream & oxblood
+   ============================================================ */
+:root{
+  color-scheme: light dark;
+  --bg:          light-dark(#F6F3EC, #14110F);
+  --surface:     light-dark(#EDE8DD, #1D1917);
+  --ink:         light-dark(#1A1614, #F0EAE1);
+  --muted:       light-dark(#5E564E, #A79C90);
+  --accent:      light-dark(#7A2B2B, #E08A7E);
+  --accent-hover:light-dark(#5C1E1E, #EFA79C);
+  --rule:        light-dark(#DED7C9, #2A2522);
+  --rule-strong: light-dark(#8B8377, #63594F);
+  --accent-wash: color-mix(in oklab, var(--accent) 7%, var(--bg));
+
+  --display:"EB Garamond", Georgia, serif;
+  --mono:"Space Mono", ui-monospace, Menlo, monospace;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--display); font-size:1.1875rem; line-height:1.62;
+  font-variant-numeric:oldstyle-nums;
+}
+h1,h2,h3,blockquote{text-wrap:balance}
+p{text-wrap:pretty}
+a{color:var(--accent)}
+.wrap{max-width:52rem; margin:0 auto; padding:0 1.5rem}
+
+/* ---------- masthead + trust furniture ---------- */
+.masthead{border-bottom:1px solid var(--ink)}
+.masthead .wrap{padding-top:1.75rem; padding-bottom:1.25rem; text-align:center}
+.wordmark{
+  font-family:var(--display); font-size:2.5rem; font-weight:500; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink); text-decoration:none; display:inline-block;
+}
+.masthead nav{display:flex; gap:1.5rem; justify-content:center; flex-wrap:wrap; margin-top:1rem}
+.masthead nav a{
+  font-family:var(--mono); font-size:.6875rem; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--muted); text-decoration:none;
+}
+.masthead nav a:hover{color:var(--accent)}
+
+/* Serious Eats: authority as homepage furniture, not fine print */
+.trust{background:var(--surface); border-bottom:1px solid var(--rule)}
+.trust .wrap{
+  display:flex; justify-content:center; gap:2.5rem; flex-wrap:wrap;
+  padding-top:.85rem; padding-bottom:.85rem;
+  font-family:var(--mono); font-size:.6875rem; text-transform:uppercase;
+  letter-spacing:.06em; color:var(--muted); text-align:center;
+}
+.trust b{color:var(--ink); font-weight:700}
+
+/* ---------- no-score policy banner ---------- */
+.policy{
+  margin:3rem 0 0; padding:1.75rem; border:1px solid var(--accent);
+  background:var(--accent-wash); text-align:center;
+}
+.policy h2{
+  font-family:var(--mono); font-size:.6875rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--accent); margin:0 0 .75rem;
+}
+.policy p{margin:0 auto; max-width:48ch; font-size:1.125rem}
+.policy a{font-family:var(--mono); font-size:.75rem; text-transform:uppercase; letter-spacing:.08em; display:inline-block; margin-top:.75rem}
+
+/* ---------- unranked index, grouped by place ---------- */
+.group{margin-top:3.5rem}
+.group > h2{
+  font-family:var(--mono); font-size:.75rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:.14em; color:var(--muted); margin:0 0 1.25rem;
+  padding-bottom:.5rem; border-bottom:1px solid var(--ink);
+}
+.entry{padding:1.5rem 0; border-bottom:1px solid var(--rule)}
+.entry h3{
+  font-family:var(--display); font-weight:600; font-size:1.5rem; margin:0 0 .25rem;
+  line-height:1.2;
+}
+.entry h3 a{color:inherit; text-decoration:none}
+.entry h3 a:hover{color:var(--accent)}
+.entry .facts{
+  font-family:var(--mono); font-size:.6875rem; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--muted); margin:0 0 .6rem;
+}
+.entry p{margin:0; color:var(--ink)}
+.entry .callout{
+  margin-top:.6rem; padding-left:.9rem; border-left:2px solid var(--accent);
+  font-size:1.0625rem;
+}
+.entry .callout b{font-family:var(--mono); font-size:.6875rem; text-transform:uppercase;
+  letter-spacing:.08em; color:var(--accent); display:block}
+.no-order{
+  font-family:var(--mono); font-size:.625rem; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--rule-strong); margin:.75rem 0 0;
+}
+
+/* ---------- review page ---------- */
+.page-break{border:none; border-top:1px solid var(--ink); margin:5rem 0 0}
+.page-break-label{
+  font-family:var(--mono); font-size:.625rem; text-transform:uppercase; letter-spacing:.14em;
+  color:var(--muted); margin:.6rem 0 0;
+}
+.review{padding-top:3rem}
+.kicker{
+  font-family:var(--mono); font-size:.6875rem; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--accent); margin:0 0 1rem;
+}
+.review h1{
+  font-family:var(--display); font-weight:600; font-size:clamp(2.25rem,5.5vw,3.5rem);
+  line-height:1.08; margin:0 0 1rem;
+}
+.rname{font-family:var(--mono); font-size:.8125rem; color:var(--muted); margin:0 0 1.5rem}
+
+/* the two verdicts, never averaged — Michelin's decoupling, in words */
+.verdicts{
+  display:grid; grid-template-columns:1fr 1fr; gap:0;
+  border:1px solid var(--ink); margin:0 0 2rem;
+}
+.verdicts > div{padding:1.25rem; border-right:1px solid var(--rule)}
+.verdicts > div:last-child{border-right:none}
+.verdicts dt{
+  font-family:var(--mono); font-size:.625rem; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--muted); margin-bottom:.4rem;
+}
+.verdicts dd{margin:0; font-size:1.375rem; line-height:1.25; font-weight:600}
+.verdicts .word{color:var(--accent)}
+.verdicts small{
+  display:block; margin-top:.5rem; font-family:var(--mono); font-size:.6875rem;
+  color:var(--muted); line-height:1.5; font-weight:400;
+}
+@media (max-width:38rem){
+  .verdicts{grid-template-columns:1fr}
+  .verdicts > div{border-right:none; border-bottom:1px solid var(--rule)}
+}
+
+figure{margin:2.5rem 0}
+figure i{
+  display:block; width:100%; aspect-ratio:3/2;
+  background:
+    radial-gradient(55% 65% at 36% 42%, #d8a05a 0%, #9d5f27 40%, transparent 72%),
+    linear-gradient(155deg, #6b4426 0%, #2b1a0f 70%);
+}
+figcaption{
+  margin-top:.6rem; font-family:var(--mono); font-size:.6875rem; color:var(--muted);
+  line-height:1.5;
+}
+.prose p{margin:0 0 1.4em}
+.prose p:first-of-type::first-letter{
+  font-family:var(--display); float:left; font-size:3.6rem; line-height:.82;
+  padding:.06em .1em 0 0; color:var(--accent); font-weight:600;
+}
+blockquote{
+  margin:2.5rem 0; padding:1.25rem 0; border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule); font-size:1.5rem; line-height:1.3;
+  font-style:italic; text-align:center;
+}
+.orderline{
+  margin:2.5rem 0 0; padding:1.25rem; background:var(--surface); border:1px solid var(--rule);
+}
+.orderline b{
+  font-family:var(--mono); font-size:.6875rem; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--accent); display:block; margin-bottom:.5rem;
+}
+.orderline p{margin:0}
+.method{
+  margin:3rem 0 0; padding-top:1.25rem; border-top:1px solid var(--ink);
+  font-family:var(--mono); font-size:.75rem; line-height:1.7; color:var(--muted);
+}
+.method b{color:var(--ink); text-transform:uppercase; letter-spacing:.08em; font-size:.6875rem}
+
+footer.site{border-top:1px solid var(--ink); margin-top:5rem}
+footer.site .wrap{
+  padding-top:2rem; padding-bottom:4rem; text-align:center;
+  font-family:var(--mono); font-size:.75rem; color:var(--muted);
+}
+footer.site a{color:var(--muted); text-decoration:none; margin:0 .75rem}
+footer.site a:hover{color:var(--accent)}
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important} }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <a class="wordmark" href="#">Maria Eleni</a>
+    <nav>
+      <a href="#">Reviews</a><a href="#">Lists</a><a href="#">Neighborhoods</a>
+      <a href="#">Why no scores</a><a href="#">About</a>
+    </nav>
+  </div>
+</header>
+
+<!-- authority as design, not fine print -->
+<div class="trust">
+  <div class="wrap">
+    <span><b>214</b> restaurants, <b>numbered</b> by nobody</span>
+    <span><b>7</b> years of unannounced visits</span>
+    <span><b>$0</b> accepted from any kitchen</span>
+    <span><b>Every</b> bill paid in full</span>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="policy">
+    <h2>There are no ratings on this website</h2>
+    <p>A number is a blunt instrument. It anchors the writing, and it lets you leave without reading the reason. If you want to know whether to go, the sentences are the answer.</p>
+    <a href="#">Read why we dropped the scores →</a>
+  </section>
+
+  <!-- unranked, grouped, deliberately not a leaderboard -->
+  <section class="group">
+    <h2>Where we are eating — Oakland · rechecked quarterly, last swept 9 July 2026</h2>
+
+    <article class="entry">
+      <h3><a href="#">Tanuki Izakaya</a></h3>
+      <p class="facts">Uptown · Japanese · $$ · dinner Wed–Sat · three visits</p>
+      <p>Eighteen months ago the menu had a burger on it. What replaced that is a counter, a charcoal grill, forty seats and a card you can read in one breath. The room reaches full volume by eight and it suits the place.</p>
+      <p class="callout"><b>Order this</b>The tsukune, twice, and whatever the grill cook is turning when you sit down.</p>
+    </article>
+
+    <article class="entry">
+      <h3><a href="#">Ba Mien Deli</a></h3>
+      <p class="facts">Eastlake · Vietnamese · $ · lunch daily · six visits</p>
+      <p>Nine dollars and eleven minutes. There is no seating worth the name and no reason to want any. We have never once been disappointed here, which is a sentence we have written about exactly four places.</p>
+      <p class="callout"><b>Order this</b>Number 7, extra herbs, and a coffee for the walk.</p>
+    </article>
+
+    <article class="entry">
+      <h3><a href="#">The Standing Room</a></h3>
+      <p class="facts">Mission · Wine bar · $$$ · nightly · two visits</p>
+      <p>A wine bar that reheats things. We are told this is a concept. The list is genuinely good and the food is genuinely not, and at these prices the gap between those two facts is the whole review.</p>
+      <p class="callout"><b>Order this</b>A glass of the Jura, and dinner somewhere else afterwards.</p>
+    </article>
+
+    <p class="no-order">Listed alphabetically within each neighborhood. There is no order of merit here and there never will be.</p>
+  </section>
+
+  <hr class="page-break">
+  <p class="page-break-label">A review page</p>
+
+  <article class="review">
+    <p class="kicker">Oakland · Japanese · three visits, most recently 28 July 2026</p>
+    <h1>The kitchen at Tanuki finally stopped apologising</h1>
+    <p class="rname">Tanuki Izakaya · 1412 Webster St, Oakland · $$ · about $55 a head · <a href="#">directions</a></p>
+
+    <!-- two verdicts, deliberately never averaged into one -->
+    <dl class="verdicts">
+      <div>
+        <dt>The cooking</dt>
+        <dd class="word">Worth a detour.</dd>
+        <small>Best yakitori within an hour's drive. We would cross the bridge for the tsukune alone, and have.</small>
+      </div>
+      <div>
+        <dt>The room</dt>
+        <dd>Loud, hard, correct.</dd>
+        <small>Counter only. The wall tables get the same food ten degrees cooler and none of the reason you came.</small>
+      </div>
+    </dl>
+
+    <figure>
+      <i></i>
+      <figcaption>Thigh skewers over binchotan, salted and turned once, just after service opens. Photograph — Maria Eleni.</figcaption>
+    </figure>
+
+    <div class="prose">
+      <p>Eighteen months ago this room was trying to be four restaurants at once, and the menu read like an apology for not having chosen. There was a laminated section of rolls. There was, inexplicably, a burger. The charcoal grill — the reason the place had been worth writing about at all — was doing maybe a third of the covers.</p>
+      <p>That version of Tanuki is gone. What replaced it is narrower, louder, and considerably better.</p>
+    </div>
+
+    <blockquote>The tsukune arrives with a raw yolk and no instructions, which is its own kind of confidence.</blockquote>
+
+    <div class="prose">
+      <p>The binchotan runs hot from five and the skewers come in the order they finish rather than the order you asked for them, which is the correct way and still surprises people. The chicken is broken down in-house; you can taste it in the neck and the tail, the two cuts that punish anyone buying pre-portioned.</p>
+    </div>
+
+    <div class="orderline">
+      <b>If you only order four things</b>
+      <p>Tsukune. Negima. Shishito. A second tsukune, because you will want it and the first one will already be gone.</p>
+    </div>
+
+    <div class="method">
+      <b>How we ate</b><br>
+      Three visits — 2 Nov 2025, 11 Mar 2026, 28 Jul 2026 — all unannounced, all paid in full. No comped courses, no press dinner, no affiliate links anywhere on this site. This page is updated when the restaurant changes; it is never replaced. Next scheduled revisit January 2027.
+    </div>
+  </article>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <a href="#">Why no scores</a><a href="#">How we eat</a><a href="#">Start here</a><a href="#">Newsletter</a><a href="#">RSS</a>
+  </div>
+</footer>
+
+</body>
+</html>

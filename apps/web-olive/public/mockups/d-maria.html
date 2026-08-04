@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maria Eleni — Concept D (from Maria's sketch)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Italianno&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Karla:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CONCEPT D — "Maria Eleni"
+   Built to Maria's sketch + brief: script wordmark, bow motif,
+   centered nav (Food | Wine | About), cover photo of latest post,
+   title + summary + tag chip. Palette: baby blue, ivory, navy.
+   No ads. No popups. No heavy JS — this page ships zero script.
+   ============================================================ */
+:root{
+  color-scheme: light dark;
+  --ivory:      light-dark(#FBF9F4, #0E1826);
+  --surface:    light-dark(#F1F5F9, #16263F);
+  --blue-wash:  light-dark(#DCE9F2, #1B2E4A);
+  --baby:       light-dark(#A8C6DE, #7FA9CC);
+  --navy:       light-dark(#16263F, #EDF2F7);   /* ink */
+  --muted:      light-dark(#54637A, #A7B6C9);
+  --accent:     light-dark(#2E5C8A, #9CC4E4);
+  --accent-hover: light-dark(#1D3F63, #C2DBEF);
+  --rule:       light-dark(#E2E6EC, #23364F);
+  --rule-strong:light-dark(#8C99A9, #5C7A96);
+
+  --script:"Italianno", "Snell Roundhand", cursive;
+  --display:"Cormorant Garamond", Georgia, serif;
+  --body:"Karla", ui-sans-serif, system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ivory); color:var(--navy);
+  font-family:var(--body); font-size:1.0625rem; line-height:1.65;
+}
+h1,h2,h3,blockquote{text-wrap:balance}
+p{text-wrap:pretty}
+a{color:var(--accent); text-underline-offset:.18em}
+a:hover{color:var(--accent-hover)}
+.wrap{max-width:64rem; margin:0 auto; padding:0 1.5rem}
+
+/* ---------- masthead: script wordmark, bow, centered nav ---------- */
+.masthead{padding:2rem 0 0; position:relative}
+.menu-btn{
+  position:absolute; top:1.75rem; right:1.5rem; background:none; border:none;
+  cursor:pointer; padding:.5rem; color:var(--navy); line-height:0;
+}
+.menu-btn span{display:block; width:22px; height:1.5px; background:currentColor; margin:4px 0}
+.wordmark{
+  display:block; text-align:center; font-family:var(--script);
+  font-size:clamp(3.75rem,11vw,6.5rem); line-height:.9; color:var(--navy);
+  text-decoration:none; letter-spacing:.01em;
+}
+.swash{display:block; margin:.25rem auto 0; width:min(90%,34rem); height:14px; color:var(--baby)}
+.bow{display:block; margin:.5rem auto 1.25rem; width:130px; height:52px; color:var(--baby)}
+.bow path, .bow circle{fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round}
+
+nav.primary{
+  display:flex; justify-content:center; align-items:center; gap:0;
+  flex-wrap:wrap; padding-bottom:1.5rem;
+}
+nav.primary a{
+  font-size:.8125rem; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--navy); text-decoration:none; padding:.35rem 1.15rem; font-weight:500;
+}
+nav.primary a:hover{color:var(--accent)}
+nav.primary .div{color:var(--baby); user-select:none}
+nav.primary a.tip{
+  margin-left:.75rem; letter-spacing:.14em; color:var(--muted); font-size:.6875rem;
+  border:1px solid var(--rule-strong); border-radius:999px; padding:.3rem .8rem;
+}
+nav.primary a.tip:hover{border-color:var(--accent); color:var(--accent)}
+.rule-full{border:none; border-top:1px solid var(--navy); margin:0}
+
+/* ---------- hero: cover photo of the latest post ---------- */
+.hero{margin:2.5rem 0 0}
+.hero .frame{
+  display:block; width:100%; aspect-ratio:16/9; border:1px solid var(--rule);
+  background:var(--surface); padding:.5rem;
+}
+.hero .frame i{
+  display:block; width:100%; height:100%;
+  background:
+    radial-gradient(55% 65% at 34% 40%, #cfe2ee 0%, #9dbdd6 40%, transparent 72%),
+    radial-gradient(45% 55% at 72% 64%, #f0e4cf 0%, #d8c19b 45%, transparent 78%),
+    linear-gradient(155deg, #b9d2e4 0%, #7e9bb6 55%, #43607e 100%);
+}
+.hero-meta{
+  display:grid; grid-template-columns:1fr auto; gap:1rem 2rem; align-items:start;
+  padding:1.5rem 0 2rem; border-bottom:1px solid var(--rule);
+}
+.hero-meta h1{
+  font-family:var(--display); font-weight:400;
+  font-size:clamp(2rem,5vw,3.25rem); line-height:1.08; margin:0 0 .5rem;
+}
+.hero-meta h1 a{color:inherit; text-decoration:none}
+.hero-meta h1 a:hover{color:var(--accent)}
+.hero-meta .summary{margin:0; color:var(--muted); font-size:1.0625rem; max-width:52ch}
+.hero-meta .stamp{
+  font-size:.75rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  margin:0 0 .75rem;
+}
+.chip{
+  display:inline-block; font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--navy); background:var(--blue-wash); border:1px solid var(--baby);
+  border-radius:999px; padding:.35rem .85rem; text-decoration:none; white-space:nowrap;
+}
+.chip:hover{background:var(--baby); color:var(--navy)}
+.chip.plain{background:transparent}
+
+.tagline{
+  text-align:center; font-family:var(--display); font-style:italic; font-size:1.125rem;
+  color:var(--muted); margin:-.5rem 0 1.5rem;
+}
+.hero .frame{position:relative}
+.overlay-chip{
+  position:absolute; top:1.25rem; left:1.25rem;
+  font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase;
+  background:var(--ivory); color:var(--navy); border:1px solid var(--baby);
+  border-radius:999px; padding:.35rem .85rem;
+}
+
+/* ---------- rail labels (uppercase, letterspaced — Rosewood) ---------- */
+.rail-label{
+  font-size:.6875rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted);
+  margin:0 0 .75rem; font-weight:600;
+}
+
+/* ---------- philosophy block ---------- */
+.philosophy{
+  margin:3.5rem 0 0; padding:2.5rem; background:var(--blue-wash); border:1px solid var(--baby);
+  text-align:center;
+}
+.philosophy h2{
+  font-family:var(--display); font-weight:400; font-size:clamp(1.75rem,4vw,2.5rem);
+  margin:0 0 1rem; line-height:1.15;
+}
+.philosophy p:not(.rail-label){margin:0 auto; max-width:56ch; color:var(--navy)}
+.read-on{
+  display:inline-block; margin-top:1.25rem; font-size:.6875rem; letter-spacing:.16em;
+  text-transform:uppercase; text-decoration:none; border-bottom:1px solid var(--baby);
+  padding-bottom:.2rem;
+}
+
+/* ---------- most popular ---------- */
+.popular{margin:3.5rem 0 0}
+.popular ol{margin:0; padding:0; list-style:none; counter-reset:p}
+.popular li{
+  counter-increment:p; display:grid; grid-template-columns:2.5rem 1fr auto; gap:1rem;
+  align-items:baseline; padding:.85rem 0; border-bottom:1px solid var(--rule);
+}
+.popular li::before{
+  content:counter(p,decimal-leading-zero); font-family:var(--display); font-size:1.25rem;
+  color:var(--baby);
+}
+.popular a{font-family:var(--display); font-size:1.25rem; text-decoration:none; color:var(--navy)}
+.popular a:hover{color:var(--accent)}
+.popular span{font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+
+/* ---------- badges ---------- */
+.badges{display:flex; flex-wrap:wrap; gap:.4rem; margin:.75rem 0 0}
+.badge{
+  font-size:.625rem; letter-spacing:.12em; text-transform:uppercase;
+  border:1px solid var(--rule-strong); color:var(--muted); padding:.25rem .6rem; border-radius:999px;
+}
+.badge--award{border-color:var(--accent); color:var(--accent); font-weight:600}
+
+/* ---------- article body ---------- */
+.article{max-width:62ch}
+.article p{margin:0 0 1.35em}
+.article .lede{font-size:1.25rem; line-height:1.55}
+.article .lede::first-letter{
+  font-family:var(--display); float:left; font-size:3.6rem; line-height:.85;
+  padding:.06em .1em 0 0; color:var(--accent);
+}
+.article blockquote{
+  margin:2rem 0; padding:0 0 0 1.25rem; border-left:2px solid var(--baby);
+  font-family:var(--display); font-size:1.5rem; line-height:1.3;
+}
+
+/* ---------- tag rail (tags cut across Food & Wine) ---------- */
+.tags-rail{
+  display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center;
+  padding:1.75rem 0; border-bottom:1px solid var(--rule);
+}
+
+/* ---------- section heads ---------- */
+.section-head{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
+  margin:3.5rem 0 1.5rem;
+}
+.section-head h2{
+  font-family:var(--display); font-weight:400; font-size:2rem; margin:0; letter-spacing:.01em;
+}
+.section-head a{
+  font-size:.75rem; letter-spacing:.14em; text-transform:uppercase;
+  text-decoration:none; color:var(--muted); white-space:nowrap;
+}
+.section-head a:hover{color:var(--accent)}
+
+/* ---------- post list: title + summary + tag, per the sketch ---------- */
+.post{
+  display:grid; grid-template-columns:14rem 1fr auto; gap:1.5rem; align-items:start;
+  padding:1.5rem 0; border-bottom:1px solid var(--rule);
+}
+.post .thumb{border:1px solid var(--rule); background:var(--surface); padding:.375rem}
+.post .thumb i{display:block; width:100%; aspect-ratio:4/3}
+.post h3{font-family:var(--display); font-weight:500; font-size:1.5rem; margin:0 0 .35rem; line-height:1.2}
+.post h3 a{color:inherit; text-decoration:none}
+.post h3 a:hover{color:var(--accent)}
+.post .stamp{font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0 0 .4rem}
+.post p.sum{margin:0; color:var(--muted); font-size:.9375rem; max-width:56ch}
+@media (max-width:48rem){
+  .post{grid-template-columns:1fr; }
+  .post .chip{justify-self:start}
+  .hero-meta{grid-template-columns:1fr}
+}
+
+/* ---------- the review rubric card (Maria's axes) ---------- */
+.rubric{
+  border:1px solid var(--navy); background:var(--surface); padding:1.75rem;
+  margin:1rem 0 0;
+}
+.rubric > header{
+  display:flex; justify-content:space-between; align-items:baseline; gap:1rem;
+  flex-wrap:wrap; border-bottom:1px solid var(--rule); padding-bottom:1rem; margin-bottom:1.25rem;
+}
+.rubric h3{font-family:var(--display); font-weight:500; font-size:1.75rem; margin:0}
+.rubric .where{font-size:.8125rem; color:var(--muted); margin:.25rem 0 0}
+.rubric .overall{text-align:right}
+.rubric .overall b{
+  display:block; font-family:var(--display); font-size:3rem; line-height:1;
+  color:var(--accent); font-weight:500;
+}
+.rubric .overall span{font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.axes{margin:0; padding:0; list-style:none; display:grid; gap:.9rem}
+.axes li{display:grid; grid-template-columns:13rem 1fr 3rem; gap:1rem; align-items:center}
+.axes .label{font-size:.8125rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.axes .bar{height:6px; background:var(--rule); border-radius:999px; overflow:hidden}
+.axes .bar i{display:block; height:100%; background:var(--accent)}
+.axes .val{
+  text-align:right; font-family:var(--display); font-size:1.125rem; font-weight:600;
+  font-variant-numeric:tabular-nums;
+}
+.axes .val.na{font-family:var(--body); font-size:.6875rem; letter-spacing:.1em; color:var(--muted); text-transform:uppercase}
+@media (max-width:48rem){ .axes li{grid-template-columns:1fr 3rem; } .axes .bar{grid-column:1 / -1; order:3} }
+
+.disclosures{
+  margin:1.5rem 0 0; padding:1rem 0 0; border-top:1px solid var(--rule);
+  display:grid; gap:.6rem; font-size:.875rem; color:var(--muted);
+}
+.disclosures b{
+  color:var(--navy); font-size:.6875rem; letter-spacing:.12em; text-transform:uppercase;
+  display:block; margin-bottom:.15rem; font-weight:600;
+}
+
+/* ---------- living updates / revisit log ---------- */
+.revisits{margin:2rem 0 0; border-left:2px solid var(--baby); padding-left:1.25rem}
+.revisits h4{
+  font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  margin:0 0 .75rem; font-weight:600;
+}
+.revisit{padding:.6rem 0; border-bottom:1px solid var(--rule)}
+.revisit:last-child{border-bottom:none}
+.revisit time{
+  font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent);
+  display:block; margin-bottom:.15rem;
+}
+.revisit p{margin:0; font-size:.9375rem; color:var(--muted)}
+
+/* ---------- poll (light, no JS needed to read it) ---------- */
+.poll{border:1px solid var(--baby); background:var(--blue-wash); padding:1.5rem; margin-top:2rem}
+.poll h4{font-family:var(--display); font-weight:500; font-size:1.375rem; margin:0 0 1rem}
+.poll ul{margin:0; padding:0; list-style:none; display:grid; gap:.6rem}
+.poll li{display:grid; grid-template-columns:1fr 3.5rem; gap:1rem; align-items:center; font-size:.9375rem}
+.poll .pbar{grid-column:1 / -1; height:4px; background:var(--ivory); border-radius:999px; overflow:hidden}
+.poll .pbar i{display:block; height:100%; background:var(--baby)}
+.poll .pct{text-align:right; font-size:.8125rem; color:var(--muted); font-variant-numeric:tabular-nums}
+.poll form{margin-top:1rem}
+.poll button{
+  font-family:var(--body); font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase;
+  padding:.55rem 1.1rem; border:1px solid var(--navy); background:transparent;
+  color:var(--navy); cursor:pointer; border-radius:999px;
+}
+.poll button:hover{background:var(--navy); color:var(--ivory)}
+
+/* ---------- tip jar ---------- */
+.tipjar{margin-top:1rem}
+.tiers{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--rule);
+  border:1px solid var(--rule);
+}
+.tier{background:var(--ivory); padding:1.25rem; text-decoration:none; color:inherit; display:block}
+.tier:hover{background:var(--blue-wash)}
+.tier b{display:block; font-family:var(--display); font-size:1.75rem; font-weight:500; color:var(--accent)}
+.tier span{display:block; font-size:.875rem; color:var(--muted); margin-top:.25rem}
+.tier.custom b{font-size:1.25rem; line-height:1.3}
+@media (max-width:48rem){ .tiers{grid-template-columns:1fr 1fr} }
+
+/* ---------- pledge / newsletter (inline only, never a popup) ---------- */
+.pledge{
+  margin:3.5rem 0 0; border-top:1px solid var(--navy); border-bottom:1px solid var(--navy);
+  padding:2rem 0; text-align:center;
+}
+.pledge p{margin:0 auto; max-width:52ch; font-family:var(--display); font-size:1.375rem; line-height:1.45}
+.pledge .small{font-family:var(--body); font-size:.875rem; color:var(--muted); margin-top:1rem}
+.signup{display:flex; gap:.5rem; justify-content:center; margin-top:1.5rem; flex-wrap:wrap}
+.signup input{
+  font-family:var(--body); font-size:.9375rem; padding:.65rem .9rem;
+  border:1px solid var(--rule-strong); background:var(--ivory); color:var(--navy);
+  min-width:min(20rem,80vw); border-radius:999px;
+}
+.signup button{
+  font-family:var(--body); font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase;
+  padding:.65rem 1.4rem; border:1px solid var(--navy); background:var(--navy);
+  color:var(--ivory); cursor:pointer; border-radius:999px;
+}
+.signup button:hover{background:var(--accent); border-color:var(--accent)}
+
+/* ---------- footer ---------- */
+footer.site{margin-top:4rem; border-top:1px solid var(--rule); background:var(--surface)}
+footer.site .wrap{
+  display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:2rem;
+  padding-top:3rem; padding-bottom:3.5rem; font-size:.875rem; color:var(--muted);
+}
+footer.site .bow{width:80px; height:32px; margin:0 0 .75rem}
+footer.site b{
+  display:block; color:var(--navy); font-size:.6875rem; letter-spacing:.14em;
+  text-transform:uppercase; margin-bottom:.6rem;
+}
+footer.site a{display:block; color:var(--muted); text-decoration:none; padding:.18rem 0}
+footer.site a:hover{color:var(--accent)}
+@media (max-width:48rem){ footer.site .wrap{grid-template-columns:1fr 1fr} }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <button class="menu-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
+
+    <a class="wordmark" href="#">Maria Eleni</a>
+    <svg class="swash" viewBox="0 0 500 14" aria-hidden="true" preserveAspectRatio="none">
+      <path d="M2 11 C 120 2, 380 2, 498 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+
+    <svg class="bow" viewBox="0 0 200 80" aria-hidden="true">
+      <path d="M100 30 C 72 6, 32 8, 27 26 C 22 45, 66 45, 100 31"/>
+      <path d="M100 30 C 128 6, 168 8, 173 26 C 178 45, 134 45, 100 31"/>
+      <path d="M95 36 C 88 52, 78 62, 63 73 C 68 64, 70 55, 70 48"/>
+      <path d="M105 36 C 112 52, 122 62, 137 73 C 132 64, 130 55, 130 48"/>
+      <circle cx="100" cy="31" r="5.5"/>
+    </svg>
+
+    <nav class="primary">
+      <a href="#">Food</a>
+      <span class="div">|</span>
+      <a href="#">Wine</a>
+      <span class="div">|</span>
+      <a href="#">About</a>
+      <a class="tip" href="#">Tip jar</a>
+    </nav>
+    <p class="tagline">Vegan eater, wine drinker, and a menace to anyone who says "Mediterranean"</p>
+  </div>
+  <hr class="rule-full">
+</header>
+
+<main class="wrap">
+
+  <!-- ===== hero: cover photo of the latest post, per the sketch ===== -->
+  <section class="hero">
+    <a class="frame" href="#" aria-label="Read the latest post"><i></i><span class="overlay-chip">Reviews</span></a>
+    <div class="hero-meta">
+      <div>
+        <p class="stamp">3 August 2026 · Denver</p>
+        <h1><a href="#">Safta says it's Mediterranean. Safta is being polite.</a></h1>
+        <p class="summary">A gorgeous room, a menu that spans four countries and commits to none of them, and one bowl of gigantes that made the whole evening make sense. Also: why we should all stop saying "Mediterranean."</p>
+      </div>
+      <a class="chip" href="#">Reviews</a>
+    </div>
+  </section>
+
+  <!-- ===== tags cut across Food & Wine ===== -->
+  <nav class="tags-rail" aria-label="Browse by tag">
+    <a class="chip plain" href="#">Reviews</a>
+    <a class="chip plain" href="#">Recipes</a>
+    <a class="chip plain" href="#">Food Ed</a>
+    <a class="chip plain" href="#">Wine Ed</a>
+    <a class="chip plain" href="#">Interviews</a>
+    <a class="chip plain" href="#">Culture &amp; Opinion</a>
+    <a class="chip plain" href="#">Community</a>
+    <a class="chip plain" href="#">Values</a>
+  </nav>
+
+  <!-- ===== recent ===== -->
+  <div class="section-head">
+    <h2>Lately</h2>
+    <a href="#">Everything, oldest to newest →</a>
+  </div>
+
+  <article class="post">
+    <span class="thumb"><i style="background:linear-gradient(150deg,#c9dcea,#5f7f9e)"></i></span>
+    <div>
+      <p class="stamp">28 July 2026</p>
+      <h3><a href="#">An open letter to my fellow foodies</a></h3>
+      <p class="sum">Why this blog exists, what it will never do, and what "vote with your dollar" actually costs at the table.</p>
+    </div>
+    <a class="chip" href="#">Values</a>
+  </article>
+
+  <article class="post">
+    <span class="thumb"><i style="background:linear-gradient(150deg,#e7dcc6,#a98f63)"></i></span>
+    <div>
+      <p class="stamp">21 July 2026</p>
+      <h3><a href="#">Every sauce is four things in a trench coat</a></h3>
+      <p class="sum">Emulsion, reduction, purée, roux — and the plant-based swap for each that actually holds together.</p>
+    </div>
+    <a class="chip" href="#">Food Ed</a>
+  </article>
+
+  <article class="post">
+    <span class="thumb"><i style="background:linear-gradient(150deg,#d8c3d0,#7a5468)"></i></span>
+    <div>
+      <p class="stamp">14 July 2026</p>
+      <h3><a href="#">Orange wine is not a personality. Ask better questions.</a></h3>
+      <p class="sum">Skin contact, explained without the smugness — plus five bottles under $30 and who actually made them.</p>
+    </div>
+    <a class="chip" href="#">Wine Ed</a>
+  </article>
+
+  <article class="post">
+    <span class="thumb"><i style="background:linear-gradient(150deg,#cfe0d4,#5c7a63)"></i></span>
+    <div>
+      <p class="stamp">7 July 2026</p>
+      <h3><a href="#">"We'd love to, but our chef doesn't know what to make you"</a></h3>
+      <p class="sum">An open letter to restaurants on vegan labelling, menu legends, and the two-minute fix most kitchens are one conversation away from.</p>
+    </div>
+    <a class="chip" href="#">Culture &amp; Opinion</a>
+  </article>
+
+  <!-- ===== philosophy gets its own page, not an About paragraph ===== -->
+  <section class="philosophy">
+    <p class="rail-label">Start here</p>
+    <h2>An open letter to my fellow foodies</h2>
+    <p>There are no ads on this site and there never will be. Nothing here is sponsored, nothing is affiliate-linked, and every bill was paid in full by us. What that buys you is the only thing worth having from a review: the freedom to say a place is not good.</p>
+    <a class="read-on" href="#">Read the letter →</a>
+  </section>
+
+  <!-- ===== most popular ===== -->
+  <section class="popular">
+    <p class="rail-label">Most-read this year</p>
+    <ol>
+      <li><a href="#">Stop saying "Mediterranean"</a><span>Culture &amp; Opinion</span></li>
+      <li><a href="#">Every restaurant that lied to me about the butter</a><span>Reviews</span></li>
+      <li><a href="#">Nine bottles under $30 and who actually made them</a><span>Wine Ed</span></li>
+      <li><a href="#">How to host a mixed table without cooking twice</a><span>Food Ed</span></li>
+    </ol>
+  </section>
+
+  <!-- ===== the review rubric, Maria's axes ===== -->
+  <div class="section-head">
+    <h2>How a review looks</h2>
+    <a href="#">The full rubric →</a>
+  </div>
+
+  <section class="rubric">
+    <header>
+      <div>
+        <h3>Safta</h3>
+        <p class="where">3330 Brighton Blvd, Denver · $$$ · <a href="#">Eastern Mediterranean</a> · <a href="#">Vegan-friendly</a></p>
+        <p class="badges"><span class="badge">Independently owned</span><span class="badge">Vegan menu, printed</span><span class="badge badge--award">2026 Fair Kitchen Award</span></p>
+      </div>
+      <div class="overall">
+        <b>7.4</b>
+        <span>Composite · <a href="#">how we score</a></span>
+      </div>
+    </header>
+
+    <ul class="axes">
+      <li><span class="label">Food quality</span><span class="bar"><i style="width:88%"></i></span><span class="val">8.8</span></li>
+      <li><span class="label">Vegan-friendliness</span><span class="bar"><i style="width:65%"></i></span><span class="val">6.5</span></li>
+      <li><span class="label">Service</span><span class="bar"><i style="width:82%"></i></span><span class="val">8.2</span></li>
+      <li><span class="label">Ambiance</span><span class="bar"><i style="width:90%"></i></span><span class="val">9.0</span></li>
+      <li><span class="label">Value</span><span class="bar"><i style="width:60%"></i></span><span class="val">6.0</span></li>
+      <li><span class="label">Ownership &amp; ethics</span><span class="bar"><i style="width:70%"></i></span><span class="val">7.0</span></li>
+      <li><span class="label">Supply transparency</span><span class="bar"><i style="width:45%"></i></span><span class="val">4.5</span></li>
+    </ul>
+
+    <div class="disclosures">
+      <p><b>How we ate</b>Two visits, unannounced. We paid both bills in full. No comped courses, no press dinner, no affiliate links anywhere on this site.</p>
+      <p><b>Ownership</b>Independently owned, single location. No private equity stake on record as of July 2026. <a href="#">How we check this →</a></p>
+      <p><b>Supply chain</b>Produce sourcing named on the menu; protein and oil sourcing not disclosed on request. Scored down accordingly.</p>
+      <p><b>Interview</b>Chef declined an interview for this review. The standing invitation remains open. <a href="#">Reader questions for the next one →</a></p>
+    </div>
+
+    <div class="revisits">
+      <h4>Living updates — this review changes when the restaurant does</h4>
+      <div class="revisit">
+        <time datetime="2026-07-28">28 July 2026 · third visit</time>
+        <p>Vegan legend now printed on the menu instead of recited by the server. Vegan-friendliness 5.5 → 6.5.</p>
+      </div>
+      <div class="revisit">
+        <time datetime="2026-03-11">11 March 2026 · second visit</time>
+        <p>New pastry chef. The dessert course went from an afterthought to the reason to stay. Food 8.2 → 8.8.</p>
+      </div>
+      <div class="revisit">
+        <time datetime="2025-11-02">2 November 2025 · first visit</time>
+        <p>Original review published. Composite 6.9.</p>
+      </div>
+    </div>
+
+    <div class="poll">
+      <h4>Has the gigantes stayed this good?</h4>
+      <ul>
+        <li><span>Yes — same bowl, every time</span><span class="pct">61%</span><span class="pbar"><i style="width:61%"></i></span></li>
+        <li><span>It's slipped since last year</span><span class="pct">24%</span><span class="pbar"><i style="width:24%"></i></span></li>
+        <li><span>Haven't had it</span><span class="pct">15%</span><span class="pbar"><i style="width:15%"></i></span></li>
+      </ul>
+      <form><button type="button">Add your answer</button></form>
+    </div>
+  </section>
+
+  <!-- ===== and the article itself ===== -->
+  <div class="section-head">
+    <h2>Inside a post</h2>
+    <a href="#">Read the whole thing →</a>
+  </div>
+  <article class="article">
+    <p class="lede">I want to be fair to Safta, because the room is genuinely beautiful and because I have now eaten there three times and paid three times, which is more than most people who have opinions about it.</p>
+    <p>But I have to start with the menu, because the menu is where the problem lives. It says "Mediterranean." Mediterranean is twenty-two countries and roughly four thousand years, and using it as a cuisine descriptor is a way of not saying "Israeli," or "Lebanese," or "Greek," which are the three things this kitchen is actually cooking, sometimes on the same plate.</p>
+    <blockquote>Naming the cuisine is not a political act. Refusing to name it is.</blockquote>
+    <p>The gigantes arrive in a shallow bowl, the beans slumped and glossy, with enough dill that you smell it before it lands. This is the best thing on the menu and it is nine dollars, which tells you the kitchen knows exactly what it is good at even when the menu copy will not say so out loud.</p>
+  </article>
+
+  <!-- ===== tip jar ===== -->
+  <div class="section-head">
+    <h2>Tip jar</h2>
+    <a href="#">Why there are no ads here →</a>
+  </div>
+  <section class="tipjar">
+    <div class="tiers">
+      <a class="tier" href="#"><b>$2</b><span>Buy me a coffee — Europe</span></a>
+      <a class="tier" href="#"><b>$10</b><span>Buy me a coffee — America</span></a>
+      <a class="tier" href="#"><b>$15</b><span>Buy me lunch</span></a>
+      <a class="tier" href="#"><b>$40</b><span>Buy me dinner</span></a>
+      <a class="tier" href="#"><b>$500</b><span>Buy me a really nice dinner</span></a>
+      <a class="tier" href="#"><b>$2,000</b><span>Buy me a vacation</span></a>
+      <a class="tier custom" href="#"><b>Pitch in for culinary school</b><span>Any amount → Le Cordon Bleu plant-based programs</span></a>
+    </div>
+  </section>
+
+  <!-- ===== pledge + inline newsletter (never a popup) ===== -->
+  <section class="pledge">
+    <p>No ads. No sponsored posts. No affiliate links. No pop-ups, ever. If something here was free, we say so at the top of the page.</p>
+    <p class="small">Written by Maria Eleni, with Connor. Every restaurant bill paid in full, every time.</p>
+    <form class="signup">
+      <label for="em" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Email address</label>
+      <input id="em" type="email" placeholder="your@email.com">
+      <button type="button">Send me the good ones</button>
+    </form>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div>
+      <svg class="bow" viewBox="0 0 200 80" aria-hidden="true">
+        <path d="M100 30 C 72 6, 32 8, 27 26 C 22 45, 66 45, 100 31"/>
+        <path d="M100 30 C 128 6, 168 8, 173 26 C 178 45, 134 45, 100 31"/>
+        <path d="M95 36 C 88 52, 78 62, 63 73 C 68 64, 70 55, 70 48"/>
+        <path d="M105 36 C 112 52, 122 62, 137 73 C 132 64, 130 55, 130 48"/>
+        <circle cx="100" cy="31" r="5.5"/>
+      </svg>
+      Food and wine, with a vegan lens and a receipt for everything.
+    </div>
+    <div>
+      <b>Read</b>
+      <a href="#">Food</a><a href="#">Wine</a><a href="#">All reviews</a><a href="#">Start here</a>
+    </div>
+    <div>
+      <b>Values</b>
+      <a href="#">Our rubric</a><a href="#">Disclosure policy</a><a href="#">Report a labor violation</a><a href="#">Awards</a>
+    </div>
+    <div>
+      <b>Elsewhere</b>
+      <a href="#">The map</a><a href="#">Newsletter</a><a href="#">RSS</a><a href="#">Tip jar</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
