@@ -33,8 +33,12 @@ if (review.bestOccasion) facts.push(['Best occasion', review.bestOccasion]);
         <span class="score">
           {review.rating} <span class="scale">/ {scaleMax}</span>
         </span>
-        <div class="bar" role="img" aria-label={`Rated ${review.rating} out of ${scaleMax}`}>
-          <div class="fill" style={`width: ${ratingPercent}%`} />
+        <div
+          class="bar"
+          role="img"
+          aria-label={`Rated ${String(review.rating)} out of ${String(scaleMax)}`}
+        >
+          <div class="fill" style={`width: ${String(ratingPercent)}%`} />
         </div>
       </div>
     )

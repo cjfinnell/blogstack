@@ -94,10 +94,10 @@ function postProcess(html: string): string {
 
 export function renderLexicalToHtml(content: unknown): string {
   if (!content) return '';
-  let doc: LexicalDoc | null;
+  let parsed: unknown;
   if (typeof content === 'string') {
     try {
-      doc = JSON.parse(content) as LexicalDoc;
+      parsed = JSON.parse(content);
     } catch {
       // The editor saves serialized HTML, not a Lexical JSON tree, and some
       // rows predate the editor entirely — take the markup as the rendered
@@ -105,8 +105,14 @@ export function renderLexicalToHtml(content: unknown): string {
       return postProcess(content);
     }
   } else {
-    doc = content as LexicalDoc;
+    parsed = content;
   }
-  if (!doc?.root) return '';
+  // `content` (and JSON.parse's result) come from outside this module with
+  // no schema guarantee, so root's presence has to be checked at runtime
+  // rather than assumed via a type cast.
+  if (typeof parsed !== 'object' || parsed === null || !('root' in parsed) || !parsed.root) {
+    return '';
+  }
+  const doc = parsed as LexicalDoc;
   return postProcess(renderNode(doc.root));
 }

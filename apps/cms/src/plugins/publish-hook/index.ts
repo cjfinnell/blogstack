@@ -18,9 +18,12 @@
 import { definePlugin } from '@sonicjs-cms/core';
 
 interface GithubDispatchConfig {
-  repo?: string;
-  token?: string;
-  siteId?: string;
+  // Explicit `| undefined` (not just `?`) because onBoot assigns
+  // `env?.FOO` verbatim — env vars that are genuinely unset in local dev
+  // (env.dev) — rather than only ever omitting the key.
+  repo?: string | undefined;
+  token?: string | undefined;
+  siteId?: string | undefined;
 }
 
 const github: GithubDispatchConfig = {};
@@ -60,7 +63,7 @@ export const publishHookPlugin = definePlugin({
           event_type: 'cms-publish',
           client_payload: { site: github.siteId },
         }),
-      }).catch((error) => {
+      }).catch((error: unknown) => {
         // Non-fatal: a missed rebuild trigger is recoverable with a manual
         // `npm run release`. It must never surface as a save error.
         console.warn('[publish-hook] GitHub dispatch failed:', error);

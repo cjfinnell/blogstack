@@ -12,7 +12,7 @@ const eventName = process.env.GITHUB_EVENT_NAME;
 const allSites = JSON.parse(process.env.ALL_SITES ?? '[]') as string[];
 
 function writeOutput(sites: string[], cmsChanged: boolean) {
-  const lines = [`sites=${JSON.stringify(sites)}`, `cms_changed=${cmsChanged}`];
+  const lines = [`sites=${JSON.stringify(sites)}`, `cms_changed=${String(cmsChanged)}`];
   const outputPath = process.env.GITHUB_OUTPUT;
   for (const line of lines) {
     if (outputPath) appendFileSync(outputPath, `${line}\n`);
@@ -22,7 +22,7 @@ function writeOutput(sites: string[], cmsChanged: boolean) {
 
 function validated(site: string | undefined): string[] {
   if (!site || !allSites.includes(site)) {
-    throw new Error(`Rejected site "${site}" — not in vars.SITES (${allSites.join(', ')})`);
+    throw new Error(`Rejected site "${String(site)}" — not in vars.SITES (${allSites.join(', ')})`);
   }
   return [site];
 }
@@ -51,7 +51,9 @@ function main() {
     case 'push': {
       const base = process.env.BASE_SHA;
       const head = process.env.HEAD_SHA;
-      const diff = execSync(`git diff --name-only ${base} ${head}`, { encoding: 'utf8' });
+      const diff = execSync(`git diff --name-only ${String(base)} ${String(head)}`, {
+        encoding: 'utf8',
+      });
       const changed = diff.split('\n').filter(Boolean);
 
       const cmsChanged = isCmsChanged(changed);
@@ -78,13 +80,15 @@ function main() {
       // `cms_changed` from this path; `sites` is unused.
       const base = process.env.PR_BASE_SHA;
       const head = process.env.PR_HEAD_SHA;
-      const diff = execSync(`git diff --name-only ${base}...${head}`, { encoding: 'utf8' });
+      const diff = execSync(`git diff --name-only ${String(base)}...${String(head)}`, {
+        encoding: 'utf8',
+      });
       const changed = diff.split('\n').filter(Boolean);
       writeOutput([], isCmsChanged(changed));
       break;
     }
     default:
-      throw new Error(`Unhandled event: ${eventName}`);
+      throw new Error(`Unhandled event: ${String(eventName)}`);
   }
 }
 

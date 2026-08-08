@@ -8,13 +8,13 @@ import { startFixtureServer } from './fixtures/serve-fixture-cms.ts';
 const PORT = 8788;
 
 const server = await startFixtureServer(PORT);
-console.log(`fixture CMS listening on :${PORT}`);
+console.log(`fixture CMS listening on :${String(PORT)}`);
 
 const child = spawn('npm', ['run', 'build', '--workspace', 'apps/web-dev'], {
   stdio: 'inherit',
   env: {
     ...process.env,
-    CMS_URL: `http://localhost:${PORT}`,
+    CMS_URL: `http://localhost:${String(PORT)}`,
     SITE_URL: 'http://localhost:4321',
   },
 });
