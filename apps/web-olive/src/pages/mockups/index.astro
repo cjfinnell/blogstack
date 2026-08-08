@@ -2,57 +2,35 @@
 // Deliberately does not use BaseLayout or import `blog`: this shell must
 // not inherit the theme the mockups are proposing to replace, and it must
 // build even if the CMS is unreachable.
-const concepts = [
+//
+// Round 2. Round 1 offered seven competing concepts; Maria picked D
+// outright, so these three are not alternatives to each other — they are one
+// design system shown across the three page types. See notes/round-1-feedback.md.
+const pages = [
   {
-    key: 'a',
-    file: 'a-table.html',
-    name: "Table d'Olive",
-    blurb:
-      'Warm print revival; asymmetric grid, oversized rating in the margin, archive resurfacing.',
+    key: '1',
+    file: '1-home.html',
+    name: 'Home',
+    blurb: 'Concept D refined: whimsier wordmark, fuller bow, her four colours, search promoted.',
   },
   {
-    key: 'b',
-    file: 'b-brine-ink.html',
-    name: 'Brine & Ink',
-    blurb: 'Editorial brutalism; the archive as a ruled numbered ledger with a glyph vocabulary.',
+    key: '2',
+    file: '2-map.html',
+    name: 'Map & lists',
+    blurb: "Concept F's map and saved lists in D's skin, with B's rankings ledger under the map.",
   },
   {
-    key: 'c',
-    file: 'c-service.html',
-    name: 'Service',
-    blurb: 'Dark, dinner-lit, all-serif; single column, full-bleed photography, standing columns.',
-  },
-  {
-    key: 'd',
-    file: 'd-maria.html',
-    name: 'Maria Eleni',
-    blurb: 'Her sketch, built: script wordmark, bow, ivory and navy, seven-axis ethics rubric.',
-  },
-  {
-    key: 'e',
-    file: 'e-unscored.html',
-    name: 'Unscored',
-    blurb: 'No numbers anywhere; cooking and room judged separately, in words.',
-  },
-  {
-    key: 'f',
-    file: 'f-map.html',
-    name: 'The Map',
-    blurb:
-      'The index is a map of every place she has eaten, with a keyboard-navigable list beside it.',
-  },
-  {
-    key: 'g',
-    file: 'g-plain.html',
-    name: 'Plain',
-    blurb:
-      'One typeface, one loud accent, two nav links; writing and photographs carry everything.',
+    key: '3',
+    file: '3-review.html',
+    name: 'A review',
+    blurb: "Concept A's article structure with D's seven-axis rubric and C's rubric explainer.",
   },
 ];
 
 const notes = [
+  { href: '/mockups/notes/round-1-feedback.md', label: 'Round 1 feedback → this' },
   { href: '/mockups/notes/source-essences.md', label: 'Source essences' },
-  { href: '/mockups/notes/mockup-audit.md', label: 'Mockup audit' },
+  { href: '/mockups/notes/mockup-audit.md', label: 'Round 1 audit' },
   { href: '/mockups/notes/maria-inspo-notes.md', label: "Maria's inspiration notes" },
   { href: '/mockups/notes/olive-design-proposal.md', label: 'Design proposal' },
 ];
@@ -102,7 +80,13 @@ const notes = [
         text-transform: uppercase;
         letter-spacing: 0.06em;
         color: var(--shell-muted);
+        margin: 0 1rem 0.25rem;
+      }
+      .sidebar .standfirst {
         margin: 0 1rem 0.75rem;
+        font-size: 0.78rem;
+        line-height: 1.4;
+        color: var(--shell-muted);
       }
       .sidebar ul {
         list-style: none;
@@ -196,7 +180,8 @@ const notes = [
           white-space: nowrap;
           padding: 0.75rem;
         }
-        .sidebar h1 {
+        .sidebar h1,
+        .sidebar .standfirst {
           display: none;
         }
         .sidebar ul {
@@ -229,23 +214,27 @@ const notes = [
   </head>
   <body>
     <div class="layout">
-      <nav class="sidebar" aria-label="Mockup concepts">
-        <h1>Olive concepts</h1>
+      <nav class="sidebar" aria-label="Mockup pages">
+        <h1>Olive — round 2</h1>
+        <p class="standfirst">
+          One direction, three pages. These are not alternatives to each other; they share a
+          palette, a wordmark and a masthead on purpose.
+        </p>
         <ul>
           {
-            concepts.map((c) => (
+            pages.map((p) => (
               <li>
                 <a
-                  href={`/mockups/${c.file}`}
-                  data-key={c.key}
-                  data-file={c.file}
-                  data-name={c.name}
+                  href={`/mockups/${p.file}`}
+                  data-key={p.key}
+                  data-file={p.file}
+                  data-name={p.name}
                 >
                   <>
-                    <span class="key">{c.key}</span>
-                    <span class="name">{c.name}</span>
+                    <span class="key">{p.key}</span>
+                    <span class="name">{p.name}</span>
                   </>
-                  <span class="blurb">{c.blurb}</span>
+                  <span class="blurb">{p.blurb}</span>
                 </a>
               </li>
             ))
@@ -268,20 +257,20 @@ const notes = [
       </nav>
       <main class="pane">
         <div class="pane-header">
-          <a id="standalone-link" href="/mockups/a-table.html" target="_blank" rel="noopener"
+          <a id="standalone-link" href="/mockups/1-home.html" target="_blank" rel="noopener"
             >Open standalone ↗</a
           >
           <span id="viewport-readout">— × —</span>
         </div>
-        <iframe id="mockup-frame" title="Olive mockup" src="/mockups/a-table.html"></iframe>
+        <iframe id="mockup-frame" title="Olive mockup" src="/mockups/1-home.html"></iframe>
       </main>
     </div>
     <script>
-      type Concept = { key: string; file: string; name: string; el: HTMLAnchorElement };
+      type Page = { key: string; file: string; name: string; el: HTMLAnchorElement };
 
-      const concepts: Concept[] = [];
+      const pages: Page[] = [];
       document.querySelectorAll<HTMLAnchorElement>('.sidebar a[data-key]').forEach((a) => {
-        concepts.push({
+        pages.push({
           key: a.dataset.key ?? '',
           file: a.dataset.file ?? '',
           name: a.dataset.name ?? '',
@@ -294,17 +283,17 @@ const notes = [
       const readout = document.getElementById('viewport-readout') as HTMLSpanElement;
 
       function selectKey(key: string) {
-        const match = concepts.find((c) => c.key === key) || concepts[0];
+        const match = pages.find((p) => p.key === key) || pages[0];
         if (!match) return;
         frame.src = `/mockups/${match.file}`;
         frame.title = match.name;
         standaloneLink.href = `/mockups/${match.file}`;
-        concepts.forEach((c) => c.el.classList.toggle('active', c.key === match.key));
+        pages.forEach((p) => p.el.classList.toggle('active', p.key === match.key));
       }
 
       function keyFromHash() {
         const h = location.hash.replace('#', '');
-        return h || 'a';
+        return h || '1';
       }
 
       function updateReadout() {
@@ -314,18 +303,18 @@ const notes = [
       // Rewrite plain standalone links into hash links now that JS is confirmed
       // running; without this script, the anchors above still work as direct
       // links to each standalone mockup.
-      concepts.forEach((c) => {
-        c.el.setAttribute('href', `#${c.key}`);
-        c.el.addEventListener('click', (e) => {
+      pages.forEach((p) => {
+        p.el.setAttribute('href', `#${p.key}`);
+        p.el.addEventListener('click', (e) => {
           e.preventDefault();
-          location.hash = c.key;
+          location.hash = p.key;
         });
       });
 
       window.addEventListener('hashchange', () => selectKey(keyFromHash()));
       window.addEventListener('resize', updateReadout);
 
-      if (!location.hash) location.hash = 'a';
+      if (!location.hash) location.hash = '1';
       selectKey(keyFromHash());
       updateReadout();
     </script>

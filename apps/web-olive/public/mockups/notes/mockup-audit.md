@@ -1,5 +1,11 @@
 # Mockup audit — differentiation and source coverage
 
+> **Round 1, superseded.** This audited the original A–G concepts, which no
+> longer exist in the gallery. It is kept because the source coverage matrix
+> below still records which reference site each surviving pattern came from.
+> For what Maria actually said and what shipped as a result, see
+> `round-1-feedback.md`.
+
 Audited all four mockups against every reference gathered this session. Two problems found and fixed.
 
 ---

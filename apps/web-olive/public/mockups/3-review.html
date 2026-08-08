@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maria Eleni — 3. A review page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Karla:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ROUND 2 — page 3 of 3: THE REVIEW PAGE
+   Concept A's article structure + concept D's rubric, in D's skin.
+
+   Maria on A: "I really like some things about this, especially for the
+   main article. I like the title and subtitle. I like the organisation of
+   the numbers. It's good to have a short version, and the pull quotes,
+   and then pictures of the food along with the description and the map.
+   I don't love the colours. I don't love the font."
+
+   So the structure is kept verbatim and the colours and type are D's:
+     - title decoupled from the restaurant name (A)
+     - the score, broken out in the margin (A)
+     - "The short version" before the essay (A)
+     - pull quotes (A and B — she asked for these twice)
+     - "What to order": dish photo + description (A)
+     - address block with the map (A)
+     - the seven-axis rubric with bars, living updates, disclosures (D)
+     - "how we score" explainer, so the standing rubric is legible (C)
+
+   Zero script.
+   ============================================================ */
+:root{
+  color-scheme: light dark;
+  --cream:      light-dark(#FBF9F4, #0E1826);
+  --baby:       light-dark(#A8C6DE, #7FA9CC);
+  --navy:       light-dark(#16263F, #EDF2F7);
+  --ink:        light-dark(#33383F, #DCE3EB);
+  --surface:    light-dark(#F1F5F9, #16263F);
+  --blue-wash:  light-dark(#DCE9F2, #1B2E4A);
+  --muted:      light-dark(#6A7280, #A7B6C9);
+  --accent:     light-dark(#2E5C8A, #9CC4E4);
+  --accent-hover: light-dark(#1D3F63, #C2DBEF);
+  --rule:       light-dark(#E2E6EC, #23364F);
+  --rule-strong:light-dark(#8C99A9, #5C7A96);
+
+  --script:"Parisienne", "Snell Roundhand", cursive;
+  --display:"Cormorant Garamond", Georgia, serif;
+  --body:"Karla", ui-sans-serif, system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--cream); color:var(--ink);
+  font-family:var(--body); font-size:1.0625rem; line-height:1.65;
+}
+h1,h2,h3,h4,blockquote{color:var(--navy); text-wrap:balance}
+p{text-wrap:pretty}
+a{color:var(--accent); text-underline-offset:.18em}
+a:hover{color:var(--accent-hover)}
+.wrap{max-width:64rem; margin:0 auto; padding:0 1.5rem}
+
+/* ---------- masthead: same furniture, compacted for an article ---------- */
+.masthead{padding:1.75rem 0 0; position:relative}
+.menu-btn{
+  position:absolute; top:1.5rem; right:1.5rem; background:none; border:none;
+  cursor:pointer; padding:.5rem; color:var(--navy); line-height:0;
+}
+.menu-btn span{display:block; width:22px; height:1.5px; background:currentColor; margin:4px 0}
+.wordmark{
+  display:block; text-align:center; font-family:var(--script);
+  font-size:clamp(2.5rem,6vw,3.75rem); line-height:1.05; color:var(--navy);
+  text-decoration:none; padding-bottom:.08em;
+}
+.bow{display:block; margin:.2rem auto .9rem; width:112px; height:48px; color:var(--baby)}
+.bow path, .bow ellipse{fill:currentColor}
+.bow .knot{fill:color-mix(in oklab, var(--navy) 22%, var(--baby))}
+nav.primary{display:flex; justify-content:center; align-items:center; flex-wrap:wrap; padding-bottom:1rem}
+nav.primary a{
+  font-size:.8125rem; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--navy); text-decoration:none; padding:.35rem 1.15rem; font-weight:500;
+}
+nav.primary a:hover, nav.primary a.on{color:var(--accent)}
+nav.primary a.on{border-bottom:1.5px solid var(--accent)}
+nav.primary .div{color:var(--baby); user-select:none}
+nav.primary a.tip{
+  margin-left:.75rem; letter-spacing:.14em; color:var(--muted); font-size:.6875rem;
+  border:1px solid var(--rule-strong); border-radius:999px; padding:.3rem .8rem;
+}
+.search{max-width:30rem; margin:0 auto 1.25rem}
+.search form{
+  display:flex; align-items:center; gap:.5rem;
+  border:1.5px solid var(--navy); border-radius:999px; background:var(--cream);
+  padding:.1rem .3rem .1rem .9rem;
+}
+.search form:focus-within{border-color:var(--accent); box-shadow:0 0 0 3px var(--blue-wash)}
+.search svg{width:16px; height:16px; color:var(--muted); flex:none}
+.search input{
+  flex:1; min-width:0; border:none; background:none; font-family:var(--body);
+  font-size:.9375rem; color:var(--ink); padding:.6rem 0;
+}
+.search input::placeholder{color:var(--muted)}
+.search input:focus{outline:none}
+.search button{
+  font-family:var(--body); font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase;
+  padding:.55rem 1.1rem; border:none; background:var(--navy); color:var(--cream);
+  cursor:pointer; border-radius:999px; flex:none;
+}
+.search button:hover{background:var(--accent)}
+.rule-full{border:none; border-top:1px solid var(--navy); margin:0}
+
+/* ---------- the asymmetric stage: article column + left margin ---------- */
+.stage{
+  max-width:74rem; margin:0 auto; padding:0 1.5rem;
+  display:grid; grid-template-columns:14rem minmax(0,1fr); gap:0 3rem;
+}
+.stage > *{grid-column:2}
+.stage > .marginalia{grid-column:1}
+.stage > .wide{grid-column:1 / -1}
+@media (max-width:64rem){
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .stage > *, .stage > .marginalia, .stage > .wide{grid-column:1}
+}
+
+/* ---------- identity card, above the hero (title ≠ restaurant name) ---------- */
+.identity{padding:2.5rem 0 1.5rem}
+.kicker{
+  font-size:.6875rem; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--accent); margin:0 0 .75rem; font-weight:600;
+}
+.identity h1{
+  font-family:var(--display); font-weight:400; font-size:clamp(2.25rem,5.5vw,3.5rem);
+  line-height:1.06; margin:0 0 .75rem;
+}
+.restaurant-name{
+  font-family:var(--display); font-size:1.5rem; margin:0 0 1rem; color:var(--navy);
+}
+.restaurant-name .light{color:var(--muted); font-size:1.125rem}
+.facts{
+  display:flex; flex-wrap:wrap; gap:.5rem 0; list-style:none; margin:0 0 1rem; padding:0;
+  font-size:.875rem; color:var(--muted);
+}
+.facts li:not(:last-child)::after{content:"·"; color:var(--baby); padding:0 .6rem}
+.facts a{color:var(--accent); text-decoration:none}
+.facts a:hover{text-decoration:underline}
+.byline{font-size:.875rem; color:var(--muted); margin:0 0 1.25rem}
+.byline b{color:var(--navy)}
+.actions{display:flex; gap:.5rem; flex-wrap:wrap}
+.btn{
+  font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase; text-decoration:none;
+  border:1px solid var(--rule-strong); color:var(--navy); padding:.5rem 1rem; border-radius:999px;
+}
+.btn:hover{border-color:var(--accent); color:var(--accent)}
+.btn--primary{background:var(--navy); border-color:var(--navy); color:var(--cream)}
+.btn--primary:hover{background:var(--accent); border-color:var(--accent); color:var(--cream)}
+
+/* ---------- the score, broken out in the margin ---------- */
+.marginalia{padding-top:2.5rem}
+.score-block{position:sticky; top:1.5rem; align-self:start}
+.score-num{
+  display:block; font-family:var(--display); font-weight:500; font-size:5rem;
+  line-height:.9; color:var(--accent);
+}
+.score-den{
+  display:block; font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); margin:.35rem 0 1.25rem;
+}
+.note{margin:0 0 .8rem; font-size:.875rem; color:var(--muted); line-height:1.45}
+.note b{
+  display:block; color:var(--navy); font-size:.6875rem; letter-spacing:.12em;
+  text-transform:uppercase; margin-bottom:.1rem;
+}
+@media (max-width:64rem){
+  .marginalia{padding-top:0}
+  .score-block{position:static; display:grid; grid-template-columns:auto 1fr;
+    gap:0 1.5rem; align-items:start; border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule); padding:1.25rem 0; margin-bottom:1.5rem}
+  .score-num{grid-row:1}
+  .score-den{grid-row:2; margin-bottom:0}
+  .note{grid-column:2}
+}
+
+/* ---------- hero photograph ---------- */
+figure.hero{margin:0 0 2rem}
+figure.hero .frame{
+  display:block; border:1px solid var(--rule); background:var(--surface); padding:.5rem;
+}
+figure.hero .frame i{
+  display:block; width:100%; aspect-ratio:3/2;
+  background:
+    radial-gradient(55% 65% at 34% 40%, #cfe2ee 0%, #9dbdd6 40%, transparent 72%),
+    radial-gradient(45% 55% at 72% 64%, #f0e4cf 0%, #d8c19b 45%, transparent 78%),
+    linear-gradient(155deg, #b9d2e4 0%, #7e9bb6 55%, #43607e 100%);
+}
+figure.hero figcaption{
+  display:flex; justify-content:space-between; gap:1.5rem; flex-wrap:wrap;
+  margin-top:.6rem; font-size:.8125rem; color:var(--muted);
+}
+figure.hero .credit{white-space:nowrap}
+
+/* ---------- the short version ---------- */
+.verdict{
+  border:1px solid var(--baby); background:var(--blue-wash);
+  padding:1.5rem 1.75rem; margin:0 0 2.25rem;
+}
+.verdict h2{font-family:var(--display); font-weight:500; font-size:1.5rem; margin:0 0 .75rem}
+.verdict ul{margin:0; padding:0 0 0 1.1rem}
+.verdict li{margin:0 0 .5rem; color:var(--ink)}
+.verdict li:last-child{margin-bottom:0}
+
+/* ---------- prose ---------- */
+.prose{max-width:64ch}
+.prose p{margin:0 0 1.35em}
+.prose .lede{font-size:1.1875rem; line-height:1.6}
+.prose .lede::first-letter{
+  font-family:var(--display); float:left; font-size:3.6rem; line-height:.85;
+  padding:.06em .1em 0 0; color:var(--accent);
+}
+blockquote.pull{
+  margin:2.25rem 0; padding:1.25rem 0 1.25rem 1.5rem; border-left:3px solid var(--baby);
+  font-family:var(--display); font-size:1.75rem; line-height:1.28; font-style:italic;
+  max-width:38ch;
+}
+
+/* ---------- section labels ---------- */
+.section-label{
+  font-family:var(--display); font-weight:400; font-size:2rem; margin:3rem 0 1.25rem;
+}
+
+/* ---------- what to order: photo + description ---------- */
+.dish{
+  display:grid; grid-template-columns:11rem 1fr; gap:1.5rem; align-items:start;
+  padding:1.25rem 0; border-bottom:1px solid var(--rule);
+}
+.dish .thumb{border:1px solid var(--rule); background:var(--surface); padding:.375rem}
+.dish .thumb i{display:block; width:100%; aspect-ratio:1/1}
+.dish h3{font-family:var(--display); font-weight:500; font-size:1.375rem; margin:0 0 .35rem}
+.dish p{margin:0; color:var(--muted); font-size:.9375rem}
+.must, .skip{
+  font-family:var(--body); font-size:.625rem; letter-spacing:.14em; text-transform:uppercase;
+  border-radius:999px; padding:.2rem .6rem; margin-left:.5rem; vertical-align:.18em;
+}
+.must{background:var(--navy); color:var(--cream)}
+.skip{border:1px solid var(--rule-strong); color:var(--muted)}
+@media (max-width:44rem){ .dish{grid-template-columns:1fr} }
+
+/* ---------- the rubric ---------- */
+.rubric{border:1px solid var(--navy); background:var(--surface); padding:1.75rem; margin:1rem 0 0}
+.rubric > header{
+  display:flex; justify-content:space-between; align-items:baseline; gap:1rem;
+  flex-wrap:wrap; border-bottom:1px solid var(--rule); padding-bottom:1rem; margin-bottom:1.25rem;
+}
+.rubric h3{font-family:var(--display); font-weight:500; font-size:1.75rem; margin:0}
+.rubric .where{font-size:.8125rem; color:var(--muted); margin:.25rem 0 0}
+.rubric .overall{text-align:right}
+.rubric .overall b{
+  display:block; font-family:var(--display); font-size:3rem; line-height:1;
+  color:var(--accent); font-weight:500;
+}
+.rubric .overall span{font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.badges{display:flex; flex-wrap:wrap; gap:.4rem; margin:.75rem 0 0}
+.badge{
+  font-size:.625rem; letter-spacing:.12em; text-transform:uppercase;
+  border:1px solid var(--rule-strong); color:var(--muted); padding:.25rem .6rem; border-radius:999px;
+}
+.badge--award{border-color:var(--accent); color:var(--accent); font-weight:600}
+.axes{margin:0; padding:0; list-style:none; display:grid; gap:.9rem}
+.axes li{display:grid; grid-template-columns:13rem 1fr 3rem; gap:1rem; align-items:center}
+.axes .label{font-size:.8125rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.axes .bar{height:6px; background:var(--rule); border-radius:999px; overflow:hidden}
+.axes .bar i{display:block; height:100%; background:var(--accent)}
+.axes .val{
+  text-align:right; font-family:var(--display); font-size:1.125rem; font-weight:600;
+  color:var(--navy); font-variant-numeric:tabular-nums;
+}
+.axes .val.na{font-family:var(--body); font-size:.6875rem; letter-spacing:.1em;
+  color:var(--muted); text-transform:uppercase}
+@media (max-width:48rem){ .axes li{grid-template-columns:1fr 3rem} .axes .bar{grid-column:1 / -1; order:3} }
+
+/* how the rubric is explained — the "standing" part of the standing columns */
+.rubric-explainer{
+  margin:1.5rem 0 0; padding:1.25rem; border:1px dashed var(--baby); background:var(--cream);
+  font-size:.9375rem; color:var(--muted);
+}
+.rubric-explainer b{
+  display:block; color:var(--navy); font-size:.6875rem; letter-spacing:.12em;
+  text-transform:uppercase; margin-bottom:.35rem;
+}
+
+.disclosures{
+  margin:1.5rem 0 0; padding:1rem 0 0; border-top:1px solid var(--rule);
+  display:grid; gap:.6rem; font-size:.875rem; color:var(--muted);
+}
+.disclosures b{
+  color:var(--navy); font-size:.6875rem; letter-spacing:.12em; text-transform:uppercase;
+  display:block; margin-bottom:.15rem; font-weight:600;
+}
+
+.revisits{margin:2rem 0 0; border-left:2px solid var(--baby); padding-left:1.25rem}
+.revisits h4{
+  font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  margin:0 0 .75rem; font-weight:600;
+}
+.revisit{padding:.6rem 0; border-bottom:1px solid var(--rule)}
+.revisit:last-child{border-bottom:none}
+.revisit time{
+  font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent);
+  display:block; margin-bottom:.15rem;
+}
+.revisit p{margin:0; font-size:.9375rem; color:var(--muted)}
+
+/* ---------- address + map ---------- */
+.location{display:grid; grid-template-columns:1.1fr 1fr; gap:2rem; align-items:start; margin-top:1rem}
+.location .map{
+  position:relative; aspect-ratio:4/3; border:1px solid var(--rule);
+  background:
+    linear-gradient(0deg, var(--rule) 1px, transparent 1px) 0 0/100% 2rem,
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px) 0 0/2rem 100%,
+    var(--surface);
+  overflow:hidden;
+}
+.location .map .water{
+  position:absolute; inset:auto -10% -14% -10%; height:32%;
+  background:color-mix(in oklab, var(--baby) 55%, var(--surface)); transform:rotate(-4deg);
+}
+.location .map .pin{
+  position:absolute; left:52%; top:46%; transform:translate(-50%,-100%);
+  width:1.9rem; height:1.9rem; border-radius:50% 50% 50% 2px; background:var(--navy);
+  color:var(--cream); display:grid; place-items:center; font-family:var(--display);
+  font-weight:600; font-size:.8125rem; text-decoration:none;
+  box-shadow:0 0 0 3px color-mix(in oklab, var(--baby) 55%, transparent);
+}
+.location dl{margin:0}
+.location dl > div{padding:.7rem 0; border-bottom:1px solid var(--rule)}
+.location dt{
+  font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  margin-bottom:.2rem;
+}
+.location dd{margin:0; font-size:.9375rem; color:var(--ink)}
+.location .go{display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1.25rem}
+@media (max-width:56rem){ .location{grid-template-columns:1fr} }
+
+/* ---------- related ---------- */
+.related-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem}
+.rcard{text-decoration:none; color:inherit; display:block}
+.rcard .frame{border:1px solid var(--rule); background:var(--surface); padding:.375rem; display:block}
+.rcard .frame i{display:block; width:100%; aspect-ratio:4/3}
+.rcard .rmeta{
+  display:flex; align-items:baseline; gap:.6rem; margin:.75rem 0 .25rem;
+  font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted);
+}
+.rcard .rscore{
+  font-family:var(--display); font-size:1.25rem; letter-spacing:0; color:var(--accent);
+  font-weight:600; text-transform:none;
+}
+.rcard h3{font-family:var(--display); font-weight:500; font-size:1.375rem; margin:0 0 .25rem}
+.rcard:hover h3{color:var(--accent)}
+.rcard p{margin:0; font-size:.9375rem; color:var(--muted)}
+@media (max-width:56rem){ .related-grid{grid-template-columns:1fr} }
+
+/* ---------- credits ---------- */
+.credits{
+  margin-top:3rem; border-top:1px solid var(--navy); border-bottom:1px solid var(--navy);
+  padding:1.5rem 0; display:grid; gap:.35rem; font-size:.875rem; color:var(--muted);
+}
+.credits b{
+  color:var(--navy); font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase;
+  margin-bottom:.35rem;
+}
+
+/* ---------- footer ---------- */
+footer.site{margin-top:4rem; border-top:1px solid var(--rule); background:var(--surface)}
+footer.site .inner{
+  max-width:74rem; margin:0 auto; padding:3rem 1.5rem 3.5rem;
+  display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:2rem;
+  font-size:.875rem; color:var(--muted);
+}
+footer.site .bow{width:96px; height:42px; margin:0 0 .75rem}
+footer.site b{
+  display:block; color:var(--navy); font-size:.6875rem; letter-spacing:.14em;
+  text-transform:uppercase; margin-bottom:.6rem;
+}
+footer.site a{display:block; color:var(--muted); text-decoration:none; padding:.18rem 0}
+footer.site a:hover{color:var(--accent)}
+@media (max-width:48rem){ footer.site .inner{grid-template-columns:1fr 1fr} }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <button class="menu-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
+
+    <a class="wordmark" href="1-home.html">Maria Eleni</a>
+
+    <svg class="bow" viewBox="0 0 240 104" aria-hidden="true">
+      <path d="M112 58 C 105 76, 89 90, 66 102 C 77 84, 81 70, 83 58 Z"/>
+      <path d="M128 58 C 135 76, 151 90, 174 102 C 163 84, 159 70, 157 58 Z"/>
+      <path d="M118 48 C 92 14, 44 8, 30 32 C 17 54, 66 66, 117 56 Z"/>
+      <path d="M122 48 C 148 14, 196 8, 210 32 C 223 54, 174 66, 123 56 Z"/>
+      <ellipse class="knot" cx="120" cy="52" rx="13" ry="11"/>
+    </svg>
+
+    <nav class="primary">
+      <a class="on" href="#">Food</a>
+      <span class="div">|</span>
+      <a href="#">Wine</a>
+      <span class="div">|</span>
+      <a href="2-map.html">Map &amp; lists</a>
+      <span class="div">|</span>
+      <a href="#">About</a>
+      <a class="tip" href="#">Tip jar</a>
+    </nav>
+
+    <div class="search">
+      <form role="search" onsubmit="return false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"/><path d="M20 20l-4.5-4.5" stroke-linecap="round"/>
+        </svg>
+        <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search the blog</label>
+        <input id="q" type="search" placeholder="Search restaurants, dishes, wine…">
+        <button type="button">Search</button>
+      </form>
+    </div>
+  </div>
+  <hr class="rule-full">
+</header>
+
+<main class="stage">
+
+  <!-- ===== identity card: the headline is not the restaurant name ===== -->
+  <div class="identity wide">
+    <p class="kicker">Restaurant review · Denver · No. 214</p>
+    <h1>Safta says it's Mediterranean. Safta is being polite.</h1>
+    <p class="restaurant-name">
+      Safta <span style="color:var(--baby)">/</span>
+      <span class="light">3330 Brighton Blvd, Denver</span>
+    </p>
+    <ul class="facts">
+      <li><a href="#">Eastern Mediterranean</a></li>
+      <li><a href="#">Vegan-friendly</a></li>
+      <li><a href="#">RiNo</a></li>
+      <li>$$$ · about $72 a head</li>
+      <li>Three visits · Nov 2025, Mar 2026, Jul 2026</li>
+    </ul>
+    <p class="byline">By Maria Eleni, with Connor · <a href="#">41 comments</a> · Published 2 Nov 2025 · <b>Updated 28 Jul 2026</b></p>
+    <div class="actions">
+      <a class="btn btn--primary" href="#">Reserve</a>
+      <a class="btn" href="2-map.html">See it on the map</a>
+      <a class="btn" href="#">Directions</a>
+      <a class="btn" href="#">Save to a list</a>
+    </div>
+  </div>
+
+  <!-- ===== the numbers, broken out in the margin ===== -->
+  <aside class="marginalia score-block">
+    <span class="score-num">7.4</span>
+    <span class="score-den">Composite · <a href="#">how&nbsp;we&nbsp;score</a></span>
+    <p class="note"><b>Food</b>8.8 — the gigantes are the whole argument.</p>
+    <p class="note"><b>Ambiance</b>9.0 — the prettiest room in RiNo, and it knows it.</p>
+    <p class="note"><b>Value</b>6.0 — you are paying for the room too.</p>
+    <p class="note"><b>Supply transparency</b>4.5 — produce named, protein not.</p>
+  </aside>
+
+  <figure class="hero">
+    <span class="frame"><i></i></span>
+    <figcaption>
+      <span>Gigantes, slumped and glossy, with enough dill that you smell the bowl before it lands.</span>
+      <span class="credit">Photograph — Maria Eleni</span>
+    </figcaption>
+  </figure>
+
+  <!-- ===== the short version, before the essay ===== -->
+  <div class="verdict">
+    <h2>The short version</h2>
+    <ul>
+      <li>Go for the mezze. Six plates and a bottle, out for about $140 for two.</li>
+      <li>The gigantes are the best nine dollars on any menu in this city.</li>
+      <li>Skip the whole-fish special — priced like an occasion, cooked like a Tuesday.</li>
+      <li>The vegan legend is now printed on the menu. It was not, a year ago. That matters.</li>
+      <li>Ask for the counter. The dining room is beautiful and twice as loud.</li>
+    </ul>
+  </div>
+
+  <div class="prose">
+    <p class="lede">I want to be fair to Safta, because the room is genuinely beautiful and because I have now eaten there three times and paid three times, which is more than most people who have opinions about it.</p>
+    <p>But I have to start with the menu, because the menu is where the problem lives. It says "Mediterranean." Mediterranean is twenty-two countries and roughly four thousand years, and using it as a cuisine descriptor is a way of not saying "Israeli," or "Lebanese," or "Greek," which are the three things this kitchen is actually cooking, sometimes on the same plate.</p>
+  </div>
+
+  <blockquote class="pull">Naming the cuisine is not a political act. Refusing to name it is.</blockquote>
+
+  <div class="prose">
+    <p>The gigantes arrive in a shallow bowl, the beans slumped and glossy, with enough dill that you smell it before it lands. This is the best thing on the menu and it is nine dollars, which tells you the kitchen knows exactly what it is good at even when the menu copy will not say so out loud.</p>
+    <p>The room has not been softened, and it should not be. Brick, glass, a wood oven you can see from every seat, and a volume that reaches its ceiling by eight and stays there. Sitting at the counter is not merely better; it is the only sensible choice — the tables along the wall get the same food ten degrees cooler and none of the reason you came.</p>
+    <p>What has changed since 2025, and changed for the better, is the labelling. A year ago the vegan options were recited by a server who was clearly improvising. Now they are printed, with a legend, and the kitchen will tell you which oil it fried in if you ask. That is a two-minute fix that most restaurants still have not made.</p>
+  </div>
+
+  <blockquote class="pull">"We can do something for you" is not a menu. A legend is a menu.</blockquote>
+
+  <!-- ===== what to order: photo + description ===== -->
+  <section class="wide">
+    <h2 class="section-label">What to order</h2>
+
+    <article class="dish">
+      <span class="thumb"><i style="background:radial-gradient(60% 60% at 40% 40%,#e6d9a8,#a8963f 60%,#3f3a12)"></i></span>
+      <div>
+        <h3>Gigantes <span class="must">Must order</span></h3>
+        <p>Butter beans braised soft in tomato and enough dill to be a decision rather than a garnish. Nine dollars. Order two bowls; you will not want to share the first.</p>
+      </div>
+    </article>
+
+    <article class="dish">
+      <span class="thumb"><i style="background:radial-gradient(55% 55% at 55% 45%,#e8dcc2,#b3894f 55%,#3a2712)"></i></span>
+      <div>
+        <h3>Hummus, from the wood oven <span class="must">Must order</span></h3>
+        <p>Served hot, which is the whole point, with a pita that arrives inflated and deflates on the table. Vegan as served — the labouring over "is there labneh in this" is over, it is printed now.</p>
+      </div>
+    </article>
+
+    <article class="dish">
+      <span class="thumb"><i style="background:radial-gradient(60% 60% at 45% 55%,#c9d07a,#63702b 55%,#26300f)"></i></span>
+      <div>
+        <h3>Charred cabbage, tahini, pistachio</h3>
+        <p>A quarter head, blistered black at the edges and still sweet at the core. Fourteen dollars for a vegetable, and the only one on this list where that price feels earned.</p>
+      </div>
+    </article>
+
+    <article class="dish">
+      <span class="thumb"><i style="background:linear-gradient(150deg,#7d8ba0,#3c4655 60%,#1a1f27)"></i></span>
+      <div>
+        <h3>Whole branzino <span class="skip">Skip</span></h3>
+        <p>Fifty-two dollars for a competent fish that has nothing to do with the rest of the meal. Give the money to the mezze and order another bottle.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ===== the rubric ===== -->
+  <section class="wide">
+    <h2 class="section-label">How this scored</h2>
+
+    <div class="rubric">
+      <header>
+        <div>
+          <h3>Safta</h3>
+          <p class="where">3330 Brighton Blvd, Denver · $$$ · <a href="#">Eastern Mediterranean</a> · <a href="#">Vegan-friendly</a></p>
+          <p class="badges">
+            <span class="badge">Independently owned</span>
+            <span class="badge">Vegan menu, printed</span>
+            <span class="badge badge--award">2026 Fair Kitchen Award</span>
+          </p>
+        </div>
+        <div class="overall">
+          <b>7.4</b>
+          <span>Composite</span>
+        </div>
+      </header>
+
+      <ul class="axes">
+        <li><span class="label">Food quality</span><span class="bar"><i style="width:88%"></i></span><span class="val">8.8</span></li>
+        <li><span class="label">Vegan-friendliness</span><span class="bar"><i style="width:65%"></i></span><span class="val">6.5</span></li>
+        <li><span class="label">Service</span><span class="bar"><i style="width:82%"></i></span><span class="val">8.2</span></li>
+        <li><span class="label">Ambiance</span><span class="bar"><i style="width:90%"></i></span><span class="val">9.0</span></li>
+        <li><span class="label">Value</span><span class="bar"><i style="width:60%"></i></span><span class="val">6.0</span></li>
+        <li><span class="label">Ownership &amp; ethics</span><span class="bar"><i style="width:70%"></i></span><span class="val">7.0</span></li>
+        <li><span class="label">Supply transparency</span><span class="bar"><i style="width:45%"></i></span><span class="val">4.5</span></li>
+      </ul>
+
+      <p class="rubric-explainer">
+        <b>The same seven questions, every time</b>
+        Every review on this site is scored on these seven axes and nothing else, so two reviews can be compared without reading both. The composite is the mean, unweighted — which means a beautiful room cannot buy its way out of an opaque supply chain. <a href="#">The full rubric, with what each number means →</a>
+      </p>
+
+      <div class="disclosures">
+        <p><b>How we ate</b>Three visits, unannounced. We paid every bill in full. No comped courses, no press dinner, no affiliate links anywhere on this site.</p>
+        <p><b>Ownership</b>Independently owned, single location. No private equity stake on record as of July 2026. <a href="#">How we check this →</a></p>
+        <p><b>Supply chain</b>Produce sourcing named on the menu; protein and oil sourcing not disclosed on request. Scored down accordingly.</p>
+        <p><b>Interview</b>Chef declined an interview for this review. The standing invitation remains open. <a href="#">Reader questions for the next one →</a></p>
+      </div>
+
+      <div class="revisits">
+        <h4>Living updates — this review changes when the restaurant does</h4>
+        <div class="revisit">
+          <time datetime="2026-07-28">28 July 2026 · third visit</time>
+          <p>Vegan legend now printed on the menu instead of recited by the server. Vegan-friendliness 5.5 → 6.5.</p>
+        </div>
+        <div class="revisit">
+          <time datetime="2026-03-11">11 March 2026 · second visit</time>
+          <p>New pastry chef. The dessert course went from an afterthought to the reason to stay. Food 8.2 → 8.8.</p>
+        </div>
+        <div class="revisit">
+          <time datetime="2025-11-02">2 November 2025 · first visit</time>
+          <p>Original review published. Composite 6.9.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== where it is ===== -->
+  <section class="wide">
+    <h2 class="section-label">Where it is</h2>
+    <div class="location">
+      <div class="map" role="img" aria-label="Map showing Safta at 3330 Brighton Boulevard, Denver">
+        <span class="water"></span>
+        <span class="pin" aria-hidden="true">1</span>
+      </div>
+      <div>
+        <dl>
+          <div><dt>Address</dt><dd>3330 Brighton Blvd, Denver, CO 80216</dd></div>
+          <div><dt>Hours</dt><dd>Tue–Sun, 5:00pm — 10:00pm. Brunch Sat &amp; Sun from 10:00am.</dd></div>
+          <div><dt>Getting in</dt><dd>Counter seats are walk-in only and gone by 6:15pm. Tables book out roughly two weeks ahead.</dd></div>
+          <div><dt>Damage</dt><dd>About $72 a head with two glasses. Cards only.</dd></div>
+          <div><dt>Nearby pins</dt><dd><a href="2-map.html">Khao Lek</a>, <a href="2-map.html">Marisol</a>, <a href="2-map.html">Ba Mien Deli</a></dd></div>
+        </dl>
+        <div class="go">
+          <a class="btn btn--primary" href="#">Directions</a>
+          <a class="btn" href="#">Apple Maps</a>
+          <a class="btn" href="2-map.html">Open the map</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== related ===== -->
+  <section class="wide">
+    <h2 class="section-label">If you liked this</h2>
+    <div class="related-grid">
+      <a class="rcard" href="#">
+        <span class="frame"><i style="background:linear-gradient(150deg,#c9dcea,#5f7f9e)"></i></span>
+        <p class="rmeta"><span class="rscore">9.1</span> Thai · Aurora</p>
+        <h3>Khao Lek</h3>
+        <p>The highest score we have given anyone, and it costs thirty-four dollars.</p>
+      </a>
+      <a class="rcard" href="#">
+        <span class="frame"><i style="background:linear-gradient(150deg,#e7dcc6,#a98f63)"></i></span>
+        <p class="rmeta"><span class="rscore">8.0</span> Greek · Highlands</p>
+        <h3>Kyma</h3>
+        <p>Says exactly which islands it is cooking from, and cooks them properly.</p>
+      </a>
+      <a class="rcard" href="#">
+        <span class="frame"><i style="background:linear-gradient(150deg,#d8c3d0,#7a5468)"></i></span>
+        <p class="rmeta"><span class="rscore">3.2</span> Wine bar · Cherry Creek</p>
+        <h3>The Standing Room</h3>
+        <p>A pan. We publish the bad ones, and this one reheats things.</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== credits ===== -->
+  <section class="credits wide">
+    <b>How this review was made</b>
+    <span>Words and photographs — Maria Eleni, with Connor.</span>
+    <span>Visits — 2 Nov 2025, 11 Mar 2026, 28 Jul 2026. All unannounced.</span>
+    <span>Bills — paid in full, every visit. No comped courses, no press dinner, no affiliate links.</span>
+    <span>Next scheduled revisit — January 2027. This page is updated, not replaced.</span>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="inner">
+    <div>
+      <svg class="bow" viewBox="0 0 240 104" aria-hidden="true">
+        <path d="M112 58 C 105 76, 89 90, 66 102 C 77 84, 81 70, 83 58 Z"/>
+        <path d="M128 58 C 135 76, 151 90, 174 102 C 163 84, 159 70, 157 58 Z"/>
+        <path d="M118 48 C 92 14, 44 8, 30 32 C 17 54, 66 66, 117 56 Z"/>
+        <path d="M122 48 C 148 14, 196 8, 210 32 C 223 54, 174 66, 123 56 Z"/>
+        <ellipse class="knot" cx="120" cy="52" rx="13" ry="11"/>
+      </svg>
+      Food and wine, with a vegan lens and a receipt for everything.
+    </div>
+    <div>
+      <b>Read</b>
+      <a href="1-home.html">Home</a><a href="#">Food</a><a href="#">Wine</a><a href="#">Start here</a>
+    </div>
+    <div>
+      <b>Values</b>
+      <a href="#">Our rubric</a><a href="#">Disclosure policy</a><a href="#">The pans</a>
+    </div>
+    <div>
+      <b>Elsewhere</b>
+      <a href="2-map.html">The map</a><a href="#">Newsletter</a><a href="#">RSS</a><a href="#">Tip jar</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

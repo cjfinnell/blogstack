@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maria Eleni — 2. Map &amp; lists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Karla:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ROUND 2 — page 2 of 3: MAP & LISTS
+   Concept F's structure, rebuilt in concept D's skin.
+
+   Maria on F: "immediately obsessed... I love maps, I love lists...
+   I don't like the font of this either, but if I was seeing this in the
+   colour and the font of concept D then I'd probably have some different
+   opinions. An excellent start for the map / list section — but I don't
+   think this would be on the homepage."
+
+   So: same masthead as page 1 (same wordmark, same bow, same palette),
+   F's map-as-index below it, and concept B's ledger sitting under the map
+   — which is exactly where she asked for it: "I could see this living
+   under a map as opposed to something on the homepage."
+
+   Map is drawn in CSS. No tiles, no map library, no third party, no script.
+   ============================================================ */
+:root{
+  color-scheme: light dark;
+  --cream:      light-dark(#FBF9F4, #0E1826);
+  --baby:       light-dark(#A8C6DE, #7FA9CC);
+  --navy:       light-dark(#16263F, #EDF2F7);
+  --ink:        light-dark(#33383F, #DCE3EB);
+  --surface:    light-dark(#F1F5F9, #16263F);
+  --blue-wash:  light-dark(#DCE9F2, #1B2E4A);
+  --muted:      light-dark(#6A7280, #A7B6C9);
+  --accent:     light-dark(#2E5C8A, #9CC4E4);
+  --accent-hover: light-dark(#1D3F63, #C2DBEF);
+  --rule:       light-dark(#E2E6EC, #23364F);
+  --rule-strong:light-dark(#8C99A9, #5C7A96);
+  --on-accent:  light-dark(#FBF9F4, #0E1826);
+
+  --script:"Parisienne", "Snell Roundhand", cursive;
+  --display:"Cormorant Garamond", Georgia, serif;
+  --body:"Karla", ui-sans-serif, system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--cream); color:var(--ink);
+  font-family:var(--body); font-size:1.0625rem; line-height:1.65;
+}
+h1,h2,h3,h4{color:var(--navy); text-wrap:balance}
+p{text-wrap:pretty}
+a{color:var(--accent); text-underline-offset:.18em}
+a:hover{color:var(--accent-hover)}
+.wrap{max-width:82rem; margin:0 auto; padding:0 1.5rem}
+.wrap.narrow{max-width:64rem}
+
+/* ---------- masthead: identical furniture to page 1 ---------- */
+.masthead{padding:2rem 0 0; position:relative}
+.menu-btn{
+  position:absolute; top:1.75rem; right:1.5rem; background:none; border:none;
+  cursor:pointer; padding:.5rem; color:var(--navy); line-height:0;
+}
+.menu-btn span{display:block; width:22px; height:1.5px; background:currentColor; margin:4px 0}
+.wordmark{
+  display:block; text-align:center; font-family:var(--script);
+  font-size:clamp(3rem,8vw,4.75rem); line-height:1.05; color:var(--navy);
+  text-decoration:none; padding-bottom:.08em;
+}
+.bow{display:block; margin:.3rem auto 1.1rem; width:140px; height:60px; color:var(--baby)}
+.bow path, .bow ellipse{fill:currentColor}
+.bow .knot{fill:color-mix(in oklab, var(--navy) 22%, var(--baby))}
+
+nav.primary{
+  display:flex; justify-content:center; align-items:center; flex-wrap:wrap; padding-bottom:1.25rem;
+}
+nav.primary a{
+  font-size:.8125rem; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--navy); text-decoration:none; padding:.35rem 1.15rem; font-weight:500;
+}
+nav.primary a:hover, nav.primary a.on{color:var(--accent)}
+nav.primary a.on{border-bottom:1.5px solid var(--accent)}
+nav.primary .div{color:var(--baby); user-select:none}
+nav.primary a.tip{
+  margin-left:.75rem; letter-spacing:.14em; color:var(--muted); font-size:.6875rem;
+  border:1px solid var(--rule-strong); border-radius:999px; padding:.3rem .8rem;
+}
+nav.primary a.tip:hover{border-color:var(--accent); color:var(--accent)}
+
+.search{max-width:34rem; margin:0 auto 1.5rem}
+.search form{
+  display:flex; align-items:center; gap:.5rem;
+  border:1.5px solid var(--navy); border-radius:999px; background:var(--cream);
+  padding:.15rem .35rem .15rem 1rem;
+}
+.search form:focus-within{border-color:var(--accent); box-shadow:0 0 0 3px var(--blue-wash)}
+.search svg{width:17px; height:17px; color:var(--muted); flex:none}
+.search input{
+  flex:1; min-width:0; border:none; background:none; font-family:var(--body);
+  font-size:1rem; color:var(--ink); padding:.7rem 0;
+}
+.search input::placeholder{color:var(--muted)}
+.search input:focus{outline:none}
+.search button{
+  font-family:var(--body); font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase;
+  padding:.6rem 1.2rem; border:none; background:var(--navy); color:var(--cream);
+  cursor:pointer; border-radius:999px; flex:none;
+}
+.search button:hover{background:var(--accent)}
+.rule-full{border:none; border-top:1px solid var(--navy); margin:0}
+
+/* ---------- the whole library, visible at once ---------- */
+.facets{background:var(--surface); border-bottom:1px solid var(--navy)}
+.facets .cols{
+  display:grid; grid-template-columns:repeat(5,1fr); gap:1.5rem;
+  padding-top:1.5rem; padding-bottom:1.75rem;
+}
+.facets h3{
+  font-size:.6875rem; font-weight:600; text-transform:uppercase; letter-spacing:.16em;
+  color:var(--muted); margin:0 0 .6rem;
+}
+.facets a{
+  display:flex; justify-content:space-between; gap:.75rem; font-size:.875rem;
+  color:var(--ink); text-decoration:none; padding:.2rem 0;
+  border-bottom:1px solid transparent;
+}
+.facets a:hover{color:var(--accent); border-bottom-color:var(--baby)}
+.facets a b{color:var(--rule-strong); font-weight:400; font-variant-numeric:tabular-nums}
+@media (max-width:64rem){ .facets .cols{grid-template-columns:repeat(2,1fr)} }
+
+/* ---------- the map is the index ---------- */
+.mapstage{display:grid; grid-template-columns:1.25fr 1fr; border-bottom:1px solid var(--navy)}
+.mapview{
+  position:relative; min-height:36rem; border-right:1px solid var(--navy);
+  background:
+    linear-gradient(0deg, var(--rule) 1px, transparent 1px) 0 0/100% 3rem,
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px) 0 0/3rem 100%,
+    var(--surface);
+  overflow:hidden;
+}
+.mapview .water{
+  position:absolute; inset:auto -10% -12% -10%; height:34%;
+  background:color-mix(in oklab, var(--baby) 55%, var(--surface));
+  transform:rotate(-4deg);
+}
+.mapview .road{position:absolute; background:var(--rule-strong); opacity:.45}
+.r1{left:0; right:0; top:34%; height:2px; transform:rotate(-2deg)}
+.r2{top:0; bottom:0; left:44%; width:2px; transform:rotate(3deg)}
+.r3{left:0; right:0; top:62%; height:1px}
+.pin{
+  position:absolute; transform:translate(-50%,-100%);
+  font-family:var(--display); font-weight:600; font-size:.8125rem;
+  color:var(--on-accent); background:var(--navy);
+  width:1.9rem; height:1.9rem; border-radius:50% 50% 50% 2px;
+  display:grid; place-items:center; text-decoration:none;
+  box-shadow:0 0 0 3px color-mix(in oklab, var(--baby) 55%, transparent);
+}
+.pin:hover, .pin.on{background:var(--accent); color:var(--on-accent)}
+.pin.pan{background:var(--cream); color:var(--navy); border:1.5px solid var(--rule-strong); box-shadow:none}
+.maplabel{
+  position:absolute; font-size:.625rem; font-weight:600;
+  text-transform:uppercase; letter-spacing:.18em; color:var(--rule-strong);
+}
+.mapchrome{position:absolute; left:1rem; right:1rem; top:1rem; display:flex; gap:.4rem; flex-wrap:wrap}
+.mchip{
+  font-size:.6875rem; letter-spacing:.12em; text-transform:uppercase;
+  background:var(--cream); border:1px solid var(--rule-strong); color:var(--navy);
+  padding:.32rem .75rem; border-radius:999px; text-decoration:none;
+}
+.mchip:hover, .mchip.on{background:var(--navy); border-color:var(--navy); color:var(--cream)}
+.attrib{position:absolute; right:.75rem; bottom:.6rem; font-size:.625rem; color:var(--rule-strong)}
+
+/* the same data as a list — required, not optional */
+.maplist{padding:1.5rem 1.5rem 2rem; max-height:36rem; overflow:auto}
+.maplist h2{font-family:var(--display); font-weight:400; font-size:1.75rem; margin:0 0 .25rem}
+.maplist .sub{font-size:.875rem; color:var(--muted); margin:0 0 1rem}
+.mrow{
+  display:grid; grid-template-columns:1.9rem 1fr auto; gap:.75rem; align-items:start;
+  padding:.85rem 0; border-top:1px solid var(--rule); text-decoration:none; color:inherit;
+}
+.mrow .n{
+  font-family:var(--display); font-weight:600; font-size:.8125rem; color:var(--on-accent);
+  background:var(--navy); width:1.6rem; height:1.6rem; border-radius:50%;
+  display:grid; place-items:center;
+}
+.mrow.pan .n{background:var(--cream); color:var(--navy); border:1.5px solid var(--rule-strong)}
+.mrow b{font-family:var(--display); font-size:1.25rem; font-weight:500; color:var(--navy); display:block}
+.mrow i{display:block; font-style:normal; font-size:.8125rem; color:var(--muted); margin-top:.1rem}
+.mrow .save{
+  font-size:.6875rem; letter-spacing:.1em; text-transform:uppercase; color:var(--rule-strong);
+  border:1px solid var(--rule); border-radius:999px; padding:.22rem .6rem; white-space:nowrap;
+}
+.mrow:hover b{color:var(--accent)}
+.mrow:hover .save{border-color:var(--accent); color:var(--accent)}
+@media (max-width:64rem){
+  .mapstage{grid-template-columns:1fr}
+  .mapview{border-right:none; border-bottom:1px solid var(--navy); min-height:26rem}
+  .maplist{max-height:none}
+}
+
+/* ---------- section heads ---------- */
+.section-head{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
+  margin:3.5rem 0 1.5rem;
+}
+.section-head h2{font-family:var(--display); font-weight:400; font-size:2rem; margin:0}
+.section-head a{
+  font-size:.75rem; letter-spacing:.14em; text-transform:uppercase;
+  text-decoration:none; color:var(--muted); white-space:nowrap;
+}
+.section-head a:hover{color:var(--accent)}
+
+/* ---------- the ledger, under the map, exactly where she put it ---------- */
+.ledger{border:1px solid var(--navy); background:var(--surface)}
+.ledger > header{
+  display:flex; justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap;
+  padding:1.1rem 1.5rem; border-bottom:1px solid var(--navy);
+}
+.ledger > header h3{font-family:var(--display); font-weight:500; font-size:1.5rem; margin:0}
+.ledger .cuisines{display:flex; gap:.4rem; flex-wrap:wrap; padding:1rem 1.5rem 0}
+.ledger .cuisines a{
+  font-size:.6875rem; letter-spacing:.12em; text-transform:uppercase; text-decoration:none;
+  color:var(--navy); background:var(--blue-wash); border:1px solid var(--baby);
+  border-radius:999px; padding:.3rem .8rem;
+}
+.ledger .cuisines a.on{background:var(--navy); border-color:var(--navy); color:var(--cream)}
+.ledger .cuisines a:hover{background:var(--baby)}
+.modes{display:flex; gap:.4rem; flex-wrap:wrap}
+.modes a{
+  font-size:.6875rem; letter-spacing:.12em; text-transform:uppercase; text-decoration:none;
+  color:var(--muted); border:1px solid var(--rule-strong); border-radius:999px; padding:.25rem .7rem;
+}
+.modes a.on, .modes a:hover{background:var(--navy); border-color:var(--navy); color:var(--cream)}
+.lrow{
+  display:grid; grid-template-columns:2.5rem 1fr 8rem 5rem 4rem; gap:1rem; align-items:baseline;
+  padding:.85rem 1.5rem; border-bottom:1px solid var(--rule); text-decoration:none; color:inherit;
+}
+.lrow:hover{background:var(--blue-wash)}
+.lrow .n{font-family:var(--display); font-size:1.25rem; color:var(--baby)}
+.lrow b{font-family:var(--display); font-size:1.25rem; font-weight:500; color:var(--navy)}
+.lrow i{font-style:normal; font-size:.8125rem; color:var(--muted); display:block}
+.lrow .where, .lrow .price{font-size:.8125rem; color:var(--muted)}
+.lrow .sc{
+  font-family:var(--display); font-size:1.5rem; font-weight:600; color:var(--accent);
+  text-align:right; font-variant-numeric:tabular-nums;
+}
+.lrow .sc.na{font-family:var(--body); font-size:.6875rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted)}
+.ledger > footer{padding:.95rem 1.5rem; border-top:1px solid var(--navy);
+  font-size:.8125rem; color:var(--muted)}
+@media (max-width:56rem){
+  .lrow{grid-template-columns:2rem 1fr 4rem}
+  .lrow .where, .lrow .price{display:none}
+}
+
+/* ---------- saved lists ---------- */
+.list-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+  background:var(--rule); border:1px solid var(--rule)}
+.listcard{background:var(--cream); padding:1.25rem; text-decoration:none; color:inherit; display:block}
+.listcard:hover{background:var(--blue-wash)}
+.listcard b{font-family:var(--display); font-size:1.25rem; font-weight:500; color:var(--navy);
+  display:block; margin-bottom:.3rem}
+.listcard span{font-size:.875rem; color:var(--muted)}
+.listcard .count{
+  font-size:.6875rem; font-weight:600; color:var(--accent);
+  text-transform:uppercase; letter-spacing:.14em; display:block; margin-top:.7rem;
+}
+@media (max-width:64rem){ .list-grid{grid-template-columns:1fr 1fr} }
+
+/* ---------- latest review teaser under the map ---------- */
+.teaser{
+  display:grid; grid-template-columns:22rem 1fr; gap:2rem; align-items:center;
+  border:1px solid var(--rule); background:var(--surface); padding:1.5rem;
+}
+.teaser .frame{border:1px solid var(--rule); background:var(--cream); padding:.375rem; display:block}
+.teaser .frame i{display:block; width:100%; aspect-ratio:4/3;
+  background:radial-gradient(60% 60% at 40% 40%,#e0aa46,#8a5a1e 60%,#3a2510)}
+.teaser h3{font-family:var(--display); font-weight:400; font-size:1.75rem; margin:.35rem 0 .5rem}
+.teaser h3 a{color:inherit; text-decoration:none}
+.teaser h3 a:hover{color:var(--accent)}
+.teaser p{margin:0; color:var(--muted); font-size:.9375rem}
+.kicker{font-size:.6875rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0}
+@media (max-width:56rem){ .teaser{grid-template-columns:1fr} }
+
+/* ---------- footer ---------- */
+footer.site{margin-top:4rem; border-top:1px solid var(--rule); background:var(--surface)}
+footer.site .wrap{
+  display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:2rem;
+  padding-top:3rem; padding-bottom:3.5rem; font-size:.875rem; color:var(--muted);
+}
+footer.site .bow{width:96px; height:42px; margin:0 0 .75rem}
+footer.site b{
+  display:block; color:var(--navy); font-size:.6875rem; letter-spacing:.14em;
+  text-transform:uppercase; margin-bottom:.6rem;
+}
+footer.site a{display:block; color:var(--muted); text-decoration:none; padding:.18rem 0}
+footer.site a:hover{color:var(--accent)}
+@media (max-width:48rem){ footer.site .wrap{grid-template-columns:1fr 1fr} }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap narrow">
+    <button class="menu-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
+
+    <a class="wordmark" href="1-home.html">Maria Eleni</a>
+
+    <svg class="bow" viewBox="0 0 240 104" aria-hidden="true">
+      <path d="M112 58 C 105 76, 89 90, 66 102 C 77 84, 81 70, 83 58 Z"/>
+      <path d="M128 58 C 135 76, 151 90, 174 102 C 163 84, 159 70, 157 58 Z"/>
+      <path d="M118 48 C 92 14, 44 8, 30 32 C 17 54, 66 66, 117 56 Z"/>
+      <path d="M122 48 C 148 14, 196 8, 210 32 C 223 54, 174 66, 123 56 Z"/>
+      <ellipse class="knot" cx="120" cy="52" rx="13" ry="11"/>
+    </svg>
+
+    <nav class="primary">
+      <a href="1-home.html">Food</a>
+      <span class="div">|</span>
+      <a href="#">Wine</a>
+      <span class="div">|</span>
+      <a class="on" href="2-map.html">Map &amp; lists</a>
+      <span class="div">|</span>
+      <a href="#">About</a>
+      <a class="tip" href="#">Tip jar</a>
+    </nav>
+
+    <div class="search">
+      <form role="search" onsubmit="return false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"/><path d="M20 20l-4.5-4.5" stroke-linecap="round"/>
+        </svg>
+        <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search places</label>
+        <input id="q" type="search" placeholder="Search a place, a neighbourhood, a cuisine…">
+        <button type="button">Search</button>
+      </form>
+    </div>
+  </div>
+  <hr class="rule-full">
+
+  <!-- every way in, visible at once — nothing to drill into -->
+  <div class="facets">
+    <div class="wrap cols">
+      <div>
+        <h3>Neighbourhoods</h3>
+        <a href="#">RiNo <b>22</b></a><a href="#">Highlands <b>18</b></a>
+        <a href="#">Baker <b>14</b></a><a href="#">Aurora <b>12</b></a>
+        <a href="#">Boulder <b>11</b></a>
+      </div>
+      <div>
+        <h3>Cuisine</h3>
+        <a href="#">Thai <b>31</b></a><a href="#">Mexican <b>27</b></a>
+        <a href="#">Greek <b>24</b></a><a href="#">Vietnamese <b>19</b></a>
+        <a href="#">New American <b>18</b></a>
+      </div>
+      <div>
+        <h3>Price</h3>
+        <a href="#">$ under 20 <b>34</b></a><a href="#">$$ 20–50 <b>96</b></a>
+        <a href="#">$$$ 50–100 <b>61</b></a><a href="#">$$$$ 100+ <b>23</b></a>
+      </div>
+      <div>
+        <h3>Good for</h3>
+        <a href="#">Eating alone <b>41</b></a><a href="#">Late night <b>29</b></a>
+        <a href="#">Big groups <b>24</b></a><a href="#">First date <b>21</b></a>
+        <a href="#">Worth the drive <b>15</b></a>
+      </div>
+      <div>
+        <h3>Values</h3>
+        <a href="#">Vegan menu printed <b>38</b></a><a href="#">Independently owned <b>147</b></a>
+        <a href="#">Sourcing disclosed <b>52</b></a><a href="#">Service included <b>9</b></a>
+        <a href="#">The pans <b>12</b></a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ THE MAP IS THE INDEX ============ -->
+  <section class="mapstage">
+    <div class="mapview">
+      <span class="water"></span>
+      <span class="road r1"></span><span class="road r2"></span><span class="road r3"></span>
+      <span class="maplabel" style="left:12%; top:18%">HIGHLANDS</span>
+      <span class="maplabel" style="left:52%; top:26%">RINO</span>
+      <span class="maplabel" style="left:20%; top:70%">BAKER</span>
+      <span class="maplabel" style="left:66%; top:78%">CHERRY CREEK</span>
+
+      <div class="mapchrome">
+        <a class="mchip on" href="#">All 214</a>
+        <a class="mchip" href="#">Vegan menu</a>
+        <a class="mchip" href="#">Under $25</a>
+        <a class="mchip" href="#">Open now</a>
+        <a class="mchip" href="#">Want to go</a>
+        <a class="mchip" href="#">Been</a>
+      </div>
+
+      <a class="pin on" href="3-review.html" style="left:56%; top:34%" aria-label="1. Safta">1</a>
+      <a class="pin" href="#" style="left:31%; top:24%" aria-label="2. Khao Lek">2</a>
+      <a class="pin" href="#" style="left:24%; top:66%" aria-label="3. Ba Mien Deli">3</a>
+      <a class="pin" href="#" style="left:69%; top:52%" aria-label="4. Marisol">4</a>
+      <a class="pin pan" href="#" style="left:44%; top:76%" aria-label="5. The Standing Room, a pan">5</a>
+      <a class="pin" href="#" style="left:76%; top:29%" aria-label="6. Nong's Kitchen">6</a>
+
+      <span class="attrib">Static map, built at deploy · no tiles requested</span>
+    </div>
+
+    <div class="maplist">
+      <h2>Everywhere we have eaten</h2>
+      <p class="sub">214 places. The map and this list are the same data — the list is the one that works with a keyboard.</p>
+
+      <a class="mrow" href="3-review.html"><span class="n">1</span><span><b>Safta</b><i>RiNo · Eastern Mediterranean · $$$ · three visits</i></span><span class="save">Been</span></a>
+      <a class="mrow" href="#"><span class="n">2</span><span><b>Khao Lek</b><i>Aurora · Thai · $$ · four visits</i></span><span class="save">Been</span></a>
+      <a class="mrow" href="#"><span class="n">3</span><span><b>Ba Mien Deli</b><i>Federal · Vietnamese · $ · six visits</i></span><span class="save">Been</span></a>
+      <a class="mrow" href="#"><span class="n">4</span><span><b>Marisol</b><i>Baker · New American · $$ · two visits</i></span><span class="save">Want to go</span></a>
+      <a class="mrow pan" href="#"><span class="n">5</span><span><b>The Standing Room</b><i>Cherry Creek · Wine bar · $$$ · a pan</i></span><span class="save">Been</span></a>
+      <a class="mrow" href="#"><span class="n">6</span><span><b>Nong's Kitchen</b><i>Westminster · Thai · $ · three visits</i></span><span class="save">Want to go</span></a>
+    </div>
+  </section>
+
+  <div class="wrap">
+
+    <!-- ===== the ledger, under the map, exactly where she asked for it ===== -->
+    <div class="section-head">
+      <h2>Rankings</h2>
+      <a href="#">How the scoring works →</a>
+    </div>
+
+    <section class="ledger">
+      <header>
+        <h3>Best Thai in Colorado</h3>
+        <div class="modes">
+          <a class="on" href="#">Top rated</a>
+          <a href="#">Latest</a>
+          <a href="#">Most discussed</a>
+          <a href="#">The pans</a>
+          <a href="#">Unrated</a>
+        </div>
+      </header>
+
+      <nav class="cuisines" aria-label="Rankings by cuisine">
+        <a class="on" href="#">Thai</a><a href="#">Greek</a><a href="#">Mexican</a>
+        <a href="#">Vietnamese</a><a href="#">Italian</a><a href="#">Wine bars</a>
+        <a href="#">Bakeries</a><a href="#">Vegan-only</a>
+      </nav>
+
+      <a class="lrow" href="#"><span class="n">01</span><span><b>Khao Lek</b><i>Vegan menu printed · sourcing disclosed</i></span><span class="where">Aurora</span><span class="price">$$ · ~$34</span><span class="sc">9.1</span></a>
+      <a class="lrow" href="#"><span class="n">02</span><span><b>Nong's Kitchen</b><i>Family run · single location</i></span><span class="where">Westminster</span><span class="price">$ · ~$19</span><span class="sc">8.7</span></a>
+      <a class="lrow" href="#"><span class="n">03</span><span><b>Isaan House</b><i>Sourcing named on the menu</i></span><span class="where">Denver</span><span class="price">$$ · ~$41</span><span class="sc">8.4</span></a>
+      <a class="lrow" href="#"><span class="n">04</span><span><b>Golden Basil</b><i>Vegan on request, not printed</i></span><span class="where">Lakewood</span><span class="price">$$ · ~$36</span><span class="sc">7.2</span></a>
+      <a class="lrow" href="#"><span class="n">05</span><span><b>Bangkok Terrace</b><i>Visited once — not enough to score</i></span><span class="where">Boulder</span><span class="price">$$ · ~$38</span><span class="sc na">Unrated</span></a>
+
+      <footer>Rechecked every quarter. Last pass 28 July 2026. Every bill paid in full; visits unannounced.</footer>
+    </section>
+
+    <!-- ===== saved lists ===== -->
+    <div class="section-head">
+      <h2>Your lists</h2>
+      <a href="#">Build a new one →</a>
+    </div>
+    <section class="list-grid">
+      <a class="listcard" href="#"><b>Want to go</b><span>Pinned from the map, kept on this device.</span><span class="count">18 places</span></a>
+      <a class="listcard" href="#"><b>Been, would return</b><span>The shortlist we actually use.</span><span class="count">31 places</span></a>
+      <a class="listcard" href="#"><b>Visiting friends</b><span>What to hand someone with one free evening.</span><span class="count">9 places</span></a>
+      <a class="listcard" href="#"><b>Build a list</b><span>Any set of pins, shareable as a link.</span><span class="count">New</span></a>
+    </section>
+
+    <!-- ===== the most recent review, below the map ===== -->
+    <div class="section-head">
+      <h2>Newest on the map</h2>
+      <a href="3-review.html">Read the review →</a>
+    </div>
+    <section class="teaser">
+      <a class="frame" href="3-review.html" aria-label="Read the Safta review"><i></i></a>
+      <div>
+        <p class="kicker">Pin 01 · RiNo, Denver · 3 August 2026</p>
+        <h3><a href="3-review.html">Safta says it's Mediterranean. Safta is being polite.</a></h3>
+        <p>A gorgeous room, a menu that spans four countries and commits to none of them, and one bowl of gigantes that made the whole evening make sense.</p>
+      </div>
+    </section>
+
+  </div>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div>
+      <svg class="bow" viewBox="0 0 240 104" aria-hidden="true">
+        <path d="M112 58 C 105 76, 89 90, 66 102 C 77 84, 81 70, 83 58 Z"/>
+        <path d="M128 58 C 135 76, 151 90, 174 102 C 163 84, 159 70, 157 58 Z"/>
+        <path d="M118 48 C 92 14, 44 8, 30 32 C 17 54, 66 66, 117 56 Z"/>
+        <path d="M122 48 C 148 14, 196 8, 210 32 C 223 54, 174 66, 123 56 Z"/>
+        <ellipse class="knot" cx="120" cy="52" rx="13" ry="11"/>
+      </svg>
+      Every place we have eaten, on one map. Unannounced visits, our own bill, always.
+    </div>
+    <div>
+      <b>Browse</b>
+      <a href="2-map.html">The map</a><a href="#">All rankings</a><a href="#">Lists</a><a href="3-review.html">All reviews</a>
+    </div>
+    <div>
+      <b>Values</b>
+      <a href="#">How we rate</a><a href="#">Disclosure policy</a><a href="#">The pans</a>
+    </div>
+    <div>
+      <b>Elsewhere</b>
+      <a href="1-home.html">Home</a><a href="#">Newsletter</a><a href="#">RSS</a><a href="#">Export pins</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
