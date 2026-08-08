@@ -9,6 +9,9 @@ export {
 export type { BlogClient } from './client';
 export { renderLexicalToHtml } from './lexical';
 export { applyFootnotes } from './footnotes';
+export { applyCodeBlocks } from './codeblocks';
+export { highlightCodeBlocks } from './highlight';
+export type { HighlightOptions } from './highlight';
 export { httpTransport, serviceTransport } from './transport';
 export type { Transport } from './transport';
 export type { ContentResponse, Post, PostType, ReviewMeta } from './types';

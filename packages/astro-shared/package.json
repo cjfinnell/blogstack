@@ -9,7 +9,8 @@
   "exports": {
     "./*.astro": "./src/*.astro",
     "./blog": "./src/blog.ts",
-    "./themes": "./src/themes.ts"
+    "./themes": "./src/themes.ts",
+    "./post-html": "./src/post-html.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

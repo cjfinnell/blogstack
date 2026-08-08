@@ -1,3 +1,5 @@
+import type { HighlightOptions } from '@blogstack/blog-client';
+
 export type ThemeName = 'default' | 'journal' | 'terminal';
 
 interface ColorSet {
@@ -37,8 +39,44 @@ export interface Theme {
     dateFormat: 'long' | 'iso';
     dateStyle: string;
     contentCss: string;
+    shiki: HighlightOptions;
   };
 }
+
+// Shiki emits per-token --shiki-light/--shiki-dark variables, so one rule set
+// serves every theme; only the theme pair in `post.shiki` differs. Every site
+// currently runs monokai in both modes — a dark code block on a light page is
+// the intended look — but the pair stays per-theme so a site can diverge.
+export const codeBlockCss = `
+  .content pre.shiki {
+    margin: 1.5em 0;
+    padding: 1em 1.15em;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 0.85em;
+    line-height: 1.55;
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+  }
+  .content pre.shiki code {
+    background: none;
+    padding: 0;
+    font-size: inherit;
+  }
+  .content pre.shiki span {
+    color: var(--shiki-light);
+  }
+  @media (prefers-color-scheme: dark) {
+    .content pre.shiki {
+      color: var(--shiki-dark);
+      background-color: var(--shiki-dark-bg);
+    }
+    .content pre.shiki span {
+      color: var(--shiki-dark);
+    }
+  }
+`;
 
 export const themes: Record<ThemeName, Theme> = {
   default: {
@@ -74,15 +112,16 @@ export const themes: Record<ThemeName, Theme> = {
     post: {
       dateFormat: 'long',
       dateStyle: 'color: var(--muted); font-size: 0.9rem;',
+      shiki: { light: 'monokai', dark: 'monokai' },
       contentCss: `
-        .content :global(p) { margin: 1em 0; }
-        .content :global(blockquote) {
+        .content p { margin: 1em 0; }
+        .content blockquote {
           border-left: 3px solid var(--border);
           margin: 1em 0;
           padding-left: 1em;
           color: var(--muted);
         }
-        .content :global(code) {
+        .content code {
           background: var(--border);
           padding: 0.15em 0.4em;
           border-radius: 4px;
@@ -132,16 +171,17 @@ export const themes: Record<ThemeName, Theme> = {
     post: {
       dateFormat: 'long',
       dateStyle: 'color: var(--muted); font-size: 0.9rem; font-style: italic;',
+      shiki: { light: 'monokai', dark: 'monokai' },
       contentCss: `
-        .content :global(p) { margin: 1.25em 0; }
-        .content :global(blockquote) {
+        .content p { margin: 1.25em 0; }
+        .content blockquote {
           border-left: 2px solid var(--accent);
           margin: 1.5em 0;
           padding-left: 1.25em;
           color: var(--muted);
           font-style: italic;
         }
-        .content :global(code) {
+        .content code {
           background: var(--border);
           padding: 0.15em 0.4em;
           border-radius: 3px;
@@ -190,15 +230,16 @@ export const themes: Record<ThemeName, Theme> = {
     post: {
       dateFormat: 'iso',
       dateStyle: 'color: var(--muted); font-size: 0.85rem;',
+      shiki: { light: 'monokai', dark: 'monokai' },
       contentCss: `
-        .content :global(p) { margin: 1em 0; }
-        .content :global(blockquote) {
+        .content p { margin: 1em 0; }
+        .content blockquote {
           border-left: 3px solid var(--accent);
           margin: 1em 0;
           padding-left: 1em;
           color: var(--muted);
         }
-        .content :global(code) {
+        .content code {
           background: var(--border);
           padding: 0.15em 0.4em;
           border-radius: 2px;

@@ -1,5 +1,5 @@
 ---
-import { themes, type ThemeName } from './themes';
+import { codeBlockCss, themes, type ThemeName } from './themes';
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,4 +33,4 @@ function formatDate(iso: string): string {
   </article>
 </Layout>
 
-<style is:global set:html={p.contentCss}></style>
+<style is:global set:html={p.contentCss + codeBlockCss}></style>
