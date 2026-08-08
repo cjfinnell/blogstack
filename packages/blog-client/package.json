@@ -11,6 +11,9 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "shiki": "^4.4.2"
+  },
   "devDependencies": {
     "typescript": "^6.0.3",
     "vitest": "^4.0.15"

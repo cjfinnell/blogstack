@@ -60,5 +60,21 @@
         "cuisineTags": ["vegan", "mediterranean"]
       }
     }
+  },
+  {
+    "id": "fixture-4",
+    "slug": "fixture-4",
+    "title": "Fenced code",
+    "status": "published",
+    "collectionId": "blog-posts",
+    "created_at": 1722470400000,
+    "updated_at": 1722470400000,
+    "data": {
+      "title": "Fenced code",
+      "slug": "fenced-code",
+      "content": "<p dir=\"ltr\"><span style=\"white-space: pre-wrap;\">The editor saves HTML, not a Lexical tree.</span><br><br><span style=\"white-space: pre-wrap;\">```js</span><br><span style=\"white-space: pre-wrap;\">const x = 1;</span><br><span style=\"white-space: pre-wrap;\">```</span><br><br><span style=\"white-space: pre-wrap;\">And `inline` code too.</span></p>",
+      "author": "fixture-author",
+      "publishedAt": "2024-08-01T00:00:00.000Z"
+    }
   }
 ]

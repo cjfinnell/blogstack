@@ -2,6 +2,7 @@
 // The public content API returns this tree as-is (no server-side HTML
 // serializer is exported by @sonicjs-cms/core), so rendering happens here.
 
+import { applyCodeBlocks } from './codeblocks';
 import { applyFootnotes } from './footnotes';
 
 const FORMAT_BOLD = 1;
@@ -87,6 +88,10 @@ function renderNode(node: LexicalNode): string {
   }
 }
 
+function postProcess(html: string): string {
+  return applyFootnotes(applyCodeBlocks(html));
+}
+
 export function renderLexicalToHtml(content: unknown): string {
   if (!content) return '';
   let doc: LexicalDoc | null;
@@ -94,14 +99,14 @@ export function renderLexicalToHtml(content: unknown): string {
     try {
       doc = JSON.parse(content) as LexicalDoc;
     } catch {
-      // Some rows predate the Lexical editor and hold raw HTML instead of a
-      // Lexical JSON tree (e.g. seeded/legacy posts) — pass it through as-is
-      // rather than failing the whole build over one bad row.
-      return content;
+      // The editor saves serialized HTML, not a Lexical JSON tree, and some
+      // rows predate the editor entirely — take the markup as the rendered
+      // output rather than failing the whole build over one unparseable row.
+      return postProcess(content);
     }
   } else {
     doc = content as LexicalDoc;
   }
   if (!doc?.root) return '';
-  return applyFootnotes(renderNode(doc.root));
+  return postProcess(renderNode(doc.root));
 }

@@ -2,6 +2,7 @@
 import type { ReviewMeta } from '@blogstack/blog-client';
 import BaseLayout from './BaseLayout.astro';
 import ReviewHeader from '../components/ReviewHeader.astro';
+import { codeBlockCss } from '@blogstack/astro-shared/themes';
 
 interface Props {
   title: string;
@@ -90,3 +91,5 @@ const { title, publishedAt, review } = Astro.props;
     border-radius: 6px;
   }
 </style>
+
+<style is:global set:html={codeBlockCss}></style>

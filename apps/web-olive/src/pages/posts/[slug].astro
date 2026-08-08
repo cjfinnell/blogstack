@@ -1,14 +1,10 @@
 ---
 import PostLayout from '../../layouts/PostLayout.astro';
 import ReviewLayout from '../../layouts/ReviewLayout.astro';
-import {
-  postPublishedAt,
-  postSlug,
-  postTitle,
-  renderLexicalToHtml,
-  reviewMeta,
-} from '@blogstack/blog-client';
+import { postPublishedAt, postSlug, postTitle, reviewMeta } from '@blogstack/blog-client';
 import { blog } from '@blogstack/astro-shared/blog';
+import { renderPostHtml } from '@blogstack/astro-shared/post-html';
+import { theme } from '../../site';
 
 export async function getStaticPaths() {
   const posts = await blog.getPublishedPosts(100);
@@ -19,7 +15,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const html = renderLexicalToHtml(post.data?.content);
+const html = await renderPostHtml(post.data?.content, theme);
 const review = reviewMeta(post);
 ---
 
