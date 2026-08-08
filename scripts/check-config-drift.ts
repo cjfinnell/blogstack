@@ -33,7 +33,7 @@ function renderTemplate(env: Record<string, string>): string {
 
 // Minimal ">=X.Y.Z" range check — the only shape used in this repo's engines fields.
 function satisfiesMinNode(version: string, range: string): boolean {
-  const m = range.match(/^>=\s*(\d+)\.(\d+)\.(\d+)/);
+  const m = /^>=\s*(\d+)\.(\d+)\.(\d+)/.exec(range);
   if (!m) return true; // unrecognized range shape — don't fail the check on it
   const [, rMaj, rMin, rPatch] = m.map(Number.parseFloat.bind(Number)) as unknown as [
     number,
@@ -41,7 +41,7 @@ function satisfiesMinNode(version: string, range: string): boolean {
     number,
     number,
   ];
-  const [vMaj, vMin, vPatch] = version.split('.').map(Number);
+  const [vMaj = 0, vMin = 0, vPatch = 0] = version.split('.').map(Number);
   if (vMaj !== rMaj) return vMaj > rMaj;
   if (vMin !== rMin) return vMin > rMin;
   return vPatch >= rPatch;
@@ -49,10 +49,10 @@ function satisfiesMinNode(version: string, range: string): boolean {
 
 interface WranglerEnvBlock {
   assets?: { directory?: string };
-  d1_databases?: Array<{ database_name?: string }>;
-  r2_buckets?: Array<{ bucket_name?: string }>;
+  d1_databases?: { database_name?: string }[];
+  r2_buckets?: { bucket_name?: string }[];
   vars?: Record<string, string>;
-  routes?: Array<{ pattern?: string; custom_domain?: boolean }>;
+  routes?: { pattern?: string; custom_domain?: boolean }[];
   workers_dev?: boolean;
   preview_urls?: boolean;
 }
@@ -78,17 +78,19 @@ export function checkConfigDrift(): string[] {
   } else {
     const d1Name = devBlock.d1_databases?.[0]?.database_name;
     if (d1Name !== 'blogstack-dev-db') {
-      errors.push(`[env.dev] d1 database_name is "${d1Name}", expected "blogstack-dev-db"`);
+      errors.push(`[env.dev] d1 database_name is "${String(d1Name)}", expected "blogstack-dev-db"`);
     }
     const bucketName = devBlock.r2_buckets?.[0]?.bucket_name;
     if (bucketName !== 'blogstack-dev-media') {
-      errors.push(`[env.dev] r2 bucket_name is "${bucketName}", expected "blogstack-dev-media"`);
+      errors.push(
+        `[env.dev] r2 bucket_name is "${String(bucketName)}", expected "blogstack-dev-media"`,
+      );
     }
     const corsOrigins = (devBlock.vars?.CORS_ORIGINS ?? '')
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
-    const expectedPorts = Object.values(sites).map((s) => `http://localhost:${s.devPort}`);
+    const expectedPorts = Object.values(sites).map((s) => `http://localhost:${String(s.devPort)}`);
     const sameSet =
       corsOrigins.length === expectedPorts.length &&
       expectedPorts.every((p) => corsOrigins.includes(p));
@@ -117,14 +119,16 @@ export function checkConfigDrift(): string[] {
     if (webBlock) {
       if (webBlock.assets?.directory !== expectedDir) {
         errors.push(
-          `[env.${webKey}] assets.directory is "${webBlock.assets?.directory}", expected "${expectedDir}"`,
+          `[env.${webKey}] assets.directory is "${String(webBlock.assets?.directory)}", expected "${expectedDir}"`,
         );
       }
       // preview_urls must stay off on production Workers: previews are their own
       // per-PR Workers, so versioned <hash>-<worker>.workers.dev URLs on the
       // production Worker would only be an unmonitored way around the custom domain.
       if (webBlock.preview_urls !== false) {
-        errors.push(`[env.${webKey}] preview_urls is ${webBlock.preview_urls}, expected false`);
+        errors.push(
+          `[env.${webKey}] preview_urls is ${String(webBlock.preview_urls)}, expected false`,
+        );
       }
     }
 
@@ -132,7 +136,7 @@ export function checkConfigDrift(): string[] {
       // Previews serve the same bundle the production Worker would...
       if (previewBlock.assets?.directory !== expectedDir) {
         errors.push(
-          `[env.${previewKey}] assets.directory is "${previewBlock.assets?.directory}", expected "${expectedDir}"`,
+          `[env.${previewKey}] assets.directory is "${String(previewBlock.assets?.directory)}", expected "${expectedDir}"`,
         );
       }
       // ...but must never be reachable on a production hostname. preview.yml
@@ -143,7 +147,7 @@ export function checkConfigDrift(): string[] {
       }
       if (previewBlock.workers_dev !== true) {
         errors.push(
-          `[env.${previewKey}] workers_dev is ${previewBlock.workers_dev}, expected true`,
+          `[env.${previewKey}] workers_dev is ${String(previewBlock.workers_dev)}, expected true`,
         );
       }
       // Preview Workers are assets-only clones. A binding here would be a real
@@ -158,14 +162,14 @@ export function checkConfigDrift(): string[] {
       const d1Name = cmsBlock.d1_databases?.[0]?.database_name;
       if (d1Name !== expectedDbName) {
         errors.push(
-          `[env.${cmsKey}] d1 database_name is "${d1Name}", expected "${expectedDbName}"`,
+          `[env.${cmsKey}] d1 database_name is "${String(d1Name)}", expected "${expectedDbName}"`,
         );
       }
       const expectedBucket = `blogstack-${siteId}-media`;
       const bucketName = cmsBlock.r2_buckets?.[0]?.bucket_name;
       if (bucketName !== expectedBucket) {
         errors.push(
-          `[env.${cmsKey}] r2 bucket_name is "${bucketName}", expected "${expectedBucket}"`,
+          `[env.${cmsKey}] r2 bucket_name is "${String(bucketName)}", expected "${expectedBucket}"`,
         );
       }
     }

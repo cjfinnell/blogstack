@@ -20,9 +20,9 @@ export function createBlogClient(transport: Transport) {
   async function getPublishedPosts(limit = 10, offset = 0): Promise<Post[]> {
     const where = publishedFilter();
     const res = await transport.fetch(
-      `/api/${COLLECTION_PATH}?where=${where}&limit=${limit}&offset=${offset}`,
+      `/api/${COLLECTION_PATH}?where=${where}&limit=${String(limit)}&offset=${String(offset)}`,
     );
-    if (!res.ok) throw new Error(`Failed to fetch posts: ${res.status}`);
+    if (!res.ok) throw new Error(`Failed to fetch posts: ${String(res.status)}`);
     const { data } = (await res.json()) as ContentResponse;
     return data;
   }
@@ -30,7 +30,7 @@ export function createBlogClient(transport: Transport) {
   async function getPostBySlug(slug: string): Promise<Post | null> {
     const where = publishedFilter([{ field: 'data.slug', operator: 'equals', value: slug }]);
     const res = await transport.fetch(`/api/${COLLECTION_PATH}?where=${where}&limit=1`);
-    if (!res.ok) throw new Error(`Failed to fetch post: ${res.status}`);
+    if (!res.ok) throw new Error(`Failed to fetch post: ${String(res.status)}`);
     const { data } = (await res.json()) as ContentResponse;
     return data[0] ?? null;
   }
@@ -41,15 +41,15 @@ export function createBlogClient(transport: Transport) {
 export type BlogClient = ReturnType<typeof createBlogClient>;
 
 export function postSlug(post: Post): string {
-  return post.data?.slug ?? post.slug;
+  return post.data.slug ?? post.slug;
 }
 
 export function postTitle(post: Post): string {
-  return post.data?.title ?? post.title;
+  return post.data.title ?? post.title;
 }
 
 export function postPublishedAt(post: Post): string | null {
-  return post.data?.publishedAt || null;
+  return post.data.publishedAt ?? null;
 }
 
 const POST_TYPES: PostType[] = ['essay', 'review'];
@@ -58,7 +58,7 @@ const POST_TYPES: PostType[] = ['essay', 'review'];
 // and a future CMS-side value could reach a frontend that predates it. Both
 // read as an essay rather than rendering nothing.
 export function postType(post: Post): PostType {
-  const value = post.data?.postType;
+  const value = post.data.postType;
   return value && POST_TYPES.includes(value) ? value : 'essay';
 }
 
@@ -74,7 +74,7 @@ function hasReviewContent(review: ReviewMeta): boolean {
 
 export function reviewMeta(post: Post): ReviewMeta | null {
   if (postType(post) !== 'review') return null;
-  const review = post.data?.review;
+  const review = post.data.review;
   if (!review || !hasReviewContent(review)) return null;
   return review;
 }

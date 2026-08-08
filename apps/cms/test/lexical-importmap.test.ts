@@ -30,7 +30,7 @@ describe('lexical import map hoist', () => {
     const versions = new Set<string>();
     for (const file of coreDistFiles()) {
       for (const m of readFileSync(file, 'utf8').matchAll(/LEXICAL_VERSION = "([^"]+)"/g)) {
-        versions.add(m[1]);
+        if (m[1] !== undefined) versions.add(m[1]);
       }
     }
     expect(versions.size, 'core no longer declares LEXICAL_VERSION — recheck the workaround').toBe(
