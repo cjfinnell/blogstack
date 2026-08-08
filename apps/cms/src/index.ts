@@ -15,7 +15,7 @@ const config: SonicJSConfig = {
     // package's own declarations — a pre-existing gap in the beta's types,
     // not a runtime issue (the core example plugin hits the identical
     // error). Confirmed by typechecking sonicjs-blog-base unmodified.
-    register: [publishHookPlugin] as NonNullable<SonicJSConfig['plugins']>['register'],
+    register: [publishHookPlugin] as NonNullable<NonNullable<SonicJSConfig['plugins']>['register']>,
   },
 };
 

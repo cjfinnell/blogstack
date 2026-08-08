@@ -24,11 +24,16 @@ export interface Post {
   created_at: number;
   updated_at: number;
   data: {
-    title: string;
-    slug: string;
+    // Nested `data.*` mirrors the top-level field on every row written since
+    // the CMS added the nested content shape; rows from before that migration
+    // only have the top-level field, so these read as genuinely optional —
+    // see postSlug/postTitle/postPublishedAt below, which fall back to the
+    // top-level value.
+    title?: string;
+    slug?: string;
     content: string; // JSON-encoded lexical tree — parse before rendering
     author: string;
-    publishedAt: string;
+    publishedAt?: string;
     // Absent on every row written before the review post type existed.
     postType?: PostType;
     review?: ReviewMeta;

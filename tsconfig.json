@@ -6,9 +6,30 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "noEmit": true,
+
+    // Baseline strict-mode family (noImplicitAny, strictNullChecks,
+    // strictFunctionTypes, strictBindCallApply, strictPropertyInitialization,
+    // noImplicitThis, alwaysStrict, useUnknownInCatchVariables).
     "strict": true,
+    // Everything below is a real check TypeScript ships but leaves off strict
+    // mode; the Astro apps get the equivalent set via astro/tsconfigs/strictest,
+    // so this workspace-root config mirrors that tier for consistency.
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    // Error on switch cases that fall through without a break/return.
+    "noFallthroughCasesInSwitch": true,
+    // Force `override` on methods overriding a base class member.
+    "noImplicitOverride": true,
+    // Error on code paths that fall off the end of a function without returning.
+    "noImplicitReturns": true,
+    // Reading arr[i] or a Record's value yields `T | undefined`, not `T`.
+    "noUncheckedIndexedAccess": true,
+    // Assigning `undefined` to an optional prop must say so in its type.
+    "exactOptionalPropertyTypes": true,
+    // Unreachable code and unused labels are errors, not warnings.
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

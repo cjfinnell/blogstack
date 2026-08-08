@@ -22,6 +22,8 @@ export function startFixtureServer(port: number): Promise<Server> {
   });
 
   return new Promise((resolveServer) => {
-    server.listen(port, () => resolveServer(server));
+    server.listen(port, () => {
+      resolveServer(server);
+    });
   });
 }

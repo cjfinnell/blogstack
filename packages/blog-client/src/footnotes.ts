@@ -11,9 +11,12 @@ export function applyFootnotes(html: string): string {
   if (!html) return html;
 
   const section = NOTES_SECTION.exec(html);
-  if (!section) return html;
+  // The capture group is unconditional in NOTES_SECTION, but TS can't infer
+  // that from the pattern, so it types every capture as possibly undefined.
+  const notesListHtml = section?.[1];
+  if (!section || notesListHtml === undefined) return html;
 
-  const items = [...section[1].matchAll(LIST_ITEM)].map((m) => m[1]);
+  const items = [...notesListHtml.matchAll(LIST_ITEM)].map((m) => m[1] ?? '');
   if (items.length === 0) return html;
 
   const body = html.slice(0, section.index);
@@ -24,7 +27,7 @@ export function applyFootnotes(html: string): string {
   const linkedBody = body.replace(MARKER, (match, raw: string) => {
     const n = Number(raw);
     if (n < 1 || n > items.length) return match;
-    return `<sup id="fnref-${n}"><a href="#fn-${n}">${n}</a></sup>`;
+    return `<sup id="fnref-${String(n)}"><a href="#fn-${String(n)}">${String(n)}</a></sup>`;
   });
 
   // No marker actually linked — an ordinary "Notes" section (terminal/folio
@@ -35,7 +38,7 @@ export function applyFootnotes(html: string): string {
   const notes = items
     .map(
       (text, i) =>
-        `<li id="fn-${i + 1}">${text} <a href="#fnref-${i + 1}" aria-label="Back to content">&#8617;</a></li>`,
+        `<li id="fn-${String(i + 1)}">${text} <a href="#fnref-${String(i + 1)}" aria-label="Back to content">&#8617;</a></li>`,
     )
     .join('');
 

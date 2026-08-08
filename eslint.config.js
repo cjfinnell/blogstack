@@ -17,9 +17,22 @@ export default tseslint.config(
       'wrangler.toml',
     ],
   },
+  // Plain-JS recommended rule set (no type information required).
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+  // Highest type-aware tiers typescript-eslint ships:
+  // - strictTypeChecked: every recommendedTypeChecked rule plus the rules
+  //   that catch likely bugs but aren't "safe enough" for recommended
+  //   (no-unnecessary-condition, no-non-null-assertion, prefer-nullish-coalescing, ...).
+  // - stylisticTypeChecked: consistency rules (consistent-type-imports,
+  //   prefer-optional-chain, etc.) that need type info to apply correctly.
+  ...tseslint.configs.strictTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
+  // Astro-specific correctness rules (unused CSS selectors, invalid
+  // frontmatter, etc.) plus the strict a11y rule set bundled with the
+  // plugin, since our .astro templates render markup by hand with no
+  // framework-level a11y linting elsewhere in the pipeline.
   ...astro.configs.recommended,
+  ...astro.configs['jsx-a11y-strict'],
   {
     languageOptions: {
       parserOptions: {
@@ -29,7 +42,9 @@ export default tseslint.config(
       },
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      // Error (not warn) so `npm run lint` fails the build on dead code;
+      // `_`-prefixed args stay exempt for intentionally-unused callback params.
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
   {
@@ -54,6 +69,9 @@ export default tseslint.config(
     },
   },
   {
+    // Plain JS config/script files aren't part of any tsconfig `include`,
+    // so type-aware rules would error with "not found in project" instead
+    // of linting anything useful; fall back to the non-type-checked rules.
     files: ['**/*.js', '**/*.mjs'],
     ...tseslint.configs.disableTypeChecked,
     languageOptions: {
@@ -70,5 +88,7 @@ export default tseslint.config(
       '@typescript-eslint/require-await': 'off',
     },
   },
+  // Must stay last: turns off every ESLint stylistic rule that would
+  // conflict with Prettier, which owns formatting instead.
   eslintConfigPrettier,
 );

@@ -43,13 +43,13 @@ async function hashPassword(password: string) {
   const hashHex = Array.from(new Uint8Array(hashBuffer))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
-  return `pbkdf2:${iterations}:${saltHex}:${hashHex}`;
+  return `pbkdf2:${String(iterations)}:${saltHex}:${hashHex}`;
 }
 
 async function seed() {
   const remote = process.env.SEED_REMOTE === '1';
-  const email = process.env.ADMIN_EMAIL || 'admin@connorfinnell.com';
-  const environment = process.env.SEED_ENV || 'dev';
+  const email = process.env.ADMIN_EMAIL ?? 'admin@connorfinnell.com';
+  const environment = process.env.SEED_ENV ?? 'dev';
   const { env, dispose } = await getPlatformProxy(
     remote ? { environment, remoteBindings: true } : { environment },
   );
@@ -96,7 +96,7 @@ async function seed() {
     }
     const passwordHash = await hashPassword(password);
     const nowMs = Date.now();
-    const odid = `admin-${nowMs}-${Math.random().toString(36).slice(2, 11)}`;
+    const odid = `admin-${String(nowMs)}-${Math.random().toString(36).slice(2, 11)}`;
 
     await db.batch([
       db
@@ -133,7 +133,7 @@ seed()
     console.log('Seeding complete');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch((error: unknown) => {
     console.error('Seeding failed:', error);
     process.exit(1);
   });
