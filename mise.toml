@@ -1,5 +1,5 @@
 [tools]
-node = "24.18.1"          # matches engines.node ">=24.16.0" pinned across every workspace
+node = "24.19.0"          # matches engines.node ">=24.16.0" pinned across every workspace
 
 [env]
 _.file = ".env.local"     # gitignored hostnames, auto-loaded for local dev
