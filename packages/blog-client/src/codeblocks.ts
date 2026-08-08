@@ -32,7 +32,13 @@ function splitChunks(html: string): Chunk[] {
   let match: RegExpExecArray | null;
   while ((match = PARAGRAPH.exec(html)) !== null) {
     if (match.index > cursor) chunks.push({ kind: 'raw', html: html.slice(cursor, match.index) });
-    chunks.push({ kind: 'paragraph', open: match[1], lines: match[2].split(LINE_BREAK) });
+    // Both PARAGRAPH capture groups are non-optional in the pattern, but
+    // indexed access is typed as possibly undefined regardless.
+    chunks.push({
+      kind: 'paragraph',
+      open: match[1] ?? '',
+      lines: (match[2] ?? '').split(LINE_BREAK),
+    });
     cursor = match.index + match[0].length;
   }
   if (cursor < html.length) chunks.push({ kind: 'raw', html: html.slice(cursor) });
@@ -75,8 +81,8 @@ function applyInlineCode(lineHtml: string): string {
 function trimBlankEdges(lines: string[]): string[] {
   let start = 0;
   let end = lines.length;
-  while (start < end && textOf(lines[start]).trim() === '') start++;
-  while (end > start && textOf(lines[end - 1]).trim() === '') end--;
+  while (start < end && textOf(lines[start] ?? '').trim() === '') start++;
+  while (end > start && textOf(lines[end - 1] ?? '').trim() === '') end--;
   return lines.slice(start, end);
 }
 
@@ -93,7 +99,7 @@ function renderCodeBlock(lang: string, lines: string[]): string {
 }
 
 export function applyCodeBlocks(html: string): string {
-  if (!html || !html.includes('`')) return html;
+  if (!html.includes('`')) return html;
 
   const out: string[] = [];
   let pending: string[] = [];
@@ -126,7 +132,9 @@ export function applyCodeBlocks(html: string): string {
       if (fenceLang === null) {
         if (fence) {
           flushParagraph();
-          fenceLang = fence[1];
+          // FENCE's capture group is `*` (may be empty) but always present
+          // once the pattern matches at all.
+          fenceLang = fence[1] ?? '';
           fenceLines = [];
         } else {
           pending.push(line);

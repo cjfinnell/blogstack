@@ -29,38 +29,54 @@ function jsonResponse(body: unknown, status = 200) {
 
 describe('createBlogClient', () => {
   it('requests the direct blog_post collection path, not the cached content endpoint', async () => {
-    const fetchSpy = vi.fn(async (_path: string) => jsonResponse({ data: [], meta: { count: 0 } }));
+    const fetchSpy = vi.fn<Transport['fetch']>(async (_path) =>
+      jsonResponse({ data: [], meta: { count: 0 } }),
+    );
     const transport: Transport = { fetch: fetchSpy };
     const client = createBlogClient(transport);
 
     await client.getPublishedPosts();
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
-    const [path] = fetchSpy.mock.calls[0];
+    const call = fetchSpy.mock.calls[0];
+    if (!call) throw new Error('expected fetch to have been called');
+    const [path] = call;
     expect(path.startsWith('/api/blog_post?')).toBe(true);
     expect(path).not.toContain('/api/collections/blog-posts/content');
   });
 
   it('encodes the published-status where filter', async () => {
-    const fetchSpy = vi.fn(async (_path: string) => jsonResponse({ data: [], meta: { count: 0 } }));
+    const fetchSpy = vi.fn<Transport['fetch']>(async (_path) =>
+      jsonResponse({ data: [], meta: { count: 0 } }),
+    );
     const client = createBlogClient({ fetch: fetchSpy });
 
     await client.getPublishedPosts();
 
-    const [path] = fetchSpy.mock.calls[0];
-    const where: unknown = JSON.parse(new URL(path, 'http://x').searchParams.get('where')!);
+    const call = fetchSpy.mock.calls[0];
+    if (!call) throw new Error('expected fetch to have been called');
+    const [path] = call;
+    const whereParam = new URL(path, 'http://x').searchParams.get('where');
+    if (whereParam === null) throw new Error('expected a where param');
+    const where: unknown = JSON.parse(whereParam);
     expect(where).toEqual({ and: [{ field: 'status', operator: 'equals', value: 'published' }] });
   });
 
   it('adds a slug filter for getPostBySlug', async () => {
-    const fetchSpy = vi.fn(async (_path: string) => jsonResponse({ data: [], meta: { count: 0 } }));
+    const fetchSpy = vi.fn<Transport['fetch']>(async (_path) =>
+      jsonResponse({ data: [], meta: { count: 0 } }),
+    );
     const client = createBlogClient({ fetch: fetchSpy });
 
     await client.getPostBySlug('my-post');
 
-    const [path] = fetchSpy.mock.calls[0];
+    const call = fetchSpy.mock.calls[0];
+    if (!call) throw new Error('expected fetch to have been called');
+    const [path] = call;
     const url = new URL(path, 'http://x');
-    const where: unknown = JSON.parse(url.searchParams.get('where')!);
+    const whereParam = url.searchParams.get('where');
+    if (whereParam === null) throw new Error('expected a where param');
+    const where: unknown = JSON.parse(whereParam);
     expect(where).toEqual({
       and: [
         { field: 'status', operator: 'equals', value: 'published' },
@@ -145,8 +161,6 @@ describe('reviewMeta', () => {
     post.data.postType = 'review';
     post.data.review = {
       restaurant: '',
-      city: undefined,
-      rating: undefined,
       cuisineTags: [],
     };
     expect(reviewMeta(post)).toBeNull();

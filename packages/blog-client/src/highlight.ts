@@ -33,19 +33,22 @@ export async function highlightCodeBlocks(
   if (blocks.length === 0) return html;
 
   const rendered = await Promise.all(
-    blocks.map((block) =>
-      codeToHtml(decode(block[2]), {
+    blocks.map(async (block) => ({
+      block,
+      // CODE_BLOCK's second capture group is non-optional in the pattern,
+      // but indexed access is typed as possibly undefined regardless.
+      piece: await codeToHtml(decode(block[2] ?? ''), {
         lang: resolveLang(block[1]),
         themes: { light, dark },
         defaultColor: false,
       }),
-    ),
+    })),
   );
 
   let cursor = 0;
   let out = '';
-  blocks.forEach((block, i) => {
-    out += html.slice(cursor, block.index) + rendered[i];
+  rendered.forEach(({ block, piece }) => {
+    out += html.slice(cursor, block.index) + piece;
     cursor = block.index + block[0].length;
   });
   return out + html.slice(cursor);
