@@ -76,6 +76,20 @@ export const codeBlockCss = `
       color: var(--shiki-dark);
     }
   }
+  :root[data-theme='light'] .content pre.shiki {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+  }
+  :root[data-theme='light'] .content pre.shiki span {
+    color: var(--shiki-light);
+  }
+  :root[data-theme='dark'] .content pre.shiki {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
+  :root[data-theme='dark'] .content pre.shiki span {
+    color: var(--shiki-dark);
+  }
 `;
 
 export const themes: Record<ThemeName, Theme> = {
