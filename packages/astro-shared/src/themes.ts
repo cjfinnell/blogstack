@@ -1,4 +1,4 @@
-import type { HighlightOptions } from '@blogstack/blog-client';
+import { monokaiLight, type HighlightOptions } from '@blogstack/blog-client';
 
 export type ThemeName = 'default' | 'journal' | 'terminal';
 
@@ -44,9 +44,10 @@ export interface Theme {
 }
 
 // Shiki emits per-token --shiki-light/--shiki-dark variables, so one rule set
-// serves every theme; only the theme pair in `post.shiki` differs. Every site
-// currently runs monokai in both modes — a dark code block on a light page is
-// the intended look — but the pair stays per-theme so a site can diverge.
+// serves every theme; only the theme pair in `post.shiki` differs. `default`
+// and `journal` keep monokai in both slots — a dark code block on a light
+// page is the intended look there — while `terminal` pairs it with
+// `monokaiLight` since its own light-mode chrome is a monokai derivative.
 export const codeBlockCss = `
   .content pre.shiki {
     margin: 1.5em 0;
@@ -244,7 +245,7 @@ export const themes: Record<ThemeName, Theme> = {
     post: {
       dateFormat: 'iso',
       dateStyle: 'color: var(--muted); font-size: 0.85rem;',
-      shiki: { light: 'monokai', dark: 'monokai' },
+      shiki: { light: monokaiLight, dark: 'monokai' },
       contentCss: `
         .content p { margin: 1em 0; }
         .content blockquote {

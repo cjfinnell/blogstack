@@ -1,13 +1,19 @@
 // Runs at build time only (SSG), so Shiki's cost never reaches the reader and
 // no highlighter script ships to the browser.
 
-import { bundledLanguages, codeToHtml, type BundledLanguage, type BundledTheme } from 'shiki';
+import {
+  bundledLanguages,
+  codeToHtml,
+  type BundledLanguage,
+  type BundledTheme,
+  type ThemeRegistration,
+} from 'shiki';
 
 const CODE_BLOCK = /<pre><code(?: class="language-([^"]+)")?>([\s\S]*?)<\/code><\/pre>/g;
 
 export interface HighlightOptions {
-  light: BundledTheme;
-  dark: BundledTheme;
+  light: BundledTheme | ThemeRegistration;
+  dark: BundledTheme | ThemeRegistration;
 }
 
 function decode(s: string): string {
