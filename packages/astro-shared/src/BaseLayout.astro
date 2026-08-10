@@ -37,6 +37,22 @@ const rootCss = `
       --accent: ${override.accent};
     }
   }
+  :root[data-theme='light'] {
+    color-scheme: light;
+    --fg: ${theme.colors.light.fg};
+    --bg: ${theme.colors.light.bg};
+    --muted: ${theme.colors.light.muted};
+    --border: ${theme.colors.light.border};
+    --accent: ${theme.colors.light.accent};
+  }
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    --fg: ${theme.colors.dark.fg};
+    --bg: ${theme.colors.dark.bg};
+    --muted: ${theme.colors.dark.muted};
+    --border: ${theme.colors.dark.border};
+    --accent: ${theme.colors.dark.accent};
+  }
   * {
     box-sizing: border-box;
   }
@@ -76,6 +92,15 @@ const rootCss = `
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme-mode');
+          var mode = stored === 'light' || stored === 'dark' ? stored : 'auto';
+          document.documentElement.setAttribute('data-theme', mode);
+        } catch (e) {}
+      })();
+    </script>
     <style is:global set:html={rootCss}></style>
   </head>
   <body>
