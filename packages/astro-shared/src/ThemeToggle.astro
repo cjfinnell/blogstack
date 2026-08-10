@@ -1,0 +1,48 @@
+---
+
+---
+
+<button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle color theme">
+  <span class="theme-toggle-label"></span>
+</button>
+
+<style is:global>
+  .theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.8em;
+    padding: 0.3em 0.65em;
+    border-radius: 4px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .theme-toggle:hover {
+    color: var(--fg);
+    border-color: var(--fg);
+  }
+  .theme-toggle-label::before {
+    content: 'Auto';
+  }
+  html[data-theme='light'] .theme-toggle-label::before {
+    content: 'Light';
+  }
+  html[data-theme='dark'] .theme-toggle-label::before {
+    content: 'Dark';
+  }
+</style>
+
+<script is:inline>
+  document.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-theme-toggle]');
+    if (!button) return;
+    var order = ['auto', 'light', 'dark'];
+    var current = document.documentElement.getAttribute('data-theme') || 'auto';
+    var next = order[(order.indexOf(current) + 1) % order.length];
+    document.documentElement.setAttribute('data-theme', next);
+    try {
+      localStorage.setItem('theme-mode', next);
+    } catch (e) {}
+  });
+</script>

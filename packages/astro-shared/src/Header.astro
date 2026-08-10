@@ -1,4 +1,5 @@
 ---
+import ThemeToggle from './ThemeToggle.astro';
 import { themes, type ThemeName } from './themes';
 
 interface Props {
@@ -38,6 +39,9 @@ const headerCss = `
   nav a:not(.brand):hover {
     color: var(--fg);
   }
+  nav .theme-toggle {
+    margin-left: auto;
+  }
 `;
 ---
 
@@ -45,6 +49,7 @@ const headerCss = `
   <nav>
     <a href="/" class="brand">{brand}</a>
     {links.map((link) => <a href={link.href}>{link.label}</a>)}
+    <ThemeToggle />
   </nav>
 </header>
 
