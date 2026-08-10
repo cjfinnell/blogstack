@@ -59,6 +59,9 @@ export const codeBlockCss = `
     line-height: 1.55;
     color: var(--shiki-light);
     background-color: var(--shiki-light-bg);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      0 4px 10px rgba(0, 0, 0, 0.05);
   }
   .content pre.shiki code {
     background: none;
@@ -72,6 +75,10 @@ export const codeBlockCss = `
     .content pre.shiki {
       color: var(--shiki-dark);
       background-color: var(--shiki-dark-bg);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 1px 3px rgba(0, 0, 0, 0.3),
+        0 6px 16px rgba(0, 0, 0, 0.25);
     }
     .content pre.shiki span {
       color: var(--shiki-dark);
@@ -80,6 +87,9 @@ export const codeBlockCss = `
   :root[data-theme='light'] .content pre.shiki {
     color: var(--shiki-light);
     background-color: var(--shiki-light-bg);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      0 4px 10px rgba(0, 0, 0, 0.05);
   }
   :root[data-theme='light'] .content pre.shiki span {
     color: var(--shiki-light);
@@ -87,6 +97,10 @@ export const codeBlockCss = `
   :root[data-theme='dark'] .content pre.shiki {
     color: var(--shiki-dark);
     background-color: var(--shiki-dark-bg);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 1px 3px rgba(0, 0, 0, 0.3),
+      0 6px 16px rgba(0, 0, 0, 0.25);
   }
   :root[data-theme='dark'] .content pre.shiki span {
     color: var(--shiki-dark);
