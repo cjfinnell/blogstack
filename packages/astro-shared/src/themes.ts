@@ -1,4 +1,4 @@
-import type { HighlightOptions } from '@blogstack/blog-client';
+import { monokaiLight, type HighlightOptions } from '@blogstack/blog-client';
 
 export type ThemeName = 'default' | 'journal' | 'terminal';
 
@@ -44,9 +44,10 @@ export interface Theme {
 }
 
 // Shiki emits per-token --shiki-light/--shiki-dark variables, so one rule set
-// serves every theme; only the theme pair in `post.shiki` differs. Every site
-// currently runs monokai in both modes — a dark code block on a light page is
-// the intended look — but the pair stays per-theme so a site can diverge.
+// serves every theme; only the theme pair in `post.shiki` differs. `default`
+// and `journal` keep monokai in both slots — a dark code block on a light
+// page is the intended look there — while `terminal` pairs it with
+// `monokaiLight` since its own light-mode chrome is a monokai derivative.
 export const codeBlockCss = `
   .content pre.shiki {
     margin: 1.5em 0;
@@ -58,6 +59,9 @@ export const codeBlockCss = `
     line-height: 1.55;
     color: var(--shiki-light);
     background-color: var(--shiki-light-bg);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      0 4px 10px rgba(0, 0, 0, 0.05);
   }
   .content pre.shiki code {
     background: none;
@@ -71,10 +75,35 @@ export const codeBlockCss = `
     .content pre.shiki {
       color: var(--shiki-dark);
       background-color: var(--shiki-dark-bg);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 1px 3px rgba(0, 0, 0, 0.3),
+        0 6px 16px rgba(0, 0, 0, 0.25);
     }
     .content pre.shiki span {
       color: var(--shiki-dark);
     }
+  }
+  :root[data-theme='light'] .content pre.shiki {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+  :root[data-theme='light'] .content pre.shiki span {
+    color: var(--shiki-light);
+  }
+  :root[data-theme='dark'] .content pre.shiki {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 1px 3px rgba(0, 0, 0, 0.3),
+      0 6px 16px rgba(0, 0, 0, 0.25);
+  }
+  :root[data-theme='dark'] .content pre.shiki span {
+    color: var(--shiki-dark);
   }
 `;
 
@@ -195,18 +224,18 @@ export const themes: Record<ThemeName, Theme> = {
     defaultMode: 'dark',
     colors: {
       light: {
-        fg: '#0d1a0d',
-        bg: '#f4faf4',
-        muted: '#4a684a',
-        border: '#ccdccc',
-        accent: '#0f8a34',
+        fg: '#272822',
+        bg: '#fafaf8',
+        muted: '#75715e',
+        border: '#e5e2d9',
+        accent: '#c4265e',
       },
       dark: {
-        fg: '#d8f5d8',
-        bg: '#0a0e0a',
-        muted: '#6f9b6f',
-        border: '#1e2e1e',
-        accent: '#39ff6a',
+        fg: '#f8f8f2',
+        bg: '#272822',
+        muted: '#90908a',
+        border: '#3e3d32',
+        accent: '#f92672',
       },
     },
     maxWidth: '46rem',
@@ -230,7 +259,7 @@ export const themes: Record<ThemeName, Theme> = {
     post: {
       dateFormat: 'iso',
       dateStyle: 'color: var(--muted); font-size: 0.85rem;',
-      shiki: { light: 'monokai', dark: 'monokai' },
+      shiki: { light: monokaiLight, dark: 'monokai' },
       contentCss: `
         .content p { margin: 1em 0; }
         .content blockquote {

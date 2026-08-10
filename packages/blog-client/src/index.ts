@@ -12,6 +12,7 @@ export { applyFootnotes } from './footnotes';
 export { applyCodeBlocks } from './codeblocks';
 export { highlightCodeBlocks } from './highlight';
 export type { HighlightOptions } from './highlight';
+export { monokaiLight } from './monokai-light-theme';
 export { httpTransport, serviceTransport } from './transport';
 export type { Transport } from './transport';
 export type { ContentResponse, Post, PostType, ReviewMeta } from './types';
