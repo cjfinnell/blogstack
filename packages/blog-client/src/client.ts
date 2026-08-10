@@ -8,17 +8,26 @@ import type { ContentResponse, Post, PostType, ReviewMeta } from './types';
 // so nobody "fixes" this back to the broken one.
 const COLLECTION_PATH = 'blog_post';
 
-function publishedFilter(extra: Record<string, unknown>[] = []) {
-  return encodeURIComponent(
-    JSON.stringify({
-      and: [{ field: 'status', operator: 'equals', value: 'published' }, ...extra],
-    }),
-  );
+function postsFilter(includeDrafts: boolean, extra: Record<string, unknown>[] = []) {
+  const clauses = includeDrafts
+    ? extra
+    : [{ field: 'status', operator: 'equals', value: 'published' }, ...extra];
+  return encodeURIComponent(JSON.stringify({ and: clauses }));
 }
 
-export function createBlogClient(transport: Transport) {
+export interface BlogClientOptions {
+  // Baked in at construction, not threaded through per-call args or per-page
+  // code — which client a deploy target builds decides whether drafts show,
+  // not a flag callers have to remember to pass. See astro-shared/blog.ts,
+  // the one place that reads the build-time RENDER_MODE env var.
+  includeDrafts?: boolean;
+}
+
+export function createBlogClient(transport: Transport, opts: BlogClientOptions = {}) {
+  const includeDrafts = opts.includeDrafts ?? false;
+
   async function getPublishedPosts(limit = 10, offset = 0): Promise<Post[]> {
-    const where = publishedFilter();
+    const where = postsFilter(includeDrafts);
     const res = await transport.fetch(
       `/api/${COLLECTION_PATH}?where=${where}&limit=${String(limit)}&offset=${String(offset)}`,
     );
@@ -28,7 +37,9 @@ export function createBlogClient(transport: Transport) {
   }
 
   async function getPostBySlug(slug: string): Promise<Post | null> {
-    const where = publishedFilter([{ field: 'data.slug', operator: 'equals', value: slug }]);
+    const where = postsFilter(includeDrafts, [
+      { field: 'data.slug', operator: 'equals', value: slug },
+    ]);
     const res = await transport.fetch(`/api/${COLLECTION_PATH}?where=${where}&limit=1`);
     if (!res.ok) throw new Error(`Failed to fetch post: ${String(res.status)}`);
     const { data } = (await res.json()) as ContentResponse;

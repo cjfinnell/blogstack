@@ -6,7 +6,14 @@
 // path if a CMS publish hook stops firing. See PLAN.md#local-development.
 
 import { spawnSync } from 'node:child_process';
-import { sites, siteIds, type SiteId } from '../config/sites.ts';
+import {
+  sites,
+  siteIds,
+  draftSites,
+  draftSiteIds,
+  type SiteId,
+  type DraftSiteId,
+} from '../config/sites.ts';
 
 function run(cmd: string, args: string[], extraEnv: NodeJS.ProcessEnv = {}) {
   const result = spawnSync(cmd, args, { stdio: 'inherit', env: { ...process.env, ...extraEnv } });
@@ -19,11 +26,56 @@ function isSiteId(value: string | undefined): value is SiteId {
   return !!value && (siteIds as string[]).includes(value);
 }
 
+function isDraftSiteId(value: string | undefined): value is DraftSiteId {
+  return !!value && (draftSiteIds as string[]).includes(value);
+}
+
 const siteFlagIndex = process.argv.indexOf('--site');
 const siteArg = siteFlagIndex !== -1 ? process.argv[siteFlagIndex + 1] : undefined;
 
+if (isDraftSiteId(siteArg)) {
+  const draft = draftSites[siteArg];
+  if (!draft.deployed) {
+    console.error(
+      `"${siteArg}" is not a deployed draft site (config/sites.ts draftSites has deployed: false). Nothing to release.`,
+    );
+    process.exit(1);
+  }
+
+  // No CMS deploy/migration here — a draft target reads its parent site's
+  // already-deployed CMS (draft.cms), never its own. Only the SSR web
+  // Worker gets built and deployed.
+  const themePrefix = draft.cms.toUpperCase();
+  const cmsHost = process.env[`${themePrefix}_CMS_HOST`];
+  const webOrigin = process.env[`${themePrefix}_WEB_DRAFT_ORIGIN`];
+
+  if (!cmsHost || !webOrigin) {
+    console.error(
+      `Missing ${themePrefix}_CMS_HOST / ${themePrefix}_WEB_DRAFT_ORIGIN. Set them in .env.local (or the shell env in CI).`,
+    );
+    process.exit(1);
+  }
+
+  console.log(`Releasing draft "${siteArg}" (reading CMS from "${draft.cms}")...`);
+
+  run('npm', ['run', 'gen-wrangler']);
+  run('npm', ['run', 'build', '--workspace', draft.app], {
+    CMS_URL: `https://${cmsHost}`,
+    SITE_URL: webOrigin,
+    RENDER_MODE: 'ssr',
+  });
+  run('npx', ['wrangler', 'deploy', '--env', `web_${siteArg}`]);
+
+  console.log(`Released draft "${siteArg}".`);
+  process.exit(0);
+}
+
 if (!isSiteId(siteArg)) {
-  console.error(`Usage: npm run release -- --site <site>\nSites: ${siteIds.join(', ')}`);
+  console.error(
+    `Usage: npm run release -- --site <site>\n` +
+      `Sites: ${siteIds.join(', ')}\n` +
+      `Draft sites: ${draftSiteIds.join(', ')}`,
+  );
   process.exit(1);
 }
 

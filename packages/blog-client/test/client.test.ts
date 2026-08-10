@@ -117,6 +117,40 @@ describe('createBlogClient', () => {
     const client = createBlogClient({ fetch: async () => jsonResponse({ error: 'nope' }, 404) });
     await expect(client.getPostBySlug('x')).rejects.toThrow(/404/);
   });
+
+  it('drops the status filter entirely when includeDrafts is set', async () => {
+    const fetchSpy = vi.fn<Transport['fetch']>(async (_path) =>
+      jsonResponse({ data: [], meta: { count: 0 } }),
+    );
+    const client = createBlogClient({ fetch: fetchSpy }, { includeDrafts: true });
+
+    await client.getPublishedPosts();
+
+    const call = fetchSpy.mock.calls[0];
+    if (!call) throw new Error('expected fetch to have been called');
+    const [path] = call;
+    const whereParam = new URL(path, 'http://x').searchParams.get('where');
+    if (whereParam === null) throw new Error('expected a where param');
+    const where: unknown = JSON.parse(whereParam);
+    expect(where).toEqual({ and: [] });
+  });
+
+  it('keeps the slug filter but drops status when includeDrafts is set', async () => {
+    const fetchSpy = vi.fn<Transport['fetch']>(async (_path) =>
+      jsonResponse({ data: [], meta: { count: 0 } }),
+    );
+    const client = createBlogClient({ fetch: fetchSpy }, { includeDrafts: true });
+
+    await client.getPostBySlug('my-post');
+
+    const call = fetchSpy.mock.calls[0];
+    if (!call) throw new Error('expected fetch to have been called');
+    const [path] = call;
+    const whereParam = new URL(path, 'http://x').searchParams.get('where');
+    if (whereParam === null) throw new Error('expected a where param');
+    const where: unknown = JSON.parse(whereParam);
+    expect(where).toEqual({ and: [{ field: 'data.slug', operator: 'equals', value: 'my-post' }] });
+  });
 });
 
 describe('postType', () => {

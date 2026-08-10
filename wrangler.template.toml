@@ -43,6 +43,24 @@ preview_urls = false
 assets = { directory = "apps/web-terminal/dist" }
 routes = [{ pattern = "${TERMINAL_WEB_HOST}", custom_domain = true }]
 
+# admin-draft: same app (apps/web-terminal), same @blogstack/astro-shared
+# components — nothing here is a second copy of the theme. The only
+# difference is the build: RENDER_MODE=ssr flips output:'server' at build
+# time (see astro.config.mjs) and the client bakes in includeDrafts, so this
+# Worker renders drafts+published on every request against the SAME CMS as
+# env.cms_terminal above — no separate CMS/D1/R2 deployed for this target.
+# `main` (not `assets`-only) because this is a Worker script, not a static
+# bundle: paths match @astrojs/cloudflare's build/server output tree exactly
+# (dist/server/entry.mjs, dist/client/ — verified against a real build, not
+# assumed).
+[env.web_terminal_draft]
+name = "blogstack-web-terminal-draft"
+workers_dev = false
+preview_urls = false
+main = "apps/web-terminal/dist/server/entry.mjs"
+assets = { directory = "apps/web-terminal/dist/client", binding = "ASSETS" }
+routes = [{ pattern = "${TERMINAL_WEB_DRAFT_HOST}", custom_domain = true }]
+
 # ---------- folio ----------
 [env.cms_folio]
 name = "blogstack-cms-folio"
@@ -60,6 +78,15 @@ preview_urls = false
 assets = { directory = "apps/web-folio/dist" }
 routes = [{ pattern = "${FOLIO_WEB_HOST}", custom_domain = true }]
 
+# admin-draft — see env.web_terminal_draft above for the full rationale.
+[env.web_folio_draft]
+name = "blogstack-web-folio-draft"
+workers_dev = false
+preview_urls = false
+main = "apps/web-folio/dist/server/entry.mjs"
+assets = { directory = "apps/web-folio/dist/client", binding = "ASSETS" }
+routes = [{ pattern = "${FOLIO_WEB_DRAFT_HOST}", custom_domain = true }]
+
 # ---------- olive ----------
 [env.cms_olive]
 name = "blogstack-cms-olive"
@@ -76,6 +103,15 @@ workers_dev = false
 preview_urls = false
 assets = { directory = "apps/web-olive/dist" }
 routes = [{ pattern = "${OLIVE_WEB_HOST}", custom_domain = true }]
+
+# admin-draft — see env.web_terminal_draft above for the full rationale.
+[env.web_olive_draft]
+name = "blogstack-web-olive-draft"
+workers_dev = false
+preview_urls = false
+main = "apps/web-olive/dist/server/entry.mjs"
+assets = { directory = "apps/web-olive/dist/client", binding = "ASSETS" }
+routes = [{ pattern = "${OLIVE_WEB_DRAFT_HOST}", custom_domain = true }]
 
 # ---------- per-PR previews ----------
 # One block per deployed site. Assets-only, workers.dev, no routes and no

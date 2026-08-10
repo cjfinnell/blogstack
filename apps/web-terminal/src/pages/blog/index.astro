@@ -4,6 +4,8 @@ import PostCard from '@blogstack/astro-shared/PostCard.astro';
 import { blog } from '@blogstack/astro-shared/blog';
 import { basePath } from '../../site';
 
+export const prerender = import.meta.env.RENDER_MODE !== 'ssr';
+
 const posts = await blog.getPublishedPosts(100);
 ---
 
