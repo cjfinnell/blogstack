@@ -28,6 +28,25 @@ absorbing the structures she liked from the others.
 `notes/round-1-feedback.md` records what she said about each of the seven,
 what changed in D as a result, and what is still open.
 
+## Round 3 — one decision sheet
+
+Round 2 came back with no structural objections. What was left was a set of
+mechanical corrections, one identity decision, and several questions that are
+waiting on real content rather than on design. So round 3 is a single sheet
+rather than another set of pages:
+
+| | |
+| --- | --- |
+| `0-identity.html` | Seven scripts and four bows, to pick one of each. The wordmark and the bow end up in every header, the favicon and every link preview, so they are settled before anything is built for real. |
+
+`notes/round-2-feedback.md` records the rest: what is already decided, what is
+blocked on content, the reproduced layout bug on the review page, and the fact
+that her map corpus is twelve Google Maps lists spanning far more than
+restaurants — which the CMS schema has to carry.
+
+Pages 1 through 3 are deliberately left as they were reviewed. They are not
+being patched piecemeal; the corrections land in the real implementation.
+
 ## When this dies
 
 It should be deleted in the same PR that lands the real implementation

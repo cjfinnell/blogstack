@@ -3,10 +3,20 @@
 // not inherit the theme the mockups are proposing to replace, and it must
 // build even if the CMS is unreachable.
 //
-// Round 2. Round 1 offered seven competing concepts; Maria picked D
-// outright, so these three are not alternatives to each other — they are one
-// design system shown across the three page types. See notes/round-1-feedback.md.
+// Round 1 offered seven competing concepts; Maria picked D outright, so
+// pages 1-3 are not alternatives to each other — they are one design system
+// shown across the three page types. See notes/round-1-feedback.md.
+//
+// Page 0 is a decision sheet rather than a page design: after round 2 the
+// only thing still blocking the real build is the wordmark and the bow, so
+// those get settled on their own. See notes/round-2-feedback.md.
 const pages = [
+  {
+    key: '0',
+    file: '0-identity.html',
+    name: 'Identity',
+    blurb: 'Decision sheet: seven scripts and four bows, to pick one of each. Start here.',
+  },
   {
     key: '1',
     file: '1-home.html',
@@ -28,7 +38,8 @@ const pages = [
 ];
 
 const notes = [
-  { href: '/mockups/notes/round-1-feedback.md', label: 'Round 1 feedback → this' },
+  { href: '/mockups/notes/round-2-feedback.md', label: 'Round 2 feedback → next' },
+  { href: '/mockups/notes/round-1-feedback.md', label: 'Round 1 feedback' },
   { href: '/mockups/notes/source-essences.md', label: 'Source essences' },
   { href: '/mockups/notes/mockup-audit.md', label: 'Round 1 audit' },
   { href: '/mockups/notes/maria-inspo-notes.md', label: "Maria's inspiration notes" },
@@ -217,8 +228,8 @@ const notes = [
       <nav class="sidebar" aria-label="Mockup pages">
         <h1>Olive — round 2</h1>
         <p class="standfirst">
-          One direction, three pages. These are not alternatives to each other; they share a
-          palette, a wordmark and a masthead on purpose.
+          Start at 0 — it is the one open decision. Pages 1-3 are one direction, not alternatives to
+          each other; they share a palette, a wordmark and a masthead on purpose.
         </p>
         <ul>
           {
@@ -257,12 +268,12 @@ const notes = [
       </nav>
       <main class="pane">
         <div class="pane-header">
-          <a id="standalone-link" href="/mockups/1-home.html" target="_blank" rel="noopener"
+          <a id="standalone-link" href="/mockups/0-identity.html" target="_blank" rel="noopener"
             >Open standalone ↗</a
           >
           <span id="viewport-readout">— × —</span>
         </div>
-        <iframe id="mockup-frame" title="Olive mockup" src="/mockups/1-home.html"></iframe>
+        <iframe id="mockup-frame" title="Olive mockup" src="/mockups/0-identity.html"></iframe>
       </main>
     </div>
     <script>
@@ -293,7 +304,7 @@ const notes = [
 
       function keyFromHash() {
         const h = location.hash.replace('#', '');
-        return h || '1';
+        return h || '0';
       }
 
       function updateReadout() {
@@ -314,7 +325,7 @@ const notes = [
       window.addEventListener('hashchange', () => selectKey(keyFromHash()));
       window.addEventListener('resize', updateReadout);
 
-      if (!location.hash) location.hash = '1';
+      if (!location.hash) location.hash = '0';
       selectKey(keyFromHash());
       updateReadout();
     </script>
