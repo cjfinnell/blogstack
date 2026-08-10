@@ -13,6 +13,10 @@
 // and every site (including CURRENT_SITE) gets the dummy. Requiring the flag
 // explicitly means a *deploy* job that is missing a real secret fails loudly
 // instead of silently rendering "unused.invalid" into a production route.
+//
+// WEB_DRAFT_HOST is the one exception to that fail-loud rule: it is optional,
+// not required, so a site can keep deploying its CMS/web Worker before
+// admin-draft is rolled out for it. See the WEB_DRAFT_HOST handling below.
 
 import { deployedSiteIds } from '../config/sites.ts';
 
@@ -36,13 +40,9 @@ if (preview) {
     );
   }
 } else {
-  // WEB_DRAFT_HOST: the same job that deploys env.web_<site> also builds and
-  // deploys env.web_<site>_draft right after (see deploy.yml), reusing this
-  // job's own CMS_HOST rather than a second GitHub Environment holding a
-  // copy of it. WEB_DRAFT_HOST is the one extra secret that draft step needs.
-  const missing = (
-    ['CMS_HOST', 'WEB_HOST', 'WEB_ORIGIN', 'D1_ID', 'WEB_DRAFT_HOST'] as const
-  ).filter((k) => !process.env[k]);
+  const missing = (['CMS_HOST', 'WEB_HOST', 'WEB_ORIGIN', 'D1_ID'] as const).filter(
+    (k) => !process.env[k],
+  );
   if (missing.length > 0) {
     throw new Error(
       `ci-gen-wrangler: missing ${missing.join(', ')} for site "${currentSite}". ` +
@@ -54,7 +54,15 @@ if (preview) {
   process.env[`${currentPrefix}_WEB_HOST`] = process.env.WEB_HOST;
   process.env[`${currentPrefix}_WEB_ORIGIN`] = process.env.WEB_ORIGIN;
   process.env[`${currentPrefix}_D1_ID`] = process.env.D1_ID;
-  process.env[`${currentPrefix}_WEB_DRAFT_HOST`] = process.env.WEB_DRAFT_HOST;
+  // WEB_DRAFT_HOST is deliberately NOT in the required list above: unlike
+  // the secrets checked there, a site missing it must still deploy its
+  // CMS/normal web Worker without failing the whole job — admin-draft rolls
+  // out per site, gradually, on top of an already-live production deploy.
+  // deploy.yml's draft build/deploy steps are separately gated on this same
+  // secret being present, so an unset one just skips the draft deploy.
+  if (process.env.WEB_DRAFT_HOST) {
+    process.env[`${currentPrefix}_WEB_DRAFT_HOST`] = process.env.WEB_DRAFT_HOST;
+  }
 }
 
 for (const site of deployedSiteIds) {

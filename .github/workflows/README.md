@@ -23,8 +23,11 @@ after its normal (static) web deploy — same app, rebuilt with
 `RENDER_MODE=ssr`, so it renders drafts+published against the same CMS the
 job just deployed. Not a separate matrix entry, not a separate GitHub
 Environment: it reuses the job's own `CMS_HOST` and only needs one more
-secret, `WEB_DRAFT_HOST`/`WEB_DRAFT_ORIGIN` (see Required secrets below). The
-manual escape hatch for a draft target is:
+secret, `WEB_DRAFT_HOST`/`WEB_DRAFT_ORIGIN` (see Required secrets below) —
+and unlike that job's other secrets, this one is optional: a site with no
+`WEB_DRAFT_HOST` set just skips its draft build/deploy steps, so admin-draft
+rolls out per site without touching the other two. The manual escape hatch
+for a draft target is:
 
 ```
 npm run release -- --site terminal_draft
@@ -72,13 +75,13 @@ production.
 
 Environment secrets, per deployed site (`terminal`, `folio`, `olive`) — production only:
 
-| Secret                               | Purpose                                                                            |
-| ------------------------------------ | ---------------------------------------------------------------------------------- |
-| `CF_API_TOKEN`, `CF_ACCOUNT_ID`      | Deploy credentials for that site                                                   |
-| `CMS_HOST`, `WEB_HOST`, `WEB_ORIGIN` | That site's hostnames                                                              |
-| `D1_ID`                              | That site's D1 database id, substituted into `wrangler.toml`                       |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD`      | That site's CMS admin login, (re)seeded after every CMS deploy                     |
-| `WEB_DRAFT_HOST`, `WEB_DRAFT_ORIGIN` | That site's admin-draft hostnames — reads the same `CMS_HOST` above, no new CMS/D1 |
+| Secret                               | Purpose                                                                                                                                                              |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CF_API_TOKEN`, `CF_ACCOUNT_ID`      | Deploy credentials for that site                                                                                                                                     |
+| `CMS_HOST`, `WEB_HOST`, `WEB_ORIGIN` | That site's hostnames                                                                                                                                                |
+| `D1_ID`                              | That site's D1 database id, substituted into `wrangler.toml`                                                                                                         |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`      | That site's CMS admin login, (re)seeded after every CMS deploy                                                                                                       |
+| `WEB_DRAFT_HOST`, `WEB_DRAFT_ORIGIN` | Optional — that site's admin-draft hostnames, reads the same `CMS_HOST` above, no new CMS/D1. Unset just skips that site's draft deploy, unlike every other row here |
 
 Repository secrets — used by the preview, cleanup and reconcile jobs, which are
 not scoped to a production Environment. A same-named Environment secret wins for

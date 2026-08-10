@@ -117,13 +117,20 @@ jobs:
       # against the SAME cms_${{ matrix.site }} deployed above. No separate
       # CMS/D1/R2, no separate GitHub Environment: WEB_DRAFT_HOST is the only
       # secret this needs beyond what the job already has from CMS_HOST.
+      #
+      # Gated on WEB_DRAFT_HOST being set (not required — see
+      # ci-gen-wrangler.ts) so a site can keep deploying its CMS/web Worker
+      # normally before admin-draft is rolled out for it; rolling it out for
+      # one site must not require touching the other two.
       - name: Build web (draft)
+        if: secrets.WEB_DRAFT_HOST != ''
         run: npm run build --workspace apps/web-${{ matrix.site }}
         env:
           CMS_URL: https://${{ secrets.CMS_HOST }}
           SITE_URL: ${{ secrets.WEB_DRAFT_ORIGIN }}
           RENDER_MODE: ssr
       - name: Deploy web (draft)
+        if: secrets.WEB_DRAFT_HOST != ''
         run: npx wrangler deploy --env web_${{ matrix.site }}_draft
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
