@@ -23,16 +23,26 @@ const preview = process.env.PREVIEW === '1';
 const currentPrefix = currentSite.toUpperCase();
 
 if (preview) {
-  if (process.env.CMS_HOST || process.env.WEB_HOST || process.env.WEB_ORIGIN || process.env.D1_ID) {
+  if (
+    process.env.CMS_HOST ||
+    process.env.WEB_HOST ||
+    process.env.WEB_ORIGIN ||
+    process.env.D1_ID ||
+    process.env.WEB_DRAFT_HOST
+  ) {
     throw new Error(
       'ci-gen-wrangler: PREVIEW=1 but production host secrets are present. ' +
         'Preview jobs must not be scoped to a production GitHub Environment.',
     );
   }
 } else {
-  const missing = (['CMS_HOST', 'WEB_HOST', 'WEB_ORIGIN', 'D1_ID'] as const).filter(
-    (k) => !process.env[k],
-  );
+  // WEB_DRAFT_HOST: the same job that deploys env.web_<site> also builds and
+  // deploys env.web_<site>_draft right after (see deploy.yml), reusing this
+  // job's own CMS_HOST rather than a second GitHub Environment holding a
+  // copy of it. WEB_DRAFT_HOST is the one extra secret that draft step needs.
+  const missing = (
+    ['CMS_HOST', 'WEB_HOST', 'WEB_ORIGIN', 'D1_ID', 'WEB_DRAFT_HOST'] as const
+  ).filter((k) => !process.env[k]);
   if (missing.length > 0) {
     throw new Error(
       `ci-gen-wrangler: missing ${missing.join(', ')} for site "${currentSite}". ` +
@@ -44,6 +54,7 @@ if (preview) {
   process.env[`${currentPrefix}_WEB_HOST`] = process.env.WEB_HOST;
   process.env[`${currentPrefix}_WEB_ORIGIN`] = process.env.WEB_ORIGIN;
   process.env[`${currentPrefix}_D1_ID`] = process.env.D1_ID;
+  process.env[`${currentPrefix}_WEB_DRAFT_HOST`] = process.env.WEB_DRAFT_HOST;
 }
 
 for (const site of deployedSiteIds) {
@@ -54,6 +65,7 @@ for (const site of deployedSiteIds) {
   // Never read by this job — other sites' cms_* blocks are rendered but not
   // deployed here — but gen-wrangler still needs every placeholder filled.
   process.env[`${prefix}_D1_ID`] ??= 'unused-invalid-d1-id';
+  process.env[`${prefix}_WEB_DRAFT_HOST`] ??= 'unused.invalid';
 }
 
 // env.dev is excluded from deployedSiteIds (config/sites.ts marks it
