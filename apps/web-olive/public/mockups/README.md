@@ -37,7 +37,14 @@ rather than another set of pages:
 
 | | |
 | --- | --- |
-| `0-identity.html` | Seven scripts and four bows, to pick one of each. The wordmark and the bow end up in every header, the favicon and every link preview, so they are settled before anything is built for real. |
+| `0-identity.html` | The wordmark and the bow. These end up in every header, the favicon and every link preview, so they are settled before anything is built for real. |
+
+Round 3 approved the palette outright, picked Pinyon Script and bow B1, and
+asked for three things: a more dramatic M, wavy tails, and a bow with contrast
+and a knot you can see was tied. The sheet is now that pass — three wordmark
+options and two bow finishes — plus a note explaining why the reference
+photograph itself cannot be used and what to do instead.
+`notes/round-3-feedback.md` has the detail.
 
 `notes/round-2-feedback.md` records the rest: what is already decided, what is
 blocked on content, the reproduced layout bug on the review page, and the fact

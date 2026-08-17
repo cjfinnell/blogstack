@@ -4,29 +4,32 @@
   <meta name="robots" content="noindex, nofollow" />
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Maria Eleni — 0. Identity specimen</title>
+<title>Maria Eleni — 0. Identity, final</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Great+Vibes&family=Karla:ital,wght@0,300..700;1,300..700&family=Parisienne&family=Pinyon+Script&family=Style+Script&family=Tangerine:wght@400;700&family=Yesteryear&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Karla:ital,wght@0,300..700;1,300..700&family=Miss+Fajardose&family=Monsieur+La+Doulaise&family=Pinyon+Script&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   IDENTITY SPECIMEN — the wordmark and the bow
-   Not a page design. One decision sheet, so the two pieces of the
-   brand that are expensive to change later get settled before they
-   go into components, favicons and share images.
+   IDENTITY — round 3, final pass
 
-   Answering: "I would like that same whimsical nature applied to the
-   font of Maria Eleni, a little bit more twirly and a little bit more
-   elegant, kind of like Blair Waldorf meets Elle Woods" — and the
-   photograph of painted blue bows.
+   Settled: the palette, and Pinyon Script as the direction.
+   Outstanding, from her note:
+     "I like S1 the best by far but I want there to be more dramatic
+      tails on the M leading up to it."
+     "B1 is closest but I want the tails also to be wavy like the
+      picture. I also want it to have contrast, for it to look silky
+      and watercolor-y and you can see how the knot was tied."
 
-   Read off the traits in that photograph: the ribbon is a BAND with
-   visible width, not a solid shape; the loops are OPEN, so the cream
-   shows through; the knot is small and tight; the tails are long,
-   asymmetric, and flick at the end. Round 2's bow was a filled shape
-   with stubby tails, which is why it reads as a bowtie.
+   The bow is rebuilt to that brief: a constant-width ribbon rather than
+   a tapering blade, tails that undulate instead of running straight, a
+   knot drawn as an actual wrap with a seam across it and the loops
+   darkening where they tuck underneath, and a painted surface — a
+   gradient across each band, uneven organic edges, optional paper grain
+   — instead of one flat fill. Still a single inline SVG, no script and
+   no image request.
 
-   Reply with one script number and one bow letter. S4 + B2, and so on.
+   Two things left to pick. See the note at the foot of the page about
+   the reference photograph, which we cannot use directly.
    ============================================================ */
 :root{
   color-scheme: light dark;
@@ -39,7 +42,18 @@
   --muted:      light-dark(#6A7280, #A7B6C9);
   --accent:     light-dark(#2E5C8A, #9CC4E4);
   --rule:       light-dark(#E2E6EC, #23364F);
-  --rule-strong:light-dark(#8C99A9, #5C7A96);
+
+  /* the painted ribbon, light and dark */
+  --rib-a1: light-dark(#C6D6EE, #8FA9D2);
+  --rib-a2: light-dark(#7B95C9, #5E79AE);
+  --rib-a3: light-dark(#AAC0E2, #7C97C6);
+  --rib-b1: light-dark(#9CB4DF, #7A94C4);
+  --rib-b2: light-dark(#6E88C0, #536EA4);
+  --rib-b3: light-dark(#BACAE9, #8AA3CE);
+  --knot-1: light-dark(#93ABD8, #7B93C4);
+  --knot-2: light-dark(#617AB4, #4C6499);
+  --knot-3: light-dark(#4C6398, #3D5382);
+  --seam:   light-dark(#3F5183, #2B3C64);
 
   --display:"Cormorant Garamond", Georgia, serif;
   --body:"Karla", ui-sans-serif, system-ui, sans-serif;
@@ -49,137 +63,104 @@ body{
   margin:0; background:var(--cream); color:var(--ink);
   font-family:var(--body); font-size:1rem; line-height:1.6;
 }
-h1,h2,h3{color:var(--navy); text-wrap:balance}
+h1,h2{color:var(--navy); text-wrap:balance}
 p{text-wrap:pretty}
 a{color:var(--accent)}
 .wrap{max-width:72rem; margin:0 auto; padding:0 1.5rem}
 
-/* ---------- sheet header ---------- */
 .sheet-head{border-bottom:1px solid var(--navy); padding:2.5rem 0 2rem}
 .sheet-head h1{font-family:var(--display); font-weight:400; font-size:clamp(2rem,5vw,3rem); margin:0 0 .75rem}
-.sheet-head p{max-width:62ch; margin:0 0 .75rem; color:var(--muted)}
-.howto{
-  margin-top:1.25rem; padding:1rem 1.25rem; border:1px solid var(--baby);
-  background:var(--blue-wash); color:var(--navy); max-width:62ch;
-}
-.howto b{display:block; font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase; margin-bottom:.3rem}
-
+.sheet-head p{max-width:64ch; margin:0 0 .75rem; color:var(--muted)}
 .rail-label{
   font-size:.6875rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted);
   font-weight:600; margin:0;
 }
+.locked{
+  margin-top:1.25rem; padding:1rem 1.25rem; border:1px solid var(--baby);
+  background:var(--blue-wash); color:var(--navy); max-width:64ch;
+}
+.locked b{display:block; font-size:.6875rem; letter-spacing:.14em; text-transform:uppercase; margin-bottom:.3rem}
 .section-head{margin:3.5rem 0 1.5rem; border-bottom:1px solid var(--rule); padding-bottom:.75rem}
 .section-head h2{font-family:var(--display); font-weight:400; font-size:1.75rem; margin:.25rem 0 0}
-.section-head p{margin:.4rem 0 0; color:var(--muted); font-size:.9375rem; max-width:64ch}
+.section-head p{margin:.4rem 0 0; color:var(--muted); font-size:.9375rem; max-width:66ch}
 
-/* ---------- script specimens ---------- */
-.spec{
-  display:grid; grid-template-columns:4rem 1fr 16rem; gap:1.5rem; align-items:center;
-  padding:1.5rem 0; border-bottom:1px solid var(--rule);
-}
-.spec .id{
-  font-family:var(--display); font-size:1.5rem; color:var(--baby); font-weight:600;
-  align-self:start; padding-top:.5rem;
-}
-.spec .render{min-width:0}
-.spec .big{
-  color:var(--navy); font-size:clamp(2.75rem,7vw,4.5rem); line-height:1.15;
-  display:block; padding-bottom:.06em;
-}
-.spec .small{
-  color:var(--navy); font-size:1.5rem; margin-top:.35rem; display:block; opacity:.85;
-}
-.spec .meta b{
-  display:block; color:var(--navy); font-size:.8125rem; letter-spacing:.06em;
-  text-transform:uppercase; margin-bottom:.3rem;
-}
-.spec .meta span{font-size:.875rem; color:var(--muted)}
-.spec.current{background:var(--surface); padding-left:1rem; padding-right:1rem}
-.spec.current .id::after{
-  content:"now"; display:block; font-family:var(--body); font-size:.5625rem;
-  letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:.2rem;
-}
-@media (max-width:56rem){
-  .spec{grid-template-columns:3rem 1fr; }
-  .spec .meta{grid-column:2}
+/* ---------- wordmark options ---------- */
+.opt{padding:2rem 0; border-bottom:1px solid var(--rule)}
+.opt > .head{display:flex; align-items:baseline; gap:1rem; flex-wrap:wrap; margin-bottom:.5rem}
+.opt .id{font-family:var(--display); font-size:1.5rem; color:var(--baby); font-weight:600}
+.opt .name{font-size:.8125rem; letter-spacing:.08em; text-transform:uppercase; color:var(--navy); font-weight:600}
+.opt .note{margin:.75rem 0 0; font-size:.9375rem; color:var(--muted); max-width:64ch}
+.opt .pick{
+  font-size:.625rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+  border:1px solid var(--accent); border-radius:999px; padding:.2rem .6rem;
 }
 
-.s1{font-family:"Pinyon Script", cursive}
-.s2{font-family:"Great Vibes", cursive}
-.s3{font-family:"Allura", cursive}
-.s4{font-family:"Tangerine", cursive; font-weight:700}
-.s5{font-family:"Style Script", cursive}
-.s6{font-family:"Yesteryear", cursive}
-.s0{font-family:"Parisienne", cursive}
+.mark{
+  color:var(--navy); display:block; white-space:nowrap;
+  font-size:clamp(3rem,9vw,6rem); line-height:1.35; overflow:visible;
+}
+.m-pinyon{font-family:"Pinyon Script", cursive}
+.m-doulaise{font-family:"Monsieur La Doulaise", cursive}
+.m-fajardose{font-family:"Miss Fajardose", cursive}
 
-/* Tangerine and Allura run small at a given size; even them up by eye */
-.spec .big.s4{font-size:clamp(4rem,10vw,6.5rem)}
-.spec .small.s4{font-size:2.25rem}
-.spec .big.s3{font-size:clamp(3.25rem,8vw,5.25rem)}
-.spec .big.s1{font-size:clamp(2.5rem,6.4vw,4.25rem)}
+/* Pinyon kept exactly, with a drawn flourish swept under the whole name */
+.underlined{position:relative; display:inline-block; padding-bottom:.2em}
+.underlined svg{
+  position:absolute; left:-.02em; bottom:0; width:100%; height:.42em; overflow:visible;
+  fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round;
+  vector-effect:non-scaling-stroke;
+}
 
-/* ---------- bows ---------- */
-.bows{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--rule);
+/* ---------- bow ---------- */
+.bowgrid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--rule);
   border:1px solid var(--rule)}
 .bowcell{background:var(--cream); padding:2rem 1.5rem; text-align:center}
-.bowcell svg{display:block; margin:0 auto; width:min(100%,17rem); height:auto; color:var(--baby)}
-.bowcell .id{
-  font-family:var(--display); font-size:1.5rem; color:var(--baby); font-weight:600;
-  display:block; margin-bottom:.75rem;
-}
-.bowcell .meta{margin:1.25rem auto 0; max-width:30ch}
-.bowcell .meta b{
-  display:block; color:var(--navy); font-size:.8125rem; letter-spacing:.06em;
-  text-transform:uppercase; margin-bottom:.3rem;
-}
-.bowcell .meta span{font-size:.875rem; color:var(--muted)}
-.bowcell .sizes{
-  display:flex; gap:1.5rem; align-items:center; justify-content:center;
-  margin-top:1.25rem; padding-top:1rem; border-top:1px dashed var(--rule);
-}
-.bowcell .sizes svg{width:auto}
-.bowcell .sizes .sm{height:34px}
-.bowcell .sizes .xs{height:18px}
-@media (max-width:56rem){ .bows{grid-template-columns:1fr} }
+.bowcell .id{font-family:var(--display); font-size:1.5rem; color:var(--baby); font-weight:600;
+  display:block; margin-bottom:.25rem}
+.bowcell .name{font-size:.8125rem; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--navy); font-weight:600; display:block; margin-bottom:1rem}
+.bowcell .art{width:min(100%,16rem); height:auto; margin:0 auto; display:block}
+.bowcell .note{margin:1.25rem auto 0; max-width:34ch; font-size:.875rem; color:var(--muted)}
+.sizes{display:flex; gap:2rem; align-items:flex-end; justify-content:center;
+  margin-top:1.5rem; padding-top:1.25rem; border-top:1px dashed var(--rule)}
+.sizes svg{height:auto}
+.sizes .z1{width:76px} .sizes .z2{width:40px} .sizes .z3{width:22px}
+.sizes figcaption{font-size:.625rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); margin-top:.5rem}
+.sizes figure{margin:0}
+@media (max-width:56rem){ .bowgrid{grid-template-columns:1fr} }
 
-/* stroked ribbon: the band is the stroke, so the loops stay open */
-.ribbon{fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round}
-.knot{fill:color-mix(in oklab, var(--navy) 24%, var(--baby)); stroke:none}
+/* ---------- lockup ---------- */
+.lockup{
+  border:1px solid var(--rule); background:var(--surface);
+  padding:3rem 1.5rem 2rem; text-align:center; margin-bottom:1.5rem;
+}
+.lockup .tag{font-size:.6875rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--muted); margin:0 0 1.75rem}
+.lockup .art{width:132px; height:auto; margin:.5rem auto 1.5rem; display:block}
+.lockup nav{display:flex; justify-content:center; align-items:center; flex-wrap:wrap;
+  border-top:1px solid var(--rule); padding-top:1.25rem}
+.lockup nav a{font-size:.8125rem; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--navy); text-decoration:none; padding:.35rem 1.15rem; font-weight:500}
+.lockup nav .div{color:var(--baby)}
 
-/* ---------- pairings ---------- */
-.pair{
-  border:1px solid var(--rule); background:var(--surface); padding:2.5rem 1.5rem 2rem;
-  text-align:center; margin-bottom:1.5rem;
-}
-.pair .tag{
-  font-size:.6875rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
-  margin:0 0 1.5rem;
-}
-.pair .mark{color:var(--navy); font-size:clamp(3rem,8vw,5rem); line-height:1.1; display:block;
-  padding-bottom:.06em}
-.pair svg{display:block; margin:.25rem auto 1.25rem; width:150px; height:auto; color:var(--baby)}
-.pair nav{
-  display:flex; justify-content:center; align-items:center; flex-wrap:wrap;
-  border-top:1px solid var(--rule); padding-top:1.25rem; margin-top:.5rem;
-}
-.pair nav a{
-  font-size:.8125rem; letter-spacing:.22em; text-transform:uppercase;
-  color:var(--navy); text-decoration:none; padding:.35rem 1.15rem; font-weight:500;
-}
-.pair nav .div{color:var(--baby)}
+/* ---------- the note about the photograph ---------- */
+.flag{border:1px solid var(--navy); padding:1.5rem 1.75rem; background:var(--cream)}
+.flag h3{font-family:var(--display); font-weight:500; font-size:1.375rem; margin:0 0 .75rem; color:var(--navy)}
+.flag p{margin:0 0 .75rem; max-width:66ch}
+.flag ol{margin:.5rem 0 0; padding-left:1.2rem; max-width:66ch}
+.flag li{margin-bottom:.5rem}
+.flag b{color:var(--navy)}
 
-/* ---------- palette ---------- */
 .swatches{display:grid; grid-template-columns:repeat(4,1fr); gap:1rem}
-.sw span{display:block; height:5rem; border:1px solid var(--rule)}
+.sw span{display:block; height:4.5rem; border:1px solid var(--rule)}
 .sw b{display:block; font-size:.8125rem; color:var(--navy); margin-top:.5rem}
 .sw i{display:block; font-style:normal; font-size:.75rem; color:var(--muted)}
-.sw.cream span{background:#FBF9F4}
-.sw.baby span{background:#A8C6DE}
-.sw.navy span{background:#16263F}
-.sw.ink span{background:#33383F}
+.sw.cream span{background:#FBF9F4} .sw.baby span{background:#A8C6DE}
+.sw.navy span{background:#16263F} .sw.ink span{background:#33383F}
 @media (max-width:56rem){ .swatches{grid-template-columns:1fr 1fr} }
 
-footer.sheet{margin:4rem 0 0; border-top:1px solid var(--navy); padding:2rem 0 4rem;
+footer.sheet{margin:3.5rem 0 0; border-top:1px solid var(--navy); padding:2rem 0 4rem;
   font-size:.9375rem; color:var(--muted)}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -188,288 +169,183 @@ footer.sheet{margin:4rem 0 0; border-top:1px solid var(--navy); padding:2rem 0 4
 </head>
 <body>
 
+<!-- ===== the bow, defined once and reused at every size ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="ribA" x1="0" y1="0" x2=".85" y2="1">
+      <stop offset="0" stop-color="var(--rib-a1)"/>
+      <stop offset=".45" stop-color="var(--rib-a2)"/>
+      <stop offset="1" stop-color="var(--rib-a3)"/>
+    </linearGradient>
+    <linearGradient id="ribB" x1="1" y1="0" x2=".1" y2="1">
+      <stop offset="0" stop-color="var(--rib-b1)"/>
+      <stop offset=".55" stop-color="var(--rib-b2)"/>
+      <stop offset="1" stop-color="var(--rib-b3)"/>
+    </linearGradient>
+    <radialGradient id="knotG" cx=".36" cy=".3" r=".9">
+      <stop offset="0" stop-color="var(--knot-1)"/>
+      <stop offset=".65" stop-color="var(--knot-2)"/>
+      <stop offset="1" stop-color="var(--knot-3)"/>
+    </radialGradient>
+
+    <!-- uneven, hand-painted edges -->
+    <filter id="paint" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="4" seed="9" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- the same, plus paper grain breaking up the wash -->
+    <filter id="paintGrain" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="4" seed="9" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="9"
+                         xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="21" result="g"/>
+      <feColorMatrix in="g" type="saturate" values="0" result="gm"/>
+      <feComponentTransfer in="gm" result="gt"><feFuncA type="linear" slope=".5"/></feComponentTransfer>
+      <feComposite in="gt" in2="d" operator="in" result="gc"/>
+      <feBlend in="d" in2="gc" mode="multiply"/>
+    </filter>
+
+    <!-- the drawing itself, before any surface treatment -->
+    <g id="bowBody">
+      <g fill="none" stroke-width="23" stroke-linecap="round" opacity=".88">
+        <path stroke="url(#ribA)" d="M150 74 C 126 20, 52 2, 26 32 C 2 60, 62 90, 145 78"/>
+        <path stroke="url(#ribB)" d="M150 74 C 174 20, 248 2, 274 32 C 298 60, 238 90, 155 78"/>
+        <path stroke="url(#ribA)" d="M142 90 C 130 118, 154 138, 122 166 C 98 188, 84 214, 52 236"/>
+        <path stroke="url(#ribB)" d="M158 90 C 172 118, 148 140, 182 168 C 208 190, 226 216, 256 240"/>
+      </g>
+      <!-- the loops darken as they tuck under the wrap -->
+      <g fill="none" stroke="var(--knot-3)" stroke-width="9" stroke-linecap="round" opacity=".38">
+        <path d="M132 64 C 126 72, 126 82, 131 90"/>
+        <path d="M170 64 C 176 72, 176 82, 171 90"/>
+      </g>
+      <!-- the wrap -->
+      <path fill="url(#knotG)"
+            d="M150 52 C 130 53, 120 64, 122 78 C 124 92, 138 99, 151 98 C 165 97, 178 88, 179 74 C 180 60, 168 51, 150 52 Z"/>
+      <!-- the seam: how it was tied -->
+      <g fill="none" stroke="var(--seam)" stroke-linecap="round" opacity=".55">
+        <path stroke-width="3.5" d="M127 67 C 141 77, 161 79, 176 68"/>
+        <path stroke-width="3" d="M147 53 C 141 66, 143 83, 151 97"/>
+      </g>
+      <path fill="var(--rib-a1)" opacity=".45" d="M134 60 C 141 56, 152 55, 159 58 C 150 60, 141 62, 134 60 Z"/>
+    </g>
+
+    <symbol id="bowPaint" viewBox="0 0 300 280">
+      <g filter="url(#paint)"><use href="#bowBody"/></g>
+    </symbol>
+    <symbol id="bowGrain" viewBox="0 0 300 280">
+      <g filter="url(#paintGrain)"><use href="#bowBody"/></g>
+    </symbol>
+    <!-- unfiltered, for a favicon and anything else rendered tiny -->
+    <symbol id="bowFlat" viewBox="0 0 300 280">
+      <g fill="none" stroke="var(--rib-a2)" stroke-width="25" stroke-linecap="round">
+        <path d="M150 74 C 126 20, 52 2, 26 32 C 2 60, 62 90, 145 78"/>
+        <path d="M150 74 C 174 20, 248 2, 274 32 C 298 60, 238 90, 155 78"/>
+        <path d="M142 90 C 130 118, 154 138, 122 166 C 98 188, 84 214, 52 236"/>
+        <path d="M158 90 C 172 118, 148 140, 182 168 C 208 190, 226 216, 256 240"/>
+      </g>
+      <path fill="var(--knot-2)"
+            d="M150 52 C 130 53, 120 64, 122 78 C 124 92, 138 99, 151 98 C 165 97, 178 88, 179 74 C 180 60, 168 51, 150 52 Z"/>
+    </symbol>
+  </defs>
+</svg>
+
 <div class="wrap">
 
   <header class="sheet-head">
-    <p class="rail-label">Decision sheet · not a page design</p>
-    <h1>The wordmark and the bow</h1>
-    <p>Two things are worth settling before anything gets built for real, because they end up in the header of every page, the favicon, and every link preview — and they are painful to change afterwards.</p>
-    <p>Everything below is in the agreed palette. Nothing else about the site is being proposed here.</p>
-    <div class="howto">
-      <b>How to reply</b>
-      One script number and one bow letter — "S3 and B2" is a complete answer. If none of them are right, say which one is closest and what is wrong with it; that is more useful than picking the least bad.
+    <p class="rail-label">Decision sheet · round 3</p>
+    <h1>Identity, final pass</h1>
+    <p>Two notes came back: the M needs more drama, and the bow needs wavy tails, contrast, and a knot you can see was tied. Both are addressed below. Two small picks are left, and one thing to flag about the photograph.</p>
+    <div class="locked">
+      <b>Settled — nothing below changes either</b>
+      The four colours, and Pinyon Script as the direction for the wordmark.
     </div>
   </header>
 
-  <!-- ================= SCRIPTS ================= -->
+  <!-- ================= THE M ================= -->
   <div class="section-head">
-    <p class="rail-label">Part one</p>
-    <h2>The wordmark</h2>
-    <p>"A little bit more twirly and a little bit more elegant, kind of like Blair Waldorf meets Elle Woods." These run in that order — S1 is the most Blair, formal and engraved; S6 is the most Elle, warm and exuberant. The current one is at the bottom for comparison.</p>
+    <p class="rail-label">Pick one</p>
+    <h2>The M</h2>
+    <p>Pinyon has no swash alternate for its capitals, so there are two honest routes: keep Pinyon and draw the flourish separately, or move one step along the same engraved-copperplate family to a face that already carries a dramatic M. F1 is the closest to what you described.</p>
   </div>
 
-  <div class="spec">
-    <span class="id">S1</span>
-    <span class="render">
-      <span class="big s1">Maria Eleni</span>
-      <span class="small s1">Maria Eleni</span>
-    </span>
-    <span class="meta">
-      <b>Pinyon Script</b>
-      <span>Engraved-invitation formal. The most Blair Waldorf of the set — this is a wedding invitation, and it is elegant rather than playful. Least whimsical option here.</span>
-    </span>
+  <div class="opt">
+    <div class="head">
+      <span class="id">F1</span>
+      <span class="name">Monsieur La Doulaise</span>
+      <span class="pick">Closest to the note</span>
+    </div>
+    <span class="mark m-doulaise">Maria Eleni</span>
+    <p class="note">Same lineage as Pinyon, but the capital carries a long looping entry stroke as part of the letter itself, and the E answers it. Nothing is drawn on top, so it stays a real typeface — it can be set at any size, in any word, without redrawing anything.</p>
   </div>
 
-  <div class="spec">
-    <span class="id">S2</span>
-    <span class="render">
-      <span class="big s2">Maria Eleni</span>
-      <span class="small s2">Maria Eleni</span>
-    </span>
-    <span class="meta">
-      <b>Great Vibes</b>
-      <span>Generous loops, confident downstrokes, still formal. The safe middle of the range — twirlier than S1 without tipping into cute.</span>
-    </span>
+  <div class="opt">
+    <div class="head">
+      <span class="id">F2</span>
+      <span class="name">Miss Fajardose</span>
+    </div>
+    <span class="mark m-fajardose">Maria Eleni</span>
+    <p class="note">Also has the flourished capital, drawn finer and set tighter. More delicate than F1 and a little more crowded between the two words. Worth seeing beside F1 rather than on its own.</p>
   </div>
 
-  <div class="spec">
-    <span class="id">S3</span>
-    <span class="render">
-      <span class="big s3">Maria Eleni</span>
-      <span class="small s3">Maria Eleni</span>
+  <div class="opt">
+    <div class="head">
+      <span class="id">F3</span>
+      <span class="name">Pinyon Script, with a drawn flourish</span>
+    </div>
+    <span class="mark m-pinyon">
+      <span class="underlined">Maria Eleni
+        <svg viewBox="0 0 600 60" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M8 18 C 90 50, 300 56, 470 28 C 522 19, 566 8, 586 2 C 574 22, 540 38, 500 46"/>
+        </svg>
+      </span>
     </span>
-    <span class="meta">
-      <b>Allura</b>
-      <span>Finer stroke, more air between letters, long twirling entry and exit strokes. The closest match to the ribbon in the photograph — same thin, painted line.</span>
-    </span>
+    <p class="note">Your original pick, untouched, with a flourish swept under the whole name rather than fused to the M. Running the swash into the M itself was tried and thrown away: at this size the join never quite lands, and it breaks differently at every screen width. This is the version of "keep Pinyon" that holds together.</p>
   </div>
 
-  <div class="spec">
-    <span class="id">S4</span>
-    <span class="render">
-      <span class="big s4">Maria Eleni</span>
-      <span class="small s4">Maria Eleni</span>
-    </span>
-    <span class="meta">
-      <b>Tangerine</b>
-      <span>Calligraphic, very fine, dramatic swashes. Needs to be set large to work at all, which suits a centred masthead and nothing else. Weakest at small sizes.</span>
-    </span>
-  </div>
-
-  <div class="spec">
-    <span class="id">S5</span>
-    <span class="render">
-      <span class="big s5">Maria Eleni</span>
-      <span class="small s5">Maria Eleni</span>
-    </span>
-    <span class="meta">
-      <b>Style Script</b>
-      <span>Bouncier and warmer, a signature rather than an invitation. Reads as friendly first, elegant second — the Elle Woods end, but still tidy.</span>
-    </span>
-  </div>
-
-  <div class="spec">
-    <span class="id">S6</span>
-    <span class="render">
-      <span class="big s6">Maria Eleni</span>
-      <span class="small s6">Maria Eleni</span>
-    </span>
-    <span class="meta">
-      <b>Yesteryear</b>
-      <span>Retro, generous swashes, the most personality per letter. Fun, and the furthest from formal — worth seeing even if it is too much.</span>
-    </span>
-  </div>
-
-  <div class="spec current">
-    <span class="id">S0</span>
-    <span class="render">
-      <span class="big s0">Maria Eleni</span>
-      <span class="small s0">Maria Eleni</span>
-    </span>
-    <span class="meta">
-      <b>Parisienne — current</b>
-      <span>Rounded and casual. Legible and pleasant, but the letterforms sit upright and the loops are small, which is why it does not read as twirly.</span>
-    </span>
-  </div>
-
-  <!-- ================= BOWS ================= -->
+  <!-- ================= THE BOW ================= -->
   <div class="section-head">
-    <p class="rail-label">Part two</p>
+    <p class="rail-label">Pick one</p>
     <h2>The bow</h2>
-    <p>Taken from the photograph: the ribbon is a band with visible width rather than a solid shape, the loops are open so the background shows through, the knot is small and tight, and the tails are long, uneven, and flick at the end. B1 through B3 are drawn as a stroked line, which is what keeps the loops open; B4 is the filled, tapered version for comparison. All four are one path each and scale to any size.</p>
+    <p>Rebuilt from B1 against your note. The ribbon is a constant-width band now rather than a tapering blade; the tails undulate instead of running straight out; the knot is a wrap with a seam across it and the loops darkening where they tuck underneath; and the surface is painted — a gradient across each band and uneven organic edges — rather than one flat colour. The only difference between these two is the paper grain.</p>
   </div>
 
-  <div class="bows">
-
+  <div class="bowgrid">
     <div class="bowcell">
-      <span class="id">B1</span>
-      <svg viewBox="0 0 300 150" aria-label="Bow option B1">
-        <g class="ribbon" stroke-width="7">
-          <path d="M150 62 C 128 30, 74 20, 56 40 C 38 60, 88 76, 146 66"/>
-          <path d="M150 62 C 172 30, 226 20, 244 40 C 262 60, 212 76, 154 66"/>
-          <path d="M144 72 C 134 100, 118 122, 80 144"/>
-          <path d="M156 72 C 172 98, 200 114, 240 126"/>
-        </g>
-        <ellipse class="knot" cx="150" cy="65" rx="9" ry="7.5"/>
-      </svg>
-      <span class="meta">
-        <b>Even ribbon</b>
-        <span>Uniform band, open loops, two long uneven tails. The most direct reading of the photograph and the most legible when it shrinks.</span>
-      </span>
-      <span class="sizes">
-        <svg class="sm" viewBox="0 0 300 150" aria-hidden="true">
-          <g class="ribbon" stroke-width="7">
-            <path d="M150 62 C 128 30, 74 20, 56 40 C 38 60, 88 76, 146 66"/>
-            <path d="M150 62 C 172 30, 226 20, 244 40 C 262 60, 212 76, 154 66"/>
-            <path d="M144 72 C 134 100, 118 122, 80 144"/>
-            <path d="M156 72 C 172 98, 200 114, 240 126"/>
-          </g>
-          <ellipse class="knot" cx="150" cy="65" rx="9" ry="7.5"/>
-        </svg>
-        <svg class="xs" viewBox="0 0 300 150" aria-hidden="true">
-          <g class="ribbon" stroke-width="10">
-            <path d="M150 62 C 128 30, 74 20, 56 40 C 38 60, 88 76, 146 66"/>
-            <path d="M150 62 C 172 30, 226 20, 244 40 C 262 60, 212 76, 154 66"/>
-            <path d="M144 72 C 134 100, 118 122, 80 144"/>
-            <path d="M156 72 C 172 98, 200 114, 240 126"/>
-          </g>
-          <ellipse class="knot" cx="150" cy="65" rx="11" ry="9"/>
-        </svg>
-      </span>
+      <span class="id">W1</span>
+      <span class="name">Painted</span>
+      <svg class="art" viewBox="0 0 300 280" role="img" aria-label="Bow option W1, painted"><use href="#bowPaint"/></svg>
+      <p class="note">Gradient, soft uneven edges, visible knot. Smooth — reads closer to gouache than watercolour.</p>
+      <div class="sizes">
+        <figure><svg class="z1" viewBox="0 0 300 280" aria-hidden="true"><use href="#bowPaint"/></svg><figcaption>masthead</figcaption></figure>
+        <figure><svg class="z2" viewBox="0 0 300 280" aria-hidden="true"><use href="#bowPaint"/></svg><figcaption>inline</figcaption></figure>
+        <figure><svg class="z3" viewBox="0 0 300 280" aria-hidden="true"><use href="#bowFlat"/></svg><figcaption>favicon</figcaption></figure>
+      </div>
     </div>
 
     <div class="bowcell">
-      <span class="id">B2</span>
-      <svg viewBox="0 0 300 150" aria-label="Bow option B2">
-        <g class="ribbon" stroke-width="5.5">
-          <path d="M150 60 C 122 22, 58 10, 38 34 C 20 58, 82 78, 146 64"/>
-          <path d="M150 60 C 178 22, 242 10, 262 34 C 280 58, 218 78, 154 64"/>
-          <path d="M143 72 C 130 100, 106 124, 62 146"/>
-          <path d="M157 72 C 172 100, 202 118, 250 130"/>
-        </g>
-        <ellipse class="knot" cx="150" cy="64" rx="8" ry="6.5"/>
-      </svg>
-      <span class="meta">
-        <b>Wide and airy</b>
-        <span>Thinner line, wider loops, longer tails that swing further out. The most delicate and the most whimsical. Loses definition first at very small sizes.</span>
-      </span>
-      <span class="sizes">
-        <svg class="sm" viewBox="0 0 300 150" aria-hidden="true">
-          <g class="ribbon" stroke-width="5.5">
-            <path d="M150 60 C 122 22, 58 10, 38 34 C 20 58, 82 78, 146 64"/>
-            <path d="M150 60 C 178 22, 242 10, 262 34 C 280 58, 218 78, 154 64"/>
-            <path d="M143 72 C 130 100, 106 124, 62 146"/>
-            <path d="M157 72 C 172 100, 202 118, 250 130"/>
-          </g>
-          <ellipse class="knot" cx="150" cy="64" rx="8" ry="6.5"/>
-        </svg>
-        <svg class="xs" viewBox="0 0 300 150" aria-hidden="true">
-          <g class="ribbon" stroke-width="9">
-            <path d="M150 60 C 122 22, 58 10, 38 34 C 20 58, 82 78, 146 64"/>
-            <path d="M150 60 C 178 22, 242 10, 262 34 C 280 58, 218 78, 154 64"/>
-            <path d="M143 72 C 130 100, 106 124, 62 146"/>
-            <path d="M157 72 C 172 100, 202 118, 250 130"/>
-          </g>
-          <ellipse class="knot" cx="150" cy="64" rx="10" ry="8"/>
-        </svg>
-      </span>
+      <span class="id">W2</span>
+      <span class="name">Painted, with grain</span>
+      <svg class="art" viewBox="0 0 300 280" role="img" aria-label="Bow option W2, painted with grain"><use href="#bowGrain"/></svg>
+      <p class="note">The same drawing with paper texture through the wash, so the colour breaks up the way paint does on cotton paper. Closer to the photograph.</p>
+      <div class="sizes">
+        <figure><svg class="z1" viewBox="0 0 300 280" aria-hidden="true"><use href="#bowGrain"/></svg><figcaption>masthead</figcaption></figure>
+        <figure><svg class="z2" viewBox="0 0 300 280" aria-hidden="true"><use href="#bowGrain"/></svg><figcaption>inline</figcaption></figure>
+        <figure><svg class="z3" viewBox="0 0 300 280" aria-hidden="true"><use href="#bowFlat"/></svg><figcaption>favicon</figcaption></figure>
+      </div>
     </div>
-
-    <div class="bowcell">
-      <span class="id">B3</span>
-      <svg viewBox="0 0 300 150" aria-label="Bow option B3">
-        <g class="ribbon" stroke-width="6.5">
-          <path d="M150 64 C 134 34, 88 18, 66 34 C 44 50, 78 74, 145 68"/>
-          <path d="M150 64 C 166 34, 212 18, 234 34 C 256 50, 222 74, 155 68"/>
-          <path d="M145 74 C 138 100, 126 120, 100 140 C 112 126, 116 112, 114 98"/>
-          <path d="M155 74 C 162 100, 176 118, 204 136 C 190 122, 186 108, 187 96"/>
-        </g>
-        <ellipse class="knot" cx="150" cy="67" rx="8.5" ry="7"/>
-      </svg>
-      <span class="meta">
-        <b>Folded tails</b>
-        <span>Tighter loops sitting higher, and tails that fold back on themselves the way a real ribbon does. More detail, more obviously hand-drawn.</span>
-      </span>
-      <span class="sizes">
-        <svg class="sm" viewBox="0 0 300 150" aria-hidden="true">
-          <g class="ribbon" stroke-width="6.5">
-            <path d="M150 64 C 134 34, 88 18, 66 34 C 44 50, 78 74, 145 68"/>
-            <path d="M150 64 C 166 34, 212 18, 234 34 C 256 50, 222 74, 155 68"/>
-            <path d="M145 74 C 138 100, 126 120, 100 140 C 112 126, 116 112, 114 98"/>
-            <path d="M155 74 C 162 100, 176 118, 204 136 C 190 122, 186 108, 187 96"/>
-          </g>
-          <ellipse class="knot" cx="150" cy="67" rx="8.5" ry="7"/>
-        </svg>
-        <svg class="xs" viewBox="0 0 300 150" aria-hidden="true">
-          <g class="ribbon" stroke-width="10">
-            <path d="M150 64 C 134 34, 88 18, 66 34 C 44 50, 78 74, 145 68"/>
-            <path d="M150 64 C 166 34, 212 18, 234 34 C 256 50, 222 74, 155 68"/>
-            <path d="M145 74 C 138 100, 126 120, 100 140"/>
-            <path d="M155 74 C 162 100, 176 118, 204 136"/>
-          </g>
-          <ellipse class="knot" cx="150" cy="67" rx="10" ry="8.5"/>
-        </svg>
-      </span>
-    </div>
-
-    <div class="bowcell">
-      <span class="id">B4</span>
-      <svg viewBox="0 0 300 150" aria-label="Bow option B4">
-        <g fill="currentColor">
-          <path d="M149 58 C 122 22, 60 10, 40 32 C 22 52, 68 76, 145 64 C 74 72, 40 54, 58 40 C 78 24, 124 38, 151 56 Z"/>
-          <path d="M151 58 C 178 22, 240 10, 260 32 C 278 52, 232 76, 155 64 C 226 72, 260 54, 242 40 C 222 24, 176 38, 149 56 Z"/>
-          <path d="M145 70 C 139 98, 125 120, 91 142 C 107 118, 117 96, 133 71 Z"/>
-          <path d="M155 70 C 161 98, 177 116, 213 134 C 195 114, 185 96, 167 71 Z"/>
-        </g>
-        <ellipse class="knot" cx="150" cy="65" rx="9" ry="7.5"/>
-      </svg>
-      <span class="meta">
-        <b>Painted, tapered</b>
-        <span>Filled rather than stroked, with the band narrowing towards the knot to mimic a brush lifting. Closest to the paint texture in the photograph, heaviest on the page.</span>
-      </span>
-      <span class="sizes">
-        <svg class="sm" viewBox="0 0 300 150" aria-hidden="true">
-          <g fill="currentColor">
-            <path d="M149 58 C 122 22, 60 10, 40 32 C 22 52, 68 76, 145 64 C 74 72, 40 54, 58 40 C 78 24, 124 38, 151 56 Z"/>
-            <path d="M151 58 C 178 22, 240 10, 260 32 C 278 52, 232 76, 155 64 C 226 72, 260 54, 242 40 C 222 24, 176 38, 149 56 Z"/>
-            <path d="M145 70 C 139 98, 125 120, 91 142 C 107 118, 117 96, 133 71 Z"/>
-            <path d="M155 70 C 161 98, 177 116, 213 134 C 195 114, 185 96, 167 71 Z"/>
-          </g>
-          <ellipse class="knot" cx="150" cy="65" rx="9" ry="7.5"/>
-        </svg>
-        <svg class="xs" viewBox="0 0 300 150" aria-hidden="true">
-          <g fill="currentColor">
-            <path d="M149 58 C 122 22, 60 10, 40 32 C 22 52, 68 76, 145 64 C 74 72, 40 54, 58 40 C 78 24, 124 38, 151 56 Z"/>
-            <path d="M151 58 C 178 22, 240 10, 260 32 C 278 52, 232 76, 155 64 C 226 72, 260 54, 242 40 C 222 24, 176 38, 149 56 Z"/>
-            <path d="M145 70 C 139 98, 125 120, 91 142 C 107 118, 117 96, 133 71 Z"/>
-            <path d="M155 70 C 161 98, 177 116, 213 134 C 195 114, 185 96, 167 71 Z"/>
-          </g>
-          <ellipse class="knot" cx="150" cy="65" rx="9" ry="7.5"/>
-        </svg>
-      </span>
-    </div>
-
   </div>
 
-  <!-- ================= PAIRINGS ================= -->
+  <!-- ================= LOCKUP ================= -->
   <div class="section-head">
-    <p class="rail-label">Part three</p>
-    <h2>In place</h2>
-    <p>Three of the combinations, sitting in a real masthead at real size, because a script that looks good on its own line can fall apart above a nav.</p>
+    <p class="rail-label">Together</p>
+    <h2>In the masthead</h2>
+    <p>F1 and F3 at real size, above a real nav.</p>
   </div>
 
-  <div class="pair">
-    <p class="tag">S3 Allura + B2 wide and airy</p>
-    <span class="mark s3">Maria Eleni</span>
-    <svg viewBox="0 0 300 150" aria-hidden="true">
-      <g class="ribbon" stroke-width="5.5">
-        <path d="M150 60 C 122 22, 58 10, 38 34 C 20 58, 82 78, 146 64"/>
-        <path d="M150 60 C 178 22, 242 10, 262 34 C 280 58, 218 78, 154 64"/>
-        <path d="M143 72 C 130 100, 106 124, 62 146"/>
-        <path d="M157 72 C 172 100, 202 118, 250 130"/>
-      </g>
-      <ellipse class="knot" cx="150" cy="64" rx="8" ry="6.5"/>
-    </svg>
+  <div class="lockup">
+    <p class="tag">F1 Monsieur La Doulaise + W2 painted with grain</p>
+    <span class="mark m-doulaise">Maria Eleni</span>
+    <svg class="art" viewBox="0 0 300 280" aria-hidden="true"><use href="#bowGrain"/></svg>
     <nav>
       <a href="#">Food</a><span class="div">|</span>
       <a href="#">Wine</a><span class="div">|</span>
@@ -478,18 +354,16 @@ footer.sheet{margin:4rem 0 0; border-top:1px solid var(--navy); padding:2rem 0 4
     </nav>
   </div>
 
-  <div class="pair">
-    <p class="tag">S2 Great Vibes + B1 even ribbon</p>
-    <span class="mark s2">Maria Eleni</span>
-    <svg viewBox="0 0 300 150" aria-hidden="true">
-      <g class="ribbon" stroke-width="7">
-        <path d="M150 62 C 128 30, 74 20, 56 40 C 38 60, 88 76, 146 66"/>
-        <path d="M150 62 C 172 30, 226 20, 244 40 C 262 60, 212 76, 154 66"/>
-        <path d="M144 72 C 134 100, 118 122, 80 144"/>
-        <path d="M156 72 C 172 98, 200 114, 240 126"/>
-      </g>
-      <ellipse class="knot" cx="150" cy="65" rx="9" ry="7.5"/>
-    </svg>
+  <div class="lockup">
+    <p class="tag">F3 Pinyon with a drawn flourish + W2 painted with grain</p>
+    <span class="mark m-pinyon">
+      <span class="underlined">Maria Eleni
+        <svg viewBox="0 0 600 60" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M8 18 C 90 50, 300 56, 470 28 C 522 19, 566 8, 586 2 C 574 22, 540 38, 500 46"/>
+        </svg>
+      </span>
+    </span>
+    <svg class="art" viewBox="0 0 300 280" aria-hidden="true"><use href="#bowGrain"/></svg>
     <nav>
       <a href="#">Food</a><span class="div">|</span>
       <a href="#">Wine</a><span class="div">|</span>
@@ -498,31 +372,29 @@ footer.sheet{margin:4rem 0 0; border-top:1px solid var(--navy); padding:2rem 0 4
     </nav>
   </div>
 
-  <div class="pair">
-    <p class="tag">S5 Style Script + B3 folded tails</p>
-    <span class="mark s5">Maria Eleni</span>
-    <svg viewBox="0 0 300 150" aria-hidden="true">
-      <g class="ribbon" stroke-width="6.5">
-        <path d="M150 64 C 134 34, 88 18, 66 34 C 44 50, 78 74, 145 68"/>
-        <path d="M150 64 C 166 34, 212 18, 234 34 C 256 50, 222 74, 155 68"/>
-        <path d="M145 74 C 138 100, 126 120, 100 140 C 112 126, 116 112, 114 98"/>
-        <path d="M155 74 C 162 100, 176 118, 204 136 C 190 122, 186 108, 187 96"/>
-      </g>
-      <ellipse class="knot" cx="150" cy="67" rx="8.5" ry="7"/>
-    </svg>
-    <nav>
-      <a href="#">Food</a><span class="div">|</span>
-      <a href="#">Wine</a><span class="div">|</span>
-      <a href="#">Map &amp; lists</a><span class="div">|</span>
-      <a href="#">About</a>
-    </nav>
+  <!-- ================= THE PHOTOGRAPH ================= -->
+  <div class="section-head">
+    <p class="rail-label">One thing to flag</p>
+    <h2>About the reference photograph</h2>
+  </div>
+
+  <div class="flag">
+    <h3>We can't use that image itself — but we can have the thing you actually want</h3>
+    <p>The bow in the photograph is printed artwork on a product from a stationery brand, and the wider shot has the maker's mark on it. Putting that painting on a public site would be using someone else's illustration as a logo, which is fine in a private notebook and not fine on a masthead.</p>
+    <p><b>The look is not the problem, though.</b> A style — painted ribbon, periwinkle on cream, wavy tails, a visible knot — is not something anyone owns. Only that specific painting is. So:</p>
+    <ol>
+      <li><b>Paint one yourself and we scan it.</b> Genuinely the best answer. It is an afternoon with a brush, it makes the mark actually yours, and it will have the wobble and the pooling that no amount of SVG trickery quite fakes. Paint three or four and we pick.</li>
+      <li><b>Use the drawn version on this page.</b> Original work, no licensing question, scales to any size, and no image to download so nothing slows the page down.</li>
+      <li><b>Commission an illustrator</b> for a painted original, if you want real paint texture without doing it yourself.</li>
+    </ol>
+    <p>One and two are not exclusive either — a scanned painting on the homepage and the drawn one for the favicon and small sizes is a normal way to run this.</p>
   </div>
 
   <!-- ================= PALETTE ================= -->
   <div class="section-head">
-    <p class="rail-label">For reference</p>
-    <h2>The palette, unchanged</h2>
-    <p>Confirmed in round 1 and not up for decision here. Everything above is drawn in these four.</p>
+    <p class="rail-label">Confirmed</p>
+    <h2>The palette</h2>
+    <p>Approved, unchanged, and used for everything above.</p>
   </div>
 
   <div class="swatches">
@@ -533,7 +405,7 @@ footer.sheet{margin:4rem 0 0; border-top:1px solid var(--navy); padding:2rem 0 4
   </div>
 
   <footer class="sheet">
-    <p>One script number and one bow letter is the whole answer. Once those are picked they go straight into the real build — everything else from round 2 is either already decided or waiting on content rather than design.</p>
+    <p>Two picks: one wordmark, F1, F2 or F3, and one bow finish, W1 or W2. Plus a yes or no on painting a bow yourself. After that the identity is done and the rest of the work is the real build.</p>
   </footer>
 
 </div>
