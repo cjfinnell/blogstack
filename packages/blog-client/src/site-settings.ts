@@ -2,12 +2,15 @@ import type { Transport } from './transport';
 import type { NavLink, SiteSettings } from './types';
 import { PLACEHOLDER_MARKER, PLACEHOLDER_VARIABLES } from './placeholders';
 
-// The `global-variables` core plugin mounts its own routes; `/resolve` returns
-// a flat `{ key: value }` map of the active rows, which is exactly the shape
-// this needs. Note it is a plugin route, not a collection route — a CMS running
-// a core older than 3.0.0-beta.26 never mounted it and answers "Collection not
-// found" from the catch-all instead.
-const RESOLVE_PATH = '/api/global-variables/resolve';
+// The `global-variables` core plugin mounts its resolve route at
+// `/api/global-variables/resolve`, but core's `/api/:collection` wildcard
+// shadows it and answers "Collection not found" instead — see
+// apps/cms/src/plugins/global-variables-route. That plugin re-mounts a
+// read-only equivalent at `/global-variables/resolve`, clear of the
+// wildcard, which is the path this client actually has to call. A CMS
+// running a core older than 3.0.0-beta.26 never mounted the plugin's routes
+// at all and answers 404 either way.
+const RESOLVE_PATH = '/global-variables/resolve';
 
 interface ResolveResponse {
   success: boolean;

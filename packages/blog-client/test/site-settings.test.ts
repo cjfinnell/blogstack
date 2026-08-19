@@ -37,7 +37,7 @@ describe('createSiteSettingsClient', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const call = fetchSpy.mock.calls[0];
     if (!call) throw new Error('expected fetch to have been called');
-    expect(call[0]).toBe('/api/global-variables/resolve');
+    expect(call[0]).toBe('/global-variables/resolve');
   });
 
   it('throws rather than inventing copy when the CMS errors', async () => {
