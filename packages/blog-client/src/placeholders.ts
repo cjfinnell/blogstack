@@ -1,14 +1,19 @@
 /**
- * The site chrome's copy, as flat global variables.
+ * The site chrome's copy, as flat keyed strings.
  *
- * Storage is the SonicJS `global-variables` core plugin: one table of
- * `key` / `value` / `description` / `category` rows, edited at
- * `/admin/global-variables`, read at `GET /api/global-variables/resolve`,
- * which returns a flat `{ key: value }` map of the active rows.
+ * Storage is the `site_copy` collection: one document per string, with
+ * `key` / `value` / `description` / `category`, edited in the admin and read at
+ * `GET /api/site_copy` like any other collection. It lived in the
+ * `global-variables` core plugin until it didn't — that plugin substitutes
+ * `{key}` tokens into prose on read, which made every one of these strings raw
+ * markup inside other people's post bodies, and its write routes carried no
+ * authentication.
  *
- * Two consequences of that store shape, both deliberate:
+ * Two consequences of the store shape, both deliberate:
  *
- *   Keys are `^[a-z0-9_]+$` — the admin form enforces it.
+ *   Keys stay `^[a-z0-9_]+$`. Nothing enforces it now that the plugin's admin
+ *   form is gone, but the frontend looks strings up by key and the convention
+ *   is what keeps that legible.
  *
  *   Values are plain strings, so lists are indexed rather than nested:
  *   `nav_1_label`, `nav_2_label`, and so on. Every value stays a single line
@@ -19,8 +24,6 @@
  * Every default is wrapped in double braces. That is the point of this file: a
  * missing value has to be unmistakable on sight, because none of this text was
  * written by the person whose site it is and none of it may reach a reader.
- * The plugin's own token syntax is single-brace `{key}`, so the two do not
- * collide.
  *
  * These same values are the CI fixture and the test expectations — one object,
  * imported in all three places, because a second hand-written copy would drift
@@ -44,8 +47,8 @@ function indexed(count: number, make: (n: number) => SettingKey[]): SettingKey[]
 /**
  * Every key the frontend reads, with the description the editor sees.
  *
- * This list is also what `scripts/seed-global-variables.ts` creates, so the
- * rows exist to be edited rather than having to be typed out by hand.
+ * This list is also what `scripts/seed-site-copy.ts` creates, so the documents
+ * exist to be edited rather than having to be typed out by hand.
  */
 export const SETTING_KEYS: SettingKey[] = [
   {

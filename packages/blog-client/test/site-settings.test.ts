@@ -5,6 +5,7 @@ import {
   createSiteSettingsClient,
   findPlaceholders,
   MissingSiteSettingsError,
+  toCopyMap,
 } from '../src/site-settings';
 import { PLACEHOLDER_VARIABLES, SETTING_KEYS } from '../src/placeholders';
 import type { Transport } from '../src/transport';
@@ -18,6 +19,11 @@ function transportReturning(body: unknown, status = 200) {
   return { fetchSpy, transport: { fetch: fetchSpy } satisfies Transport };
 }
 
+/** The collection response shape: one document per string. */
+function documentsFor(vars: Record<string, string>) {
+  return { data: Object.entries(vars).map(([key, value]) => ({ data: { key, value } })) };
+}
+
 /** A fully-filled variable map, so nothing trips the placeholder guard. */
 function filledVariables(): Record<string, string> {
   return Object.fromEntries(
@@ -26,18 +32,18 @@ function filledVariables(): Record<string, string> {
 }
 
 describe('createSiteSettingsClient', () => {
-  it('reads the global-variables plugin resolve route', async () => {
-    const { fetchSpy, transport } = transportReturning({
-      success: true,
-      data: PLACEHOLDER_VARIABLES,
-    });
+  it('reads the site_copy collection in one request', async () => {
+    const { fetchSpy, transport } = transportReturning(documentsFor(PLACEHOLDER_VARIABLES));
 
     await createSiteSettingsClient(transport).getSiteSettings();
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const call = fetchSpy.mock.calls[0];
     if (!call) throw new Error('expected fetch to have been called');
-    expect(call[0]).toBe('/global-variables/resolve');
+    // Not /api/collections/site-copy/content — that path serves from a registry
+    // cache blind to new writes, the same trap client.ts documents for posts.
+    // The limit is explicit because core pages at 50 and there are ~60 strings.
+    expect(call[0]).toBe('/api/site_copy?limit=500');
   });
 
   it('throws rather than inventing copy when the CMS errors', async () => {
@@ -48,23 +54,61 @@ describe('createSiteSettingsClient', () => {
     );
   });
 
-  // A CMS older than 3.0.0-beta.26 never mounted the plugin routes, so the
-  // catch-all collection route answers instead. The error has to point at that,
-  // not at a missing variable.
-  it('throws when the plugin route is not mounted', async () => {
+  // A CMS with no site_copy collection registered answers the wildcard's 404.
+  // The error has to point at that rather than at one missing string.
+  it('throws when the collection does not exist', async () => {
     const { transport } = transportReturning({ error: 'Collection not found' }, 404);
 
     await expect(createSiteSettingsClient(transport).getSiteSettings()).rejects.toThrow(
-      /global-variables/,
+      /site_copy/,
     );
   });
 
-  it('throws when the plugin reports failure', async () => {
-    const { transport } = transportReturning({ success: false, data: {} });
+  // Anonymous reads see published documents only, so a collection full of
+  // drafts is indistinguishable from an empty one. Both mean "do not build".
+  it('throws when nothing in the collection is published', async () => {
+    const { transport } = transportReturning({ data: [] });
+
+    await expect(createSiteSettingsClient(transport).getSiteSettings()).rejects.toThrow(
+      /came back empty/,
+    );
+  });
+
+  it('throws when the response carries no list at all', async () => {
+    const { transport } = transportReturning({ success: false });
 
     await expect(createSiteSettingsClient(transport).getSiteSettings()).rejects.toThrow(
       MissingSiteSettingsError,
     );
+  });
+});
+
+describe('toCopyMap', () => {
+  it('flattens documents into the key→value map', () => {
+    expect(toCopyMap([{ data: { key: 'site_name', value: 'The Olive Table' } }])).toEqual({
+      site_name: 'The Olive Table',
+    });
+  });
+
+  it('skips a document with no key rather than failing the build', () => {
+    // One malformed row costs its own string, which then shows as a
+    // placeholder; it does not take the whole site down with it.
+    expect(
+      toCopyMap([{ data: { value: 'orphan' } }, { data: { key: 'tagline', value: 'x' } }]),
+    ).toEqual({ tagline: 'x' });
+  });
+
+  it('reads a document with no value as unfilled', () => {
+    expect(toCopyMap([{ data: { key: 'tagline' } }])).toEqual({ tagline: '' });
+  });
+
+  it('takes the last of a repeated key', () => {
+    expect(
+      toCopyMap([
+        { data: { key: 'tagline', value: 'first' } },
+        { data: { key: 'tagline', value: 'second' } },
+      ]),
+    ).toEqual({ tagline: 'second' });
   });
 });
 
@@ -169,7 +213,7 @@ describe('assertNoPlaceholders', () => {
   it('points the reader at the admin page to fix it', () => {
     expect(() => {
       assertNoPlaceholders(assembleSettings(PLACEHOLDER_VARIABLES));
-    }).toThrow(/\/admin\/global-variables/);
+    }).toThrow(/Site Copy collection under \/admin\/content/);
   });
 
   it('passes once every variable is filled', () => {

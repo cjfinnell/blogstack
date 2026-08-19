@@ -2,13 +2,13 @@ import { createSonicJSApp, mcpPlugin, registerCollections } from '@sonicjs-cms/c
 import type { Bindings, SonicJSConfig } from '@sonicjs-cms/core';
 
 import blogPostsCollection from './collections/blog-posts.collection';
+import siteCopyCollection from './collections/site-copy.collection';
 import { guardGlobalVariables } from './global-variables-guard';
 import { hoistLexicalImportMap } from './lexical-importmap';
-import { globalVariablesRoutePlugin } from './plugins/global-variables-route';
 import { publishHookPlugin } from './plugins/publish-hook';
 
 // Trigger preview-cms: exercises the new PR-preview dev CMS deploy/migrate/seed path.
-registerCollections([blogPostsCollection]);
+registerCollections([blogPostsCollection, siteCopyCollection]);
 
 const config: SonicJSConfig = {
   plugins: {
@@ -19,10 +19,6 @@ const config: SonicJSConfig = {
     // error). Confirmed by typechecking sonicjs-blog-base unmodified.
     register: [
       publishHookPlugin,
-      // Serves the global-variables map at /global-variables/resolve, clear of
-      // core's /api/:collection wildcard. See the plugin for why the plugin's
-      // own /api/global-variables route can never answer.
-      globalVariablesRoutePlugin,
       // MCP Server. Marking the plugin active in /admin/plugins does nothing on
       // its own — the plugin is opt-in from code, and `register()` is what mounts
       // POST /mcp and the /admin/mcp dashboard. Without this entry the endpoint
@@ -33,9 +29,11 @@ const config: SonicJSConfig = {
       // every tool call then runs under that user's document ACL. MCP grants no
       // privilege of its own, so the key's owning user is the whole blast radius.
       mcpPlugin({
-        // blog_post is the only registered collection. Global variables live in
-        // the global-variables plugin, not the collection registry, so they are
-        // not reachable over MCP and cannot be listed here.
+        // Posts only. site_copy is a registered collection now, so it *could* be
+        // exposed — it is deliberately not. Those strings are the site's chrome,
+        // they change a few times a year, and a person editing them in the admin
+        // is the whole intended workflow. Nothing an agent does needs to rewrite
+        // the masthead.
         expose: ['blog_post'],
         // Writes are on: MCP is the intended path for getting posts in — a human
         // writes the prose, an agent transports it. The body must be the editor's
@@ -52,9 +50,10 @@ const config: SonicJSConfig = {
         // go live with a person. Mint the key under a limited user: its owner's
         // document ACL is the entire blast radius — but only because
         // global-variables-guard.ts holds that line. Core authenticates API keys
-        // on `/admin/*` too, and its global-variables admin routes check no
-        // permission beyond portal access, so without the guard any key could
-        // write a variable and have it resolved into posts its user cannot edit.
+        // on `/admin/*` too, and the global-variables plugin's admin routes check
+        // no permission beyond portal access, so without the guard any key could
+        // write a variable that core's content:read hook resolves into posts its
+        // user cannot edit.
         types: { blog_post: { read: true, write: true } },
         listLimit: 50,
       }),
@@ -66,10 +65,11 @@ const app = createSonicJSApp(config);
 
 export default {
   async fetch(request: Request, env: Bindings, ctx: ExecutionContext): Promise<Response> {
-    // Ahead of the app on purpose: core registers the global-variables plugin's
-    // routes before any user plugin, so a plugin-mounted middleware would never
-    // run. See global-variables-guard.ts for which writes this refuses and why
-    // a variable's value is effectively markup on the public site.
+    // Nothing here uses the global-variables plugin any more — site copy is the
+    // site_copy collection — but the plugin is a core plugin, mounted whether we
+    // want it or not, and its write routes carry no authentication. This refuses
+    // them. Ahead of the app on purpose: core registers those routes before any
+    // user plugin, so a plugin-mounted middleware would never run.
     const refused = guardGlobalVariables(request);
     if (refused) return refused;
 

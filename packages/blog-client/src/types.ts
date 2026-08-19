@@ -149,8 +149,8 @@ export interface NavLink {
 /**
  * Every readable string in the site chrome, assembled from the CMS.
  *
- * Storage is the `global-variables` core plugin — a flat table of key/value
- * rows edited at /admin/global-variables. This is the shape the frontend wants;
+ * Storage is the `site_copy` collection — one document per key/value string,
+ * edited in the admin. This is the shape the frontend wants;
  * `assembleSettings` in ./site-settings does the translation, including the
  * indexed groups that stand in for lists.
  *
