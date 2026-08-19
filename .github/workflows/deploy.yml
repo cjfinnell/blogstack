@@ -110,9 +110,16 @@ jobs:
       # Also idempotent: it creates a document only for a key that has none, and
       # carries any copy still sitting in the old global_variables table over
       # into it. The web build below reads these, so a site whose copy has not
-      # been migrated yet gets it here rather than failing on placeholders.
+      # been migrated yet gets it here rather than failing on a missing
+      # collection.
+      #
+      # olive only, because olive is the only site whose templates read site
+      # copy. Seeding the others would put 60-odd unread placeholder documents
+      # in their databases and their admin. When another site starts reading
+      # copy, drop the site condition — its build will say so, and the error
+      # names this script.
       - name: Seed site copy
-        if: needs.resolve.outputs.cms_changed == 'true'
+        if: needs.resolve.outputs.cms_changed == 'true' && matrix.site == 'olive'
         run: npm run seed:site-copy
         env:
           SEED_REMOTE: '1'
