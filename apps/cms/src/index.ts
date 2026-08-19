@@ -1,4 +1,4 @@
-import { createSonicJSApp, registerCollections } from '@sonicjs-cms/core';
+import { createSonicJSApp, mcpPlugin, registerCollections } from '@sonicjs-cms/core';
 import type { Bindings, SonicJSConfig } from '@sonicjs-cms/core';
 
 import blogPostsCollection from './collections/blog-posts.collection';
@@ -15,7 +15,31 @@ const config: SonicJSConfig = {
     // package's own declarations — a pre-existing gap in the beta's types,
     // not a runtime issue (the core example plugin hits the identical
     // error). Confirmed by typechecking sonicjs-blog-base unmodified.
-    register: [publishHookPlugin] as NonNullable<NonNullable<SonicJSConfig['plugins']>['register']>,
+    register: [
+      publishHookPlugin,
+      // MCP Server. Marking the plugin active in /admin/plugins does nothing on
+      // its own — the plugin is opt-in from code, and `register()` is what mounts
+      // POST /mcp and the /admin/mcp dashboard. Without this entry the endpoint
+      // 404s no matter what the admin UI reports.
+      //
+      // Auth is delegated: callers present an API key minted at
+      // /admin/plugins/api-keys, the core middleware resolves it to a user, and
+      // every tool call then runs under that user's document ACL. MCP grants no
+      // privilege of its own, so the key's owning user is the whole blast radius.
+      mcpPlugin({
+        // blog_post is the only registered collection. Global variables live in
+        // the global-variables plugin, not the collection registry, so they are
+        // not reachable over MCP and cannot be listed here.
+        expose: ['blog_post'],
+        // Read-only on purpose. The core build ships the write tools enabled
+        // (create/update/publish/delete), which puts publishing one tool call
+        // away from an agent that was asked to read. Nothing we run needs MCP
+        // writes — seeding goes through scripts/seed-global-variables.ts — so
+        // this stays false until something does.
+        types: { blog_post: { read: true, write: false } },
+        listLimit: 50,
+      }),
+    ] as NonNullable<NonNullable<SonicJSConfig['plugins']>['register']>,
   },
 };
 
