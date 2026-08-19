@@ -51,6 +51,56 @@ the wordmark direction. Bow B1 as the bow direction.
 Items 4 and 6 cannot be resolved against placeholder art. She said so three times. They
 resolve against real posts in the CMS, not against another mockup.
 
+### None of these block the build
+
+Every open question above is wired as a **build-time configuration key**, not as a
+hardcoded value waiting on an answer. Each ships with a sensible default, and her answer
+becomes a one-line change rather than a refactor. Nothing waits on her, and nothing has
+to be rebuilt when she replies.
+
+The whole set lives in one typed module, `src/brand.config.ts`:
+
+```ts
+export interface BrandConfig {
+  /** Q1 — the wordmark face. Only the selected face is ever fetched. */
+  wordmarkFace: 'monsieur-la-doulaise' | 'miss-fajardose' | 'pinyon-flourish';
+  /** Q2 — the bow finish. #bowFlat is always used for favicon sizes regardless. */
+  bowFinish: 'painted' | 'painted-grain';
+  /** Q3 — 'scan' swaps her painting in at large sizes; the SVG stays for small ones. */
+  bowSource: 'drawn' | 'scan';
+  /** Q8 — the D-serif / D-sans test. A token swap, not a redesign. */
+  displayFace: 'serif' | 'sans';
+  /** Q5 — renaming only. Taxonomy keys stay stable so no content migrates. */
+  tagLabels: Record<TagKey, string>;
+  /** Q4 — how rankings are scoped, once she decides. */
+  rankingScope: 'worldwide' | 'region' | 'both';
+  /** Q6 — how photographs sit against the score. Resolves against real photos. */
+  reviewPhotoTreatment: 'beside-score' | 'above-score' | 'full-bleed';
+}
+
+export const brand: BrandConfig = {
+  wordmarkFace: 'monsieur-la-doulaise', // F1, the sheet's recommendation
+  bowFinish: 'painted-grain', // W2, closest to her photograph
+  bowSource: 'drawn',
+  displayFace: 'serif',
+  rankingScope: 'region',
+  reviewPhotoTreatment: 'above-score',
+  tagLabels: {/* … */},
+};
+```
+
+Two rules that make this worth doing rather than merely tidy:
+
+- **Every key takes a `PUBLIC_`-prefixed env override, read at build time.** A preview
+  deploy can then show her F1 beside F3, or serif beside sans, without a commit — which
+  is the only way she can actually judge Q1, Q3 and Q8, since all three are questions
+  about how something _looks at real size on a real page_.
+- **Font loading follows the config.** Only the selected script face is fetched. The
+  identity sheet loads all three because it is a comparison sheet; the product must not.
+
+Q7 is the exception: it is an architecture decision, not a preference, so it is not a
+config key. See §10.
+
 ---
 
 ## 2. Identity
@@ -898,8 +948,10 @@ Do not build these. Each was considered and rejected for a reason.
 
 ## 15. Sequencing
 
-**Slice 0 — identity.** Blocked on questions 1–3 only. Wordmark and bow into components,
-favicon set, OG template. Everything downstream renders the header, so this goes first.
+**Slice 0 — brand config, then identity.** `src/brand.config.ts` lands first (§1), so no
+open question blocks anything. Then the wordmark and bow into components, the favicon
+set, and the OG template, all reading from the config. Everything downstream renders the
+header, so this goes before the rest.
 
 **Slice 1 — the design system.** Tokens (with the §3.3 corrections), fonts, the three
 type roles, masthead, footer, chips, section heads, buttons. Fix the three-different-site-names
