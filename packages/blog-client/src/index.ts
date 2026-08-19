@@ -24,23 +24,16 @@ export type { HighlightOptions } from './highlight';
 export { monokaiLight } from './monokai-light-theme';
 export { httpTransport, serviceTransport } from './transport';
 export type { Transport } from './transport';
-export type {
-  ContentResponse,
-  NavLink,
-  Post,
-  PostType,
-  ReviewMeta,
-  SiteSettings,
-  SiteSettingsResponse,
-  SiteSettingsRow,
-} from './types';
+export type { ContentResponse, NavLink, Post, PostType, ReviewMeta, SiteSettings } from './types';
 export {
+  assembleSettings,
   assertNoPlaceholders,
   createSiteSettingsClient,
   findPlaceholders,
   MissingSiteSettingsError,
 } from './site-settings';
 export type { SiteSettingsClient } from './site-settings';
-export { PLACEHOLDER_MARKER, PLACEHOLDER_SITE_SETTINGS } from './placeholders';
+export { PLACEHOLDER_MARKER, PLACEHOLDER_VARIABLES, SETTING_KEYS } from './placeholders';
+export type { SettingKey } from './placeholders';
 export { buildRssFeed } from './rss';
 export type { RssFeedOptions } from './rss';

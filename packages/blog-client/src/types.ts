@@ -51,12 +51,17 @@ export interface NavLink {
 }
 
 /**
- * Every readable string in the site chrome, from the CMS.
+ * Every readable string in the site chrome, assembled from the CMS.
+ *
+ * Storage is the `global-variables` core plugin — a flat table of key/value
+ * rows edited at /admin/global-variables. This is the shape the frontend wants;
+ * `assembleSettings` in ./site-settings does the translation, including the
+ * indexed groups that stand in for lists.
  *
  * No frontend module carries copy. Structural values — route paths, taxonomy
  * keys, design toggles — stay in code; anything a reader can see lives here.
  * `tagLabels` is a list rather than a map because the key is what content is
- * stored against: renaming a label must never migrate anything.
+ * filed under: renaming a label must never migrate anything.
  */
 export interface SiteSettings {
   siteName: string;
@@ -91,18 +96,4 @@ export interface SiteSettings {
   tipTiers: { amount: string; description: string; href: string }[];
 
   footerColumns: { heading: string; links: NavLink[] }[];
-}
-
-/** One row of the `site_settings` collection, in the shape the API returns it. */
-export interface SiteSettingsRow {
-  id: string;
-  slug: string;
-  status: string;
-  updated_at: number;
-  data: Partial<SiteSettings>;
-}
-
-export interface SiteSettingsResponse {
-  data: SiteSettingsRow[];
-  meta: { count: number };
 }

@@ -5,26 +5,11 @@
 import { createServer, type Server } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { PLACEHOLDER_SITE_SETTINGS } from '../../packages/blog-client/src/placeholders.ts';
+import { PLACEHOLDER_VARIABLES } from '../../packages/blog-client/src/placeholders.ts';
 
 const posts = JSON.parse(
   readFileSync(resolve(import.meta.dirname, 'blog-posts.json'), 'utf8'),
 ) as unknown[];
-
-// The fixture settings row is the placeholder set itself, imported rather than
-// copied. Test values and default values are the same object on purpose: a
-// second hand-written copy would drift, and the drift would show up as copy on
-// a real page. Every string in it is brace-wrapped, so a build that renders
-// these is obvious on sight and `assertNoPlaceholders` refuses to ship it.
-const siteSettings = [
-  {
-    id: 'fixture-settings',
-    slug: 'fixture-settings',
-    status: 'published',
-    updated_at: 0,
-    data: PLACEHOLDER_SITE_SETTINGS,
-  },
-];
 
 export function startFixtureServer(port: number): Promise<Server> {
   const server = createServer((req, res) => {
@@ -33,9 +18,15 @@ export function startFixtureServer(port: number): Promise<Server> {
       res.end(JSON.stringify({ data: posts, meta: { count: posts.length } }));
       return;
     }
-    if (req.url?.startsWith('/api/site_settings')) {
+    // The chrome's copy, from the global-variables plugin. The fixture serves
+    // the placeholder map itself, imported rather than copied: test values and
+    // default values are deliberately the same object, because a second
+    // hand-written set would drift and the drift would surface as copy on a
+    // real page. Every value is brace-wrapped, so a build that renders these is
+    // obvious on sight and `assertNoPlaceholders` refuses to ship it.
+    if (req.url?.startsWith('/api/global-variables/resolve')) {
       res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ data: siteSettings, meta: { count: siteSettings.length } }));
+      res.end(JSON.stringify({ success: true, data: PLACEHOLDER_VARIABLES }));
       return;
     }
     res.writeHead(404);

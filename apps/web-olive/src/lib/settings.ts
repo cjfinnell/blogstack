@@ -12,7 +12,8 @@ const client = createSiteSettingsClient(
 let cached: SiteSettings | null = null;
 
 /**
- * The site chrome's copy, fetched once per build.
+ * The site chrome's copy, fetched once per build from the CMS's
+ * `global-variables` plugin.
  *
  * Every page renders the masthead and the footer, so without memoising this
  * every route would refetch the same row. Astro builds in a single process, so
@@ -42,7 +43,7 @@ export async function getSettings(): Promise<SiteSettings> {
  *
  * Falls back to the key itself rather than to an invented label — an
  * unrecognised key is a content problem to see, not to paper over with a
- * sentence nobody wrote.
+ * word nobody wrote.
  */
 export function tagLabel(settings: SiteSettings, key: string): string {
   return settings.tagLabels.find((t) => t.key === key)?.label ?? key;
