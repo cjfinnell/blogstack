@@ -8,6 +8,15 @@ export {
 } from './client';
 export type { BlogClient } from './client';
 export { renderLexicalToHtml } from './lexical';
+export { markdownToEditorHtml } from './markdown-to-html';
+export {
+  assertContentShape,
+  assertEditorHtml,
+  assertLexicalShape,
+  isContentShape,
+  ContentShapeError,
+} from './content-shape';
+export type { LexicalDoc, LexicalNode } from './lexical-types';
 export { applyFootnotes } from './footnotes';
 export { applyCodeBlocks } from './codeblocks';
 export { highlightCodeBlocks } from './highlight';

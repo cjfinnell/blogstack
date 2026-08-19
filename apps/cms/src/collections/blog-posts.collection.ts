@@ -26,6 +26,24 @@ export default {
         type: 'lexical',
         title: 'Content',
         required: true,
+        // This description is the only thing standing between an API client and
+        // an unrenderable post. @sonicjs-cms/core's MCP schema converter has no
+        // case for `lexical`, so the field is advertised to agents as a plain
+        // string with no hint of what belongs in it, and nothing on the write
+        // path validates the value. `description` is one of the two FieldConfig
+        // keys the converter copies into the emitted JSON Schema, so it reaches
+        // the client verbatim. Keep it exact.
+        description:
+          'Serialized HTML, NOT prose and NOT markdown — the same markup the admin editor writes, so that ' +
+          'a post created through the API can still be opened and amended in the editor. Supported tags: p, ' +
+          'h1–h6, ul, ol, li, blockquote, figure, figcaption, img, br, a, strong, em, s, u, code, span. Code ' +
+          'blocks are an authoring convention rather than markup: put ``` fences and `backticks` in as ' +
+          'literal text inside a <p>, with lines joined by <br>, and the frontend lifts them out. Footnotes ' +
+          'likewise: [^1] markers inline, and a trailing <h2>Notes</h2> followed by an <ol> — both must be ' +
+          'bare tags with no attributes or the footnote pass will not match. Build this with ' +
+          'markdownToEditorHtml() from @blogstack/blog-client rather than by hand, and check it with ' +
+          'assertContentShape(); plain text written here is stored as-is and rendered as raw markup, so it ' +
+          'will look correct while being wrong.',
       },
       author: {
         type: 'user',
