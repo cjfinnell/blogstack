@@ -4,29 +4,15 @@
 
 import { applyCodeBlocks } from './codeblocks';
 import { applyFootnotes } from './footnotes';
-
-const FORMAT_BOLD = 1;
-const FORMAT_ITALIC = 2;
-const FORMAT_STRIKETHROUGH = 4;
-const FORMAT_UNDERLINE = 8;
-const FORMAT_CODE = 16;
-
-interface LexicalNode {
-  type: string;
-  children?: LexicalNode[];
-  text?: string;
-  format?: number;
-  tag?: string;
-  url?: string;
-  listType?: string;
-  src?: string;
-  altText?: string;
-  caption?: string;
-}
-
-interface LexicalDoc {
-  root: LexicalNode;
-}
+import {
+  FORMAT_BOLD,
+  FORMAT_CODE,
+  FORMAT_ITALIC,
+  FORMAT_STRIKETHROUGH,
+  FORMAT_UNDERLINE,
+  type LexicalDoc,
+  type LexicalNode,
+} from './lexical-types';
 
 function escapeHtml(s: string): string {
   return s
