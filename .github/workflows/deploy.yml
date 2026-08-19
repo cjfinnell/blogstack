@@ -62,6 +62,13 @@ jobs:
     permissions:
       contents: read
       deployments: write
+    # The `secrets` context is not allowed inside `if:` conditionals at all
+    # (job or step level) — GitHub rejects the whole workflow file at parse
+    # time with "Unrecognized named-value: 'secrets'" if you try. Computing
+    # it into a job-level env var here (secrets IS allowed in `env:`) is the
+    # workaround; the draft steps below gate on `env.HAS_WEB_DRAFT` instead.
+    env:
+      HAS_WEB_DRAFT: ${{ secrets.WEB_DRAFT_HOST != '' }}
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-node
@@ -123,14 +130,14 @@ jobs:
       # normally before admin-draft is rolled out for it; rolling it out for
       # one site must not require touching the other two.
       - name: Build web (draft)
-        if: secrets.WEB_DRAFT_HOST != ''
+        if: env.HAS_WEB_DRAFT == 'true'
         run: npm run build --workspace apps/web-${{ matrix.site }}
         env:
           CMS_URL: https://${{ secrets.CMS_HOST }}
           SITE_URL: ${{ secrets.WEB_DRAFT_ORIGIN }}
           RENDER_MODE: ssr
       - name: Deploy web (draft)
-        if: secrets.WEB_DRAFT_HOST != ''
+        if: env.HAS_WEB_DRAFT == 'true'
         run: npx wrangler deploy --env web_${{ matrix.site }}_draft
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
