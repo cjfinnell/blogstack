@@ -3,6 +3,7 @@ import type { Bindings, SonicJSConfig } from '@sonicjs-cms/core';
 
 import blogPostsCollection from './collections/blog-posts.collection';
 import { hoistLexicalImportMap } from './lexical-importmap';
+import { globalVariablesRoutePlugin } from './plugins/global-variables-route';
 import { publishHookPlugin } from './plugins/publish-hook';
 
 // Trigger preview-cms: exercises the new PR-preview dev CMS deploy/migrate/seed path.
@@ -17,6 +18,10 @@ const config: SonicJSConfig = {
     // error). Confirmed by typechecking sonicjs-blog-base unmodified.
     register: [
       publishHookPlugin,
+      // Serves the global-variables map at /global-variables/resolve, clear of
+      // core's /api/:collection wildcard. See the plugin for why the plugin's
+      // own /api/global-variables route can never answer.
+      globalVariablesRoutePlugin,
       // MCP Server. Marking the plugin active in /admin/plugins does nothing on
       // its own — the plugin is opt-in from code, and `register()` is what mounts
       // POST /mcp and the /admin/mcp dashboard. Without this entry the endpoint
@@ -32,11 +37,11 @@ const config: SonicJSConfig = {
         // not reachable over MCP and cannot be listed here.
         expose: ['blog_post'],
         // Writes are on: MCP is the intended path for getting posts in — a human
-        // writes the prose, an agent transports it. The body must be a lexical
-        // tree, so build it with markdownToLexicalJson() from
-        // @blogstack/blog-client and check it with assertLexicalShape(); nothing
-        // on the server side validates that field, and a malformed one renders
-        // as raw markup rather than failing.
+        // writes the prose, an agent transports it. The body must be the editor's
+        // HTML, so build it with markdownToEditorHtml() from
+        // @blogstack/blog-client and check it with assertContentShape(); nothing
+        // on the server side validates that field, and prose written into it is
+        // rendered as raw markup rather than failing.
         //
         // The write set includes publish and delete. Publishing over MCP does not
         // rebuild the site — core dispatches content:after:publish only from its
