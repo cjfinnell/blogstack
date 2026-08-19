@@ -1,32 +1,33 @@
-// Converts markdown to the lexical tree SonicJS stores, so that a human can hand
-// an agent prose and the agent never has to hand-build editor JSON.
+// Converts markdown to the HTML the SonicJS editor stores, so that a human can
+// hand an agent prose and the agent never has to hand-build editor internals.
 //
-// The target is deliberately narrow: the subset of node types renderLexicalToHtml
-// actually handles. Anything richer would round-trip through the CMS and then
-// vanish at render time, which is the exact silent failure this module exists to
-// prevent.
+// The target is HTML because that is what the editor actually writes. Every row
+// in the CMS holds serialized markup — `<p dir="ltr"><span style="white-space:
+// pre-wrap;">…</span></p>` — not a lexical JSON tree. renderLexicalToHtml calls
+// that the fallback path, but it is the only path any real post takes; the
+// trees in the test fixtures are hand-written and have no counterpart in the
+// database. Emitting a tree instead would render fine on the site and then
+// diverge from the editor the moment an author opened the post to amend it.
 //
-// Two constructs are left as literal text on purpose, because this codebase
-// already treats them as authoring conventions applied after rendering:
+// What we do not reproduce is the editor's export noise: the `dir="ltr"`
+// attributes and `white-space: pre-wrap` spans are artifacts of how lexical
+// serializes, not something its importer needs. Bare tags matter for a second
+// reason — applyFootnotes matches `<h[1-6]>Notes</h[1-6]>` and `<ol>` with no
+// attributes at all, so decorating those tags would silently switch footnotes
+// off.
 //
-//   Code. The editor SonicJS loads has no code node, so fences and backticks are
-//   typed as plain text and applyCodeBlocks lifts them back out of the rendered
-//   HTML. Emitting a code node here would produce markup applyCodeBlocks never
-//   sees. Fenced blocks therefore become one paragraph of literal lines, fences
-//   included, joined by linebreaks — the shape the editor produces for
-//   shift-enter, which is what applyCodeBlocks is written against.
+// Two constructs stay literal text, because both are authoring conventions this
+// codebase applies after rendering rather than node types:
 //
-//   Footnotes. `[^1]` markers and the trailing `Notes` heading plus ordered list
+//   Code. The editor has no code node, so fences and backticks are typed as
+//   plain text and applyCodeBlocks lifts them back out of the rendered HTML.
+//   Fenced blocks therefore become one paragraph of literal lines joined by
+//   <br>, which is both what the editor produces for shift-enter and what
+//   applyCodeBlocks is written to scan.
+//
+//   Footnotes. `[^1]` markers and a trailing `Notes` heading plus ordered list
 //   are rewritten into linked superscripts by applyFootnotes, again after
-//   rendering. They pass through here as ordinary text, heading and list nodes.
-
-import {
-  FORMAT_BOLD,
-  FORMAT_ITALIC,
-  FORMAT_STRIKETHROUGH,
-  type LexicalDoc,
-  type LexicalNode,
-} from './lexical-types';
+//   rendering. They pass through here as ordinary text, heading and list markup.
 
 const HEADING = /^(#{1,6})\s+(.*)$/;
 const BLOCKQUOTE = /^>\s?(.*)$/;
@@ -49,24 +50,23 @@ const ITALIC_STAR = /^\*([^*\n]+)\*/;
 const ITALIC_UNDERSCORE = /^_([^_\n]+)_/;
 const LINK = /^\[([^\]]*)\]\(([^)\s]+)\)/;
 
-function text(value: string, format: number): LexicalNode {
-  return format === 0 ? { type: 'text', text: value } : { type: 'text', text: value, format };
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
-/**
- * Parse one line's inline markup into text and link nodes.
- *
- * `format` is the bitfield inherited from any enclosing emphasis, so nesting
- * composes: `**bold and *also italic***` yields a text node with both bits set.
- */
-function parseInline(source: string, format = 0): LexicalNode[] {
-  const out: LexicalNode[] = [];
+/** Render one line's inline markup. Emphasis nests as markup rather than bitfields. */
+function inlineToHtml(source: string): string {
+  let out = '';
   let buffer = '';
   let i = 0;
 
   const flush = (): void => {
     if (buffer !== '') {
-      out.push(text(buffer, format));
+      out += escapeHtml(buffer);
       buffer = '';
     }
   };
@@ -81,10 +81,10 @@ function parseInline(source: string, format = 0): LexicalNode[] {
       continue;
     }
 
-    // An image that is not alone on its line stays literal: the renderer wraps
-    // images in <figure>, which cannot legally sit inside the <p> a paragraph
-    // becomes. Keeping the markdown visible is a defect the author can see and
-    // move to its own line, rather than invalid markup they cannot.
+    // An image that is not alone on its line stays literal: images render as a
+    // <figure>, which cannot legally sit inside the <p> a paragraph becomes.
+    // Visible markdown is a defect the author can see and move to its own line;
+    // invalid markup is not.
     const inlineImage = INLINE_IMAGE.exec(rest);
     if (inlineImage) {
       buffer += inlineImage[0];
@@ -95,7 +95,7 @@ function parseInline(source: string, format = 0): LexicalNode[] {
     const bold = BOLD.exec(rest);
     if (bold?.[1] !== undefined) {
       flush();
-      out.push(...parseInline(bold[1], format | FORMAT_BOLD));
+      out += `<strong>${inlineToHtml(bold[1])}</strong>`;
       i += bold[0].length;
       continue;
     }
@@ -103,7 +103,7 @@ function parseInline(source: string, format = 0): LexicalNode[] {
     const strike = STRIKETHROUGH.exec(rest);
     if (strike?.[1] !== undefined) {
       flush();
-      out.push(...parseInline(strike[1], format | FORMAT_STRIKETHROUGH));
+      out += `<s>${inlineToHtml(strike[1])}</s>`;
       i += strike[0].length;
       continue;
     }
@@ -111,7 +111,7 @@ function parseInline(source: string, format = 0): LexicalNode[] {
     const italic = ITALIC_STAR.exec(rest) ?? ITALIC_UNDERSCORE.exec(rest);
     if (italic?.[1] !== undefined) {
       flush();
-      out.push(...parseInline(italic[1], format | FORMAT_ITALIC));
+      out += `<em>${inlineToHtml(italic[1])}</em>`;
       i += italic[0].length;
       continue;
     }
@@ -119,7 +119,7 @@ function parseInline(source: string, format = 0): LexicalNode[] {
     const link = LINK.exec(rest);
     if (link?.[1] !== undefined && link[2] !== undefined) {
       flush();
-      out.push({ type: 'link', url: link[2], children: parseInline(link[1], format) });
+      out += `<a href="${escapeHtml(link[2])}">${inlineToHtml(link[1])}</a>`;
       i += link[0].length;
       continue;
     }
@@ -132,14 +132,8 @@ function parseInline(source: string, format = 0): LexicalNode[] {
   return out;
 }
 
-/** Inline-parse several lines into one node list, separated by linebreaks. */
-function parseInlineLines(lines: string[], format = 0): LexicalNode[] {
-  const out: LexicalNode[] = [];
-  lines.forEach((line, i) => {
-    if (i > 0) out.push({ type: 'linebreak' });
-    out.push(...parseInline(line, format));
-  });
-  return out;
+function inlineLinesToHtml(lines: string[]): string {
+  return lines.map((line) => inlineToHtml(line)).join('<br>');
 }
 
 function isBlank(line: string): boolean {
@@ -147,19 +141,19 @@ function isBlank(line: string): boolean {
 }
 
 /**
- * Convert markdown to a lexical document.
+ * Convert markdown to the editor's HTML.
  *
  * Supported: ATX headings, paragraphs, blockquotes, bullet and numbered lists,
  * standalone images, bold, italic, strikethrough, links, backslash escapes, and
  * fenced code blocks (as literal text — see the module comment).
  *
  * Not supported, by design: nested lists, tables, inline HTML, horizontal rules,
- * and setext headings. These have no node type the renderer can turn into markup,
- * so they arrive as ordinary paragraph text rather than disappearing.
+ * and setext headings. These arrive as ordinary paragraph text rather than
+ * disappearing, so an author can see what was not understood.
  */
-export function markdownToLexical(markdown: string): LexicalDoc {
+export function markdownToEditorHtml(markdown: string): string {
   const lines = markdown.replace(/\r\n?/g, '\n').split('\n');
-  const children: LexicalNode[] = [];
+  const blocks: string[] = [];
   let i = 0;
 
   while (i < lines.length) {
@@ -181,31 +175,24 @@ export function markdownToLexical(markdown: string): LexicalDoc {
         i += 1;
         if (next.startsWith('```')) break;
       }
-      children.push({
-        type: 'paragraph',
-        children: block.flatMap((codeLine, n) =>
-          n === 0 ? [text(codeLine, 0)] : [{ type: 'linebreak' }, text(codeLine, 0)],
-        ),
-      });
+      blocks.push(`<p>${block.map((codeLine) => escapeHtml(codeLine)).join('<br>')}</p>`);
       continue;
     }
 
     const heading = HEADING.exec(line);
     if (heading?.[1] !== undefined && heading[2] !== undefined) {
-      children.push({
-        type: 'heading',
-        tag: `h${String(heading[1].length)}`,
-        children: parseInline(heading[2]),
-      });
+      const level = heading[1].length;
+      blocks.push(`<h${String(level)}>${inlineToHtml(heading[2])}</h${String(level)}>`);
       i += 1;
       continue;
     }
 
     const image = IMAGE_LINE.exec(line);
     if (image?.[2] !== undefined) {
-      const node: LexicalNode = { type: 'image', src: image[2], altText: image[1] ?? '' };
-      if (image[3]) node.caption = image[3];
-      children.push(node);
+      const caption = image[3] ? `<figcaption>${escapeHtml(image[3])}</figcaption>` : '';
+      blocks.push(
+        `<figure><img src="${escapeHtml(image[2])}" alt="${escapeHtml(image[1] ?? '')}" loading="lazy" />${caption}</figure>`,
+      );
       i += 1;
       continue;
     }
@@ -218,29 +205,29 @@ export function markdownToLexical(markdown: string): LexicalDoc {
         quoted.push(match[1] ?? '');
         i += 1;
       }
-      children.push({ type: 'quote', children: parseInlineLines(quoted) });
+      blocks.push(`<blockquote>${inlineLinesToHtml(quoted)}</blockquote>`);
       continue;
     }
 
     const bullet = BULLET_ITEM.exec(line);
     const numbered = NUMBER_ITEM.exec(line);
     if (bullet ?? numbered) {
-      const listType = bullet ? 'bullet' : 'number';
+      const tag = bullet ? 'ul' : 'ol';
       const pattern = bullet ? BULLET_ITEM : NUMBER_ITEM;
-      const items: LexicalNode[] = [];
+      const items: string[] = [];
       while (i < lines.length) {
         const match = pattern.exec(lines[i] ?? '');
         if (!match) break;
-        items.push({ type: 'listitem', children: parseInline(match[1] ?? '') });
+        items.push(`<li>${inlineToHtml(match[1] ?? '')}</li>`);
         i += 1;
       }
-      children.push({ type: 'list', listType, children: items });
+      blocks.push(`<${tag}>${items.join('')}</${tag}>`);
       continue;
     }
 
     // Paragraph: everything up to the next blank line or block-level construct.
-    // A hard line break inside one becomes a linebreak node, matching what the
-    // editor produces for shift-enter.
+    // A soft line break inside one becomes <br>, matching what the editor writes
+    // for shift-enter.
     const paragraph: string[] = [];
     while (i < lines.length) {
       const next = lines[i] ?? '';
@@ -258,18 +245,8 @@ export function markdownToLexical(markdown: string): LexicalDoc {
       paragraph.push(next);
       i += 1;
     }
-    children.push({ type: 'paragraph', children: parseInlineLines(paragraph) });
+    blocks.push(`<p>${inlineLinesToHtml(paragraph)}</p>`);
   }
 
-  return { root: { type: 'root', children } };
-}
-
-/**
- * The value to write into a post's `content` field: the tree, JSON-encoded.
- *
- * The CMS column holds a string, not an object, so writing the tree itself
- * produces a row the renderer reads as `[object Object]`.
- */
-export function markdownToLexicalJson(markdown: string): string {
-  return JSON.stringify(markdownToLexical(markdown));
+  return blocks.join('');
 }
