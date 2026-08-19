@@ -1,0 +1,74 @@
+---
+import Bow from './Bow.astro';
+import type { SiteSettings } from '@blogstack/blog-client';
+
+interface Props {
+  settings: SiteSettings;
+}
+
+const { settings } = Astro.props;
+---
+
+<footer class="site">
+  <div class="wrap inner">
+    <div>
+      <Bow width={96} />
+      <p class="mission">{settings.missionLine}</p>
+    </div>
+    {
+      settings.footerColumns.map((column) => (
+        <nav>
+          <b>{column.heading}</b>
+          {column.links.map((link) => (
+            <a href={link.href}>{link.label}</a>
+          ))}
+        </nav>
+      ))
+    }
+  </div>
+</footer>
+
+<style>
+  .site {
+    margin-top: 4rem;
+    border-top: 1px solid var(--rule);
+    background: var(--surface);
+  }
+  .inner {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 2rem;
+    padding-top: 3rem;
+    padding-bottom: 3.5rem;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .site :global(.bow) {
+    margin: 0 0 0.75rem;
+  }
+  .mission {
+    margin: 0;
+  }
+  b {
+    display: block;
+    color: var(--navy);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  a {
+    display: block;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.18rem 0;
+  }
+  a:hover {
+    color: var(--accent);
+  }
+  @media (max-width: 48rem) {
+    .inner {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

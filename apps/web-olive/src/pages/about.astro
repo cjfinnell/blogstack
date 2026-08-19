@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSettings } from '../lib/settings';
+
+const settings = await getSettings();
+---
+
+<BaseLayout title={`About | ${settings.siteName}`} description={settings.tagline}>
+  <div class="wrap page">
+    <h1>About {settings.siteName}</h1>
+    <p class="lead">{settings.missionLine}</p>
+
+    <p class="rail-label">{settings.philosophy.railLabel}</p>
+    <h2>{settings.philosophy.heading}</h2>
+    <p>{settings.philosophy.body}</p>
+
+    <p class="pledge">{settings.pledge.statement}</p>
+    <p class="byline">{settings.pledge.byline}</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: 3rem 5rem;
+    max-width: 42rem;
+  }
+  .lead {
+    font-size: 1.15rem;
+    color: var(--muted);
+  }
+  .pledge {
+    margin-top: 2rem;
+    font-family: var(--display);
+  }
+  .byline {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>

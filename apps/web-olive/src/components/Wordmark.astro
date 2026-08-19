@@ -1,0 +1,101 @@
+---
+import { brand, wordmarkNeedsFlourish } from '../brand.config';
+
+/**
+ * The wordmark. Text, not an image and not an SVG path, so it stays selectable,
+ * searchable and scalable at any size.
+ *
+ * The script face is the only place the script appears anywhere on the site. It
+ * never sets a heading, a label, or body copy.
+ *
+ * A script face has no metric-matched fallback — Astro's optimised fallbacks
+ * are switched off for it in astro.config.mjs, because a synthetic match to a
+ * copperplate hand makes the swap worse than the shift. So the masthead
+ * reserves the mark's height explicitly with `min-height` derived from the same
+ * clamp, and the mark never moves as the font loads. This is the single largest
+ * CLS risk in the design.
+ *
+ * F3 keeps Pinyon Script and sweeps a drawn flourish under the whole name.
+ * Fusing a swash into the M itself was built and thrown away: at masthead size
+ * the join never lands, and because the swash is an absolutely positioned SVG
+ * while the M is a glyph, the two drift apart across screen widths and
+ * font-loading states. Do not re-attempt it.
+ */
+
+interface Props {
+  /** The three masthead size steps. */
+  size: 'home' | 'map' | 'review';
+  /** From the CMS. The name is copy, like everything else a reader sees. */
+  siteName: string;
+  href?: string | undefined;
+}
+
+const { size, siteName, href = '/' } = Astro.props;
+---
+
+<a class:list={['wordmark', `is-${size}`]} href={href} data-face={brand.wordmarkFace}>
+  {
+    wordmarkNeedsFlourish ? (
+      <span class="flourished">
+        {siteName}
+        <svg viewBox="0 0 600 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <path d="M8 18 C 90 50, 300 56, 470 28 C 522 19, 566 8, 586 2 C 574 22, 540 38, 500 46" />
+        </svg>
+      </span>
+    ) : (
+      siteName
+    )
+  }
+</a>
+
+<style>
+  .wordmark {
+    display: block;
+    text-align: center;
+    font-family: var(--script);
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--navy);
+    text-decoration: none;
+    padding-bottom: 0.08em;
+    white-space: nowrap;
+  }
+  .wordmark:hover {
+    color: var(--accent);
+  }
+
+  /* Height is reserved from the same clamp that sets the size, so the swap from
+     fallback to script face cannot shift the page below it. */
+  .is-home {
+    font-size: clamp(3.5rem, 10vw, 6rem);
+    min-height: calc(clamp(3.5rem, 10vw, 6rem) * 1.13);
+  }
+  .is-map {
+    font-size: clamp(3rem, 8vw, 4.75rem);
+    min-height: calc(clamp(3rem, 8vw, 4.75rem) * 1.13);
+  }
+  .is-review {
+    font-size: clamp(2.5rem, 6vw, 3.75rem);
+    min-height: calc(clamp(2.5rem, 6vw, 3.75rem) * 1.13);
+  }
+
+  /* F3 only: the flourish sweeps under the whole name, never into the M. */
+  .flourished {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.2em;
+  }
+  .flourished svg {
+    position: absolute;
+    left: -0.02em;
+    bottom: 0;
+    width: 100%;
+    height: 0.42em;
+    overflow: visible;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+</style>

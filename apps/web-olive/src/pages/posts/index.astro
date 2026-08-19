@@ -2,14 +2,24 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
 import { blog } from '@blogstack/astro-shared/blog';
+import { getSettings } from '../../lib/settings';
 
 export const prerender = import.meta.env.RENDER_MODE !== 'ssr';
 
 const posts = await blog.getPublishedPosts(100);
+const settings = await getSettings();
 ---
 
-<BaseLayout title="Blog | All posts" description="All posts">
-  <h1>All posts</h1>
-  {posts.length === 0 && <p>No posts published yet.</p>}
-  {posts.map((post) => <PostCard post={post} />)}
+<BaseLayout title={`All posts | ${settings.siteName}`} description={settings.tagline}>
+  <div class="wrap page">
+    <h1>All posts</h1>
+    {posts.length === 0 && <p>No posts published yet.</p>}
+    {posts.map((post) => <PostCard post={post} />)}
+  </div>
 </BaseLayout>
+
+<style>
+  .page {
+    padding-block: 3rem 5rem;
+  }
+</style>

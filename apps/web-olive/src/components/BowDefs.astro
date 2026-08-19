@@ -1,0 +1,133 @@
+---
+/**
+ * The bow, defined once per document and referenced at every size.
+ *
+ * Rendered once near the top of <body>; every <Bow /> is a <use href="#…">
+ * pointing at one of these symbols. No script, no image request.
+ *
+ * The drawing is built to Maria's round 3 note — "I want the tails also to be
+ * wavy like the picture. I also want it to have contrast, for it to look silky
+ * and watercolor-y and you can see how the knot was tied." Four things came out
+ * of that and all four are load-bearing:
+ *
+ *   1. A constant-width band, not a tapering blade. Her photograph shows even
+ *      width throughout; round 2 narrowed to points, which is why it read as a
+ *      bowtie rather than silk.
+ *   2. Tails that undulate, two inflections each, with no left-right symmetry.
+ *   3. A gradient per band, and a different gradient on each side, so the loops
+ *      read as sitting at different angles to the light.
+ *   4. A knot drawn as an actual wrap: a band over the centre, a seam curving
+ *      across it, a highlight along its top edge, and the loops darkening where
+ *      they tuck underneath.
+ *
+ * #bowFlat is the unfiltered variant. Below roughly 32px the displacement and
+ * grain filters turn to mud, and they are not free to run, so the favicon and
+ * anything small uses it instead.
+ */
+---
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="ribA" x1="0" y1="0" x2=".85" y2="1">
+      <stop offset="0" stop-color="var(--rib-a1)"></stop>
+      <stop offset=".45" stop-color="var(--rib-a2)"></stop>
+      <stop offset="1" stop-color="var(--rib-a3)"></stop>
+    </linearGradient>
+    <linearGradient id="ribB" x1="1" y1="0" x2=".1" y2="1">
+      <stop offset="0" stop-color="var(--rib-b1)"></stop>
+      <stop offset=".55" stop-color="var(--rib-b2)"></stop>
+      <stop offset="1" stop-color="var(--rib-b3)"></stop>
+    </linearGradient>
+    <radialGradient id="knotG" cx=".36" cy=".3" r=".9">
+      <stop offset="0" stop-color="var(--knot-1)"></stop>
+      <stop offset=".65" stop-color="var(--knot-2)"></stop>
+      <stop offset="1" stop-color="var(--knot-3)"></stop>
+    </radialGradient>
+
+    <!-- uneven, hand-painted edges -->
+    <filter id="paint" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="4" seed="9" result="n"
+      ></feTurbulence>
+      <feDisplacementMap
+        in="SourceGraphic"
+        in2="n"
+        scale="9"
+        xChannelSelector="R"
+        yChannelSelector="G"></feDisplacementMap>
+    </filter>
+
+    <!-- the same, plus paper grain breaking up the wash -->
+    <filter id="paintGrain" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="4" seed="9" result="n"
+      ></feTurbulence>
+      <feDisplacementMap
+        in="SourceGraphic"
+        in2="n"
+        scale="9"
+        xChannelSelector="R"
+        yChannelSelector="G"
+        result="d"></feDisplacementMap>
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="21" result="g"
+      ></feTurbulence>
+      <feColorMatrix in="g" type="saturate" values="0" result="gm"></feColorMatrix>
+      <feComponentTransfer in="gm" result="gt">
+        <feFuncA type="linear" slope=".5"></feFuncA>
+      </feComponentTransfer>
+      <feComposite in="gt" in2="d" operator="in" result="gc"></feComposite>
+      <feBlend in="d" in2="gc" mode="multiply"></feBlend>
+    </filter>
+
+    <!-- the drawing itself, before any surface treatment -->
+    <g id="bowBody">
+      <g fill="none" stroke-width="23" stroke-linecap="round" opacity=".88">
+        <path stroke="url(#ribA)" d="M150 74 C 126 20, 52 2, 26 32 C 2 60, 62 90, 145 78"></path>
+        <path stroke="url(#ribB)" d="M150 74 C 174 20, 248 2, 274 32 C 298 60, 238 90, 155 78"
+        ></path>
+        <path stroke="url(#ribA)" d="M142 90 C 130 118, 154 138, 122 166 C 98 188, 84 214, 52 236"
+        ></path>
+        <path
+          stroke="url(#ribB)"
+          d="M158 90 C 172 118, 148 140, 182 168 C 208 190, 226 216, 256 240"></path>
+      </g>
+      <!-- the loops darken as they tuck under the wrap -->
+      <g fill="none" stroke="var(--knot-3)" stroke-width="9" stroke-linecap="round" opacity=".38">
+        <path d="M132 64 C 126 72, 126 82, 131 90"></path>
+        <path d="M170 64 C 176 72, 176 82, 171 90"></path>
+      </g>
+      <!-- the wrap -->
+      <path
+        fill="url(#knotG)"
+        d="M150 52 C 130 53, 120 64, 122 78 C 124 92, 138 99, 151 98 C 165 97, 178 88, 179 74 C 180 60, 168 51, 150 52 Z"
+      ></path>
+      <!-- the seam: how it was tied -->
+      <g fill="none" stroke="var(--seam)" stroke-linecap="round" opacity=".55">
+        <path stroke-width="3.5" d="M127 67 C 141 77, 161 79, 176 68"></path>
+        <path stroke-width="3" d="M147 53 C 141 66, 143 83, 151 97"></path>
+      </g>
+      <path
+        fill="var(--rib-a1)"
+        opacity=".45"
+        d="M134 60 C 141 56, 152 55, 159 58 C 150 60, 141 62, 134 60 Z"></path>
+    </g>
+
+    <symbol id="bowPaint" viewBox="0 0 300 280">
+      <g filter="url(#paint)"><use href="#bowBody"></use></g>
+    </symbol>
+    <symbol id="bowGrain" viewBox="0 0 300 280">
+      <g filter="url(#paintGrain)"><use href="#bowBody"></use></g>
+    </symbol>
+    <!-- unfiltered, for the favicon and anything else rendered tiny -->
+    <symbol id="bowFlat" viewBox="0 0 300 280">
+      <g fill="none" stroke="var(--rib-a2)" stroke-width="25" stroke-linecap="round">
+        <path d="M150 74 C 126 20, 52 2, 26 32 C 2 60, 62 90, 145 78"></path>
+        <path d="M150 74 C 174 20, 248 2, 274 32 C 298 60, 238 90, 155 78"></path>
+        <path d="M142 90 C 130 118, 154 138, 122 166 C 98 188, 84 214, 52 236"></path>
+        <path d="M158 90 C 172 118, 148 140, 182 168 C 208 190, 226 216, 256 240"></path>
+      </g>
+      <path
+        fill="var(--knot-2)"
+        d="M150 52 C 130 53, 120 64, 122 78 C 124 92, 138 99, 151 98 C 165 97, 178 88, 179 74 C 180 60, 168 51, 150 52 Z"
+      ></path>
+    </symbol>
+  </defs>
+</svg>

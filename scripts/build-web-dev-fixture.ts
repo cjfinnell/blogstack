@@ -16,6 +16,11 @@ const child = spawn('npm', ['run', 'build', '--workspace', 'apps/web-dev'], {
     ...process.env,
     CMS_URL: `http://localhost:${String(PORT)}`,
     SITE_URL: 'http://localhost:4321',
+    // The fixture CMS serves the placeholder settings row, which a production
+    // build refuses to render. This is the one build allowed to: its whole job
+    // is to prove the client and the templates still compile without a live
+    // CMS. Nothing here is deployed.
+    ALLOW_PLACEHOLDER_COPY: '1',
   },
 });
 

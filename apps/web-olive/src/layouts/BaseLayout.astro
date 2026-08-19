@@ -1,22 +1,117 @@
 ---
-import SharedBaseLayout from '@blogstack/astro-shared/BaseLayout.astro';
-import { theme, brand, links, footerText } from '../site';
+import { Font } from 'astro:assets';
+import Masthead from '../components/Masthead.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import BowDefs from '../components/BowDefs.astro';
+import { tokenCss } from '../styles/tokens';
+import { getSettings } from '../lib/settings';
+
+/**
+ * Olive's own shell.
+ *
+ * It no longer wraps `@blogstack/astro-shared/BaseLayout`: that theme system
+ * carries five colours, one font and a left-aligned brand-plus-links header,
+ * and this design needs twelve tokens, three faces and a centred masthead with
+ * a bow. Bending it would have made it worse for the themes that do fit it.
+ *
+ * Every readable string arrives from the CMS via `getSettings()`, which is
+ * memoised for the build and refuses to render unfilled placeholder copy in a
+ * production build.
+ */
 
 interface Props {
   title: string;
-  description?: string;
+  description?: string | undefined;
+  size?: 'home' | 'map' | 'review' | undefined;
+  current?: string | undefined;
+  /** Absolute or root-relative. Food photos crop badly at 1.91:1 — pass a crop. */
+  ogImage?: string | undefined;
+  ogImageAlt?: string | undefined;
+  ogType?: 'website' | 'article' | undefined;
+  /** JSON-LD, emitted as a single @graph. */
+  jsonLd?: unknown;
 }
 
-const { title, description = 'A personal blog.' } = Astro.props;
+const {
+  title,
+  description,
+  size = 'home',
+  current,
+  ogImage,
+  ogImageAlt,
+  ogType = 'website',
+  jsonLd,
+} = Astro.props;
+
+const settings = await getSettings();
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const ogImageUrl = ogImage ? new URL(ogImage, Astro.site ?? Astro.url).toString() : undefined;
 ---
 
-<SharedBaseLayout
-  title={title}
-  description={description}
-  theme={theme}
-  brand={brand}
-  links={links}
-  footerText={footerText}
->
-  <slot />
-</SharedBaseLayout>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+    {description && <meta name="description" content={description} />}
+    <link rel="alternate" type="application/rss+xml" title={settings.siteName} href="/rss.xml" />
+    <title>{title}</title>
+
+    {
+      /* Open Graph. None of this existed before; a bare link preview is a real
+        cost for a site whose readers arrive by sharing. */
+    }
+    <meta property="og:site_name" content={settings.siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    {description && <meta property="og:description" content={description} />}
+    {
+      ogImageUrl && (
+        <>
+          <meta property="og:image" content={ogImageUrl} />
+          {/* Declared dimensions let the preview reserve space before the
+              image loads. */}
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content={ogImageAlt ?? title} />
+        </>
+      )
+    }
+    {
+      /* Without an explicit card type you get the small square preview even
+        when a large image is supplied. */
+    }
+    <meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
+
+    {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+    <Font cssVariable="--font-script" />
+    <Font cssVariable="--font-display" />
+    {/* The body face is the one the reader waits on, so it is the one preloaded. */}
+    <Font cssVariable="--font-body" preload />
+
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme-mode');
+          var mode = stored === 'light' || stored === 'dark' ? stored : 'auto';
+          document.documentElement.setAttribute('data-theme', mode);
+        } catch (e) {}
+      })();
+    </script>
+    <style is:global set:html={tokenCss}></style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{title}</a>
+    <BowDefs />
+    <Masthead settings={settings} size={size} current={current} />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter settings={settings} />
+  </body>
+</html>

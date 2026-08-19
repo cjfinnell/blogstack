@@ -1,0 +1,196 @@
+---
+import Wordmark from './Wordmark.astro';
+import Bow from './Bow.astro';
+import SearchField from './SearchField.astro';
+import ThemeToggle from '@blogstack/astro-shared/ThemeToggle.astro';
+import type { SiteSettings } from '@blogstack/blog-client';
+
+/**
+ * One persistent global header on every page, identical furniture throughout,
+ * in three size steps.
+ *
+ * Maria asked whether the same header everywhere was right. It is, and her own
+ * reason is the correct one: it makes things less confusing, especially for
+ * people who are less tech savvy.
+ *
+ * Order is fixed: hamburger, wordmark, bow, nav, search, tagline (home only),
+ * then the navy rule. Every string comes from the CMS.
+ */
+
+interface Props {
+  settings: SiteSettings;
+  size: 'home' | 'map' | 'review';
+  /** Nav label of the current section, for aria-current. */
+  current?: string | undefined;
+}
+
+const { settings, size, current } = Astro.props;
+
+const bowWidth = size === 'home' ? 168 : size === 'map' ? 140 : 112;
+const searchWidth = size === 'review' ? '30rem' : '34rem';
+const placeholder = size === 'map' ? settings.searchPlaceholderMap : settings.searchPlaceholder;
+---
+
+<header class:list={['masthead', `is-${size}`]}>
+  <div class="wrap">
+    <div class="utility">
+      <ThemeToggle />
+      <details class="menu">
+        <summary aria-label={settings.siteName}>
+          <span></span><span></span><span></span>
+        </summary>
+        <nav class="drawer">
+          {settings.primaryNav.map((link) => <a href={link.href}>{link.label}</a>)}
+          <a href={settings.tipJarHref}>{settings.tipJarLabel}</a>
+        </nav>
+      </details>
+    </div>
+
+    <Wordmark size={size} siteName={settings.siteName} />
+    <Bow width={bowWidth} />
+
+    <nav class="primary">
+      {
+        settings.primaryNav.map((link, i) => (
+          <>
+            {i > 0 && (
+              <span class="div" aria-hidden="true">
+                |
+              </span>
+            )}
+            <a
+              href={link.href}
+              class:list={{ on: current === link.label }}
+              aria-current={current === link.label ? 'page' : undefined}
+            >
+              {link.label}
+            </a>
+          </>
+        ))
+      }
+      <a class="tip" href={settings.tipJarHref}>{settings.tipJarLabel}</a>
+    </nav>
+
+    <SearchField
+      placeholder={placeholder}
+      maxWidth={searchWidth}
+      hints={size === 'home' ? settings.searchHints : undefined}
+    />
+
+    {size === 'home' && <p class="tagline">{settings.tagline}</p>}
+  </div>
+  <hr class="rule-full" />
+</header>
+
+<style>
+  .masthead {
+    padding: 2rem 0 0;
+    position: relative;
+  }
+  .is-review {
+    padding-top: 1.75rem;
+  }
+
+  .utility {
+    position: absolute;
+    top: 1.5rem;
+    right: var(--gutter);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 2;
+  }
+
+  /* The drawer is a <details>, so the secondary nav works with no JavaScript. */
+  .menu summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    line-height: 0;
+    color: var(--navy);
+  }
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .menu summary span {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: currentColor;
+    margin: 4px 0;
+  }
+  .drawer {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    display: grid;
+    min-width: 12rem;
+    background: var(--cream);
+    border: 1px solid var(--navy);
+    padding: 0.5rem 0;
+  }
+  .drawer a {
+    padding: 0.5rem 1.25rem;
+    text-decoration: none;
+    color: var(--navy);
+    font-size: 0.875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .drawer a:hover {
+    background: var(--blue-wash);
+  }
+
+  nav.primary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    padding-bottom: 1.25rem;
+  }
+  .is-review nav.primary {
+    padding-bottom: 1rem;
+  }
+  nav.primary a {
+    font-size: 0.8125rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--navy);
+    text-decoration: none;
+    padding: 0.35rem 1.15rem;
+    font-weight: 500;
+  }
+  nav.primary a:hover,
+  nav.primary a.on {
+    color: var(--accent);
+  }
+  nav.primary a.on {
+    border-bottom: 1.5px solid var(--accent);
+  }
+  nav.primary .div {
+    color: var(--baby);
+    user-select: none;
+  }
+  nav.primary a.tip {
+    margin-left: 0.75rem;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    font-size: 0.6875rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    padding: 0.3rem 0.8rem;
+  }
+  nav.primary a.tip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .tagline {
+    text-align: center;
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 1.125rem;
+    color: var(--muted);
+    margin: 1.25rem 0 1.5rem;
+  }
+</style>

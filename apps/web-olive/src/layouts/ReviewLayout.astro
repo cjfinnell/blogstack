@@ -1,8 +1,36 @@
 ---
-import type { ReviewMeta } from '@blogstack/blog-client';
 import BaseLayout from './BaseLayout.astro';
-import ReviewHeader from '../components/ReviewHeader.astro';
+import Scorecard from '../components/Scorecard.astro';
+import DishRundown from '../components/DishRundown.astro';
+import ReviewRubric from '../components/ReviewRubric.astro';
+import {
+  compositeScore,
+  heroPhoto,
+  photosMissingAlt,
+  priceBand,
+  reviewDishes,
+  reviewRevisits,
+  SCORE_MAX,
+} from '@blogstack/blog-client';
+import type { ReviewMeta } from '@blogstack/blog-client';
 import { codeBlockCss } from '@blogstack/astro-shared/themes';
+
+/**
+ * A review page.
+ *
+ * Order is deliberate and comes from three rounds of review: identity card,
+ * scorecard, lead photograph, the short version, the essay, what we ordered,
+ * how it scored, where it is, credits. Skimmers are served by the first four
+ * without flattening the prose for everyone else.
+ *
+ * Three round-2 corrections land here. The Reserve, Directions and Save
+ * buttons are gone — "I don't want to be in charge of telling people how to
+ * make reservations" — leaving only "See it on the map". "What to order"
+ * became "What we ordered". Opening hours are not rendered and not stored.
+ *
+ * One column throughout. See Scorecard.astro for why the margin column had to
+ * go.
+ */
 
 interface Props {
   title: string;
@@ -11,36 +39,210 @@ interface Props {
 }
 
 const { title, publishedAt, review } = Astro.props;
+
+const hero = heroPhoto(review);
+const dishes = reviewDishes(review);
+const revisits = reviewRevisits(review) ?? [];
+const composite = compositeScore(review);
+const band = priceBand(review);
+
+// Alt text cannot be generated, so a gap is reported rather than filled. This
+// is a build-time warning and not a failure: an existing review should not stop
+// deploying because it predates the field.
+const missingAlt = photosMissingAlt(review);
+if (missingAlt.length > 0) {
+  console.warn(
+    `[olive] "${title}" has ${String(missingAlt.length)} photograph(s) with no alt text: ` +
+      `${missingAlt.join(', ')}. Add it in the CMS — nobody can write it for you.`,
+  );
+}
+
+const dateFormat: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+};
+const formatted = (value: string): string =>
+  new Date(value).toLocaleDateString('en-GB', dateFormat);
+
+// A third-party reviewer is exactly the case Google's review-snippet carve-out
+// preserves. Only the composite is emitted as reviewRating; the seven axes are
+// editorial, not schema.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Review',
+      name: title,
+      ...(publishedAt && { datePublished: publishedAt }),
+      ...(review.updatedAt && { dateModified: review.updatedAt }),
+      ...(composite !== null && {
+        reviewRating: {
+          '@type': 'Rating',
+          ratingValue: composite,
+          bestRating: SCORE_MAX,
+          worstRating: 0,
+        },
+      }),
+      itemReviewed: {
+        '@type': 'Restaurant',
+        name: review.restaurant ?? title,
+        ...(review.address && { address: review.address }),
+        ...(review.geo && {
+          geo: { '@type': 'GeoCoordinates', latitude: review.geo.lat, longitude: review.geo.lng },
+        }),
+        ...(review.cuisineTags?.length && { servesCuisine: review.cuisineTags }),
+        ...(band && { priceRange: band }),
+      },
+    },
+  ],
+};
 ---
 
-<BaseLayout title={title} description={review.verdictSummary ?? `A review of ${title}.`}>
-  <article>
-    <header>
-      <p class="kicker">Restaurant review</p>
-      <h1>{review.restaurant ?? title}</h1>
+<BaseLayout
+  title={title}
+  description={review.verdictSummary}
+  size="review"
+  ogType="article"
+  ogImage={hero?.src}
+  ogImageAlt={hero?.alt}
+  jsonLd={jsonLd}
+>
+  <article class="stage">
+    <header class="identity">
+      <p class="kicker">
+        Restaurant review{review.city && ` · ${review.city}`}
+      </p>
+      <h1>{title}</h1>
+
       {
-        publishedAt && (
-          <time datetime={publishedAt} class="published">
-            {new Date(publishedAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </time>
+        review.restaurant && (
+          <p class="restaurant">
+            {review.restaurant}
+            {review.address && (
+              <>
+                <span class="slash" aria-hidden="true">
+                  {' / '}
+                </span>
+                <span class="light">{review.address}</span>
+              </>
+            )}
+          </p>
         )
       }
+
+      <ul class="facts">
+        {review.cuisineTags?.map((tag) => <li>{tag}</li>)}
+        {review.neighbourhood && <li>{review.neighbourhood}</li>}
+        {band && <li>{review.damage ? `${band} · ${review.damage}` : band}</li>}
+        {review.bestOccasion && <li>{review.bestOccasion}</li>}
+        {review.visitedAt && <li>Visited {formatted(review.visitedAt)}</li>}
+      </ul>
+
+      <p class="byline">
+        {publishedAt && <>Published {formatted(publishedAt)}</>}
+        {
+          review.updatedAt && (
+            <>
+              {' '}
+              · <b>Updated {formatted(review.updatedAt)}</b>
+            </>
+          )
+        }
+      </p>
+
+      {/* Reserve, Directions and Save are deliberately absent. */}
+      <div class="actions">
+        <a class="btn" href="/map">See it on the map</a>
+      </div>
     </header>
-    <ReviewHeader review={review} />
-    <div class="content">
+
+    <Scorecard review={review} />
+
+    {
+      hero && (
+        <figure class="hero">
+          <span class="frame">
+            {/* Never lazy on the image the reader came for. */}
+            <img
+              src={hero.src}
+              alt={hero.alt ?? ''}
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+              {...(hero.width ? { width: hero.width } : {})}
+              {...(hero.height ? { height: hero.height } : {})}
+            />
+          </span>
+          {(hero.caption ?? hero.credit) && (
+            <figcaption>
+              {hero.caption && <span>{hero.caption}</span>}
+              {hero.credit && <span class="credit">{hero.credit}</span>}
+            </figcaption>
+          )}
+        </figure>
+      )
+    }
+
+    {
+      review.verdictSummary && (
+        <div class="verdict">
+          <h2>The short version</h2>
+          <p>{review.verdictSummary}</p>
+          {review.recommendation && <p>{review.recommendation}</p>}
+        </div>
+      )
+    }
+
+    <div class="prose">
       <slot />
     </div>
+
+    <DishRundown dishes={dishes} heading="What we ordered" />
+
+    <ReviewRubric review={review} revisits={revisits} />
+
     {
-      review.photos && review.photos.length > 0 && (
-        <section class="gallery">
-          <h2>Photos</h2>
-          {review.photos.map((src) => (
-            <img src={src} alt="" loading="lazy" />
-          ))}
+      review.address && (
+        <section>
+          <h2 class="section-label">Where it is</h2>
+          <dl class="location">
+            <div>
+              <dt>Address</dt>
+              <dd>{review.address}</dd>
+            </div>
+            {review.gettingIn && (
+              <div>
+                <dt>Getting in</dt>
+                <dd>{review.gettingIn}</dd>
+              </div>
+            )}
+            {review.damage && (
+              <div>
+                <dt>The damage</dt>
+                <dd>{review.damage}</dd>
+              </div>
+            )}
+            {/* No opening hours, on purpose: a wrong one is worse than none. */}
+          </dl>
+          <div class="actions">
+            <a
+              class="btn btn--primary"
+              href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                `${review.restaurant ?? title}, ${review.address}`,
+              )}${review.placeId ? `&destination_place_id=${review.placeId}` : ''}`}
+            >
+              Directions
+            </a>
+            <a
+              class="btn"
+              href={`https://maps.apple.com/?daddr=${encodeURIComponent(
+                `${review.restaurant ?? title}, ${review.address}`,
+              )}&dirflg=d`}
+            >
+              Apple Maps
+            </a>
+          </div>
         </section>
       )
     }
@@ -48,47 +250,204 @@ const { title, publishedAt, review } = Astro.props;
 </BaseLayout>
 
 <style>
+  .stage {
+    max-width: var(--stage);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+
+  .identity {
+    padding: 2.5rem 0 1.5rem;
+  }
   .kicker {
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.75rem;
+    color: var(--accent);
+    margin: 0 0 0.75rem;
+    font-weight: 600;
+  }
+  /* The headline is the writer's; the restaurant name is metadata. Rendering
+     only one of them throws away whichever it did not pick. */
+  .identity h1 {
+    font-family: var(--display);
+    font-size: clamp(2.25rem, 5.5vw, 3.5rem);
+    line-height: 1.06;
+    margin: 0 0 0.75rem;
+  }
+  .restaurant {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    margin: 0 0 1rem;
+    color: var(--navy);
+  }
+  .restaurant .slash {
+    color: var(--baby);
+  }
+  .restaurant .light {
     color: var(--muted);
-    margin: 0;
+    font-size: 1.125rem;
   }
-  .published {
-    color: var(--muted);
-    font-size: 0.9rem;
-  }
-  .content :global(p) {
-    margin: 1em 0;
-  }
-  .content :global(blockquote) {
-    border-left: 3px solid var(--border);
-    margin: 1em 0;
-    padding-left: 1em;
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0;
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+    font-size: 0.875rem;
     color: var(--muted);
   }
-  .content :global(figure) {
+  .facts li:not(:last-child)::after {
+    content: '·';
+    color: var(--baby);
+    padding: 0 0.6rem;
+  }
+
+  .byline {
+    font-size: 0.875rem;
+    color: var(--muted);
+    margin: 0 0 1.25rem;
+  }
+  .byline b {
+    color: var(--navy);
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+  }
+  .btn {
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid var(--rule-strong);
+    color: var(--navy);
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+  }
+  .btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn--primary {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: var(--cream);
+  }
+  .btn--primary:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--cream);
+  }
+
+  .hero {
+    margin: 0 0 2rem;
+  }
+  .hero .frame {
+    display: block;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 0.5rem;
+  }
+  .hero img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .hero figcaption {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.6rem;
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+  .hero .credit {
+    white-space: nowrap;
+  }
+
+  .verdict {
+    border: 1px solid var(--baby);
+    background: var(--blue-wash);
+    padding: 1.5rem 1.75rem;
+    margin: 0 0 2.25rem;
+  }
+  .verdict h2 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 1.5rem;
+    margin: 0 0 0.75rem;
+  }
+  .verdict p {
+    margin: 0 0 0.5rem;
+    color: var(--ink);
+  }
+  .verdict p:last-child {
+    margin-bottom: 0;
+  }
+
+  .prose {
+    max-width: 64ch;
+  }
+  .prose :global(p) {
+    margin: 0 0 1.35em;
+    text-wrap: pretty;
+  }
+  .prose :global(blockquote) {
+    margin: 2.25rem 0;
+    padding: 1.25rem 0 1.25rem 1.5rem;
+    border-left: 3px solid var(--baby);
+    font-family: var(--display);
+    font-size: 1.75rem;
+    line-height: 1.28;
+    font-style: italic;
+    max-width: 38ch;
+    color: var(--navy);
+  }
+  .prose :global(figure) {
     margin: 1.5em 0;
   }
-  .content :global(figcaption) {
+  .prose :global(figcaption) {
     color: var(--muted);
     font-size: 0.85rem;
     margin-top: 0.4rem;
   }
-  .content :global(.footnotes) {
-    border-top: 1px solid var(--border);
+  .prose :global(.footnotes) {
+    border-top: 1px solid var(--rule);
     margin-top: 3rem;
     font-size: 0.9rem;
   }
-  .gallery {
-    display: grid;
-    gap: 0.75rem;
-    margin-top: 2.5rem;
+
+  .section-label {
+    font-family: var(--display);
+    font-size: 2rem;
+    margin: 3rem 0 1.25rem;
   }
-  .gallery img {
-    width: 100%;
-    border-radius: 6px;
+
+  .location {
+    margin: 0;
+  }
+  .location > div {
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .location dt {
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+  }
+  .location dd {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--ink);
   }
 </style>
 
