@@ -18,15 +18,18 @@ export function startFixtureServer(port: number): Promise<Server> {
       res.end(JSON.stringify({ data: posts, meta: { count: posts.length } }));
       return;
     }
-    // The chrome's copy, from the global-variables plugin. The fixture serves
-    // the placeholder map itself, imported rather than copied: test values and
+    // The chrome's copy, as site_copy documents. The fixture serves the
+    // placeholder map itself, imported rather than copied: test values and
     // default values are deliberately the same object, because a second
     // hand-written set would drift and the drift would surface as copy on a
     // real page. Every value is brace-wrapped, so a build that renders these is
     // obvious on sight and `assertNoPlaceholders` refuses to ship it.
-    if (req.url?.startsWith('/api/global-variables/resolve')) {
+    if (req.url?.startsWith('/api/site_copy')) {
+      const documents = Object.entries(PLACEHOLDER_VARIABLES).map(([key, value]) => ({
+        data: { key, value },
+      }));
       res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ success: true, data: PLACEHOLDER_VARIABLES }));
+      res.end(JSON.stringify({ data: documents, meta: { count: documents.length } }));
       return;
     }
     res.writeHead(404);

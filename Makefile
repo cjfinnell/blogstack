@@ -39,8 +39,11 @@ test: $(NODE_MODULES) ## Run the vitest suite
 	npm run test
 
 .PHONY: build
-build: typecheck ## Build the web-dev fixture site (requires a clean typecheck)
-	npm run build:web-dev
+build: typecheck ## Build the fixture sites (requires a clean typecheck)
+	npm run build:fixture
+	# web-olive is the only site that reads site copy from the CMS, so it is
+	# the only build that exercises the site_copy reader.
+	npm run build:fixture -- apps/web-olive
 
 .PHONY: check
 check: lint format-check typecheck test ## Run everything CI runs, short of the build

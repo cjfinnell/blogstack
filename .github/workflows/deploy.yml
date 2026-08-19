@@ -107,6 +107,24 @@ jobs:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      # Also idempotent: it creates a document only for a key that has none, and
+      # never touches one that exists. The web build below reads these, so a
+      # site missing a string gets a placeholder document here — which the build
+      # then refuses to ship, by design, until someone writes the words.
+      #
+      # olive only, because olive is the only site whose templates read site
+      # copy. Seeding the others would put 60-odd unread placeholder documents
+      # in their databases and their admin. When another site starts reading
+      # copy, drop the site condition — its build will say so, and the error
+      # names this script.
+      - name: Seed site copy
+        if: needs.resolve.outputs.cms_changed == 'true' && matrix.site == 'olive'
+        run: npm run seed:site-copy
+        env:
+          SEED_REMOTE: '1'
+          SEED_ENV: cms_${{ matrix.site }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
 
       - name: Build web
         run: npm run build --workspace apps/web-${{ matrix.site }}

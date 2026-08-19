@@ -13,7 +13,7 @@ let cached: SiteSettings | null = null;
 
 /**
  * The site chrome's copy, fetched once per build from the CMS's
- * `global-variables` plugin.
+ * `site_copy` collection.
  *
  * Every page renders the masthead and the footer, so without memoising this
  * every route would refetch the same row. Astro builds in a single process, so

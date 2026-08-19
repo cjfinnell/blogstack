@@ -57,6 +57,7 @@ export {
   createSiteSettingsClient,
   findPlaceholders,
   MissingSiteSettingsError,
+  toCopyMap,
 } from './site-settings';
 export type { SiteSettingsClient } from './site-settings';
 export { PLACEHOLDER_MARKER, PLACEHOLDER_VARIABLES, SETTING_KEYS } from './placeholders';

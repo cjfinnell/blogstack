@@ -2,33 +2,57 @@ import type { Transport } from './transport';
 import type { NavLink, SiteSettings } from './types';
 import { PLACEHOLDER_MARKER, PLACEHOLDER_VARIABLES } from './placeholders';
 
-// The `global-variables` core plugin mounts its resolve route at
-// `/api/global-variables/resolve`, but core's `/api/:collection` wildcard
-// shadows it and answers "Collection not found" instead — see
-// apps/cms/src/plugins/global-variables-route. That plugin re-mounts a
-// read-only equivalent at `/global-variables/resolve`, clear of the
-// wildcard, which is the path this client actually has to call. A CMS
-// running a core older than 3.0.0-beta.26 never mounted the plugin's routes
-// at all and answers 404 either way.
-const RESOLVE_PATH = '/global-variables/resolve';
+// The chrome's copy is the `site_copy` collection: one document per string,
+// read the same way posts are read. It used to be the `global-variables` core
+// plugin, which was never a settings store — its job is substituting `{key}`
+// tokens inside prose, its API sits on a path core's `/api/:collection`
+// wildcard swallows, and its write routes carry no authentication. See
+// apps/cms/src/collections/site-copy.collection.ts.
+const COLLECTION_PATH = 'site_copy';
 
-interface ResolveResponse {
-  success: boolean;
-  data: Record<string, string>;
+// One request for the lot. There are ~60 strings and core's default page size
+// is 50, so the limit has to be explicit; core caps it at 1000.
+const READ_LIMIT = 500;
+
+interface SiteCopyDocument {
+  data?: { key?: string; value?: string };
+}
+
+interface CollectionResponse {
+  data?: SiteCopyDocument[];
 }
 
 export class MissingSiteSettingsError extends Error {
   constructor(detail: string) {
     super(
-      `Could not read the CMS global variables (${detail}). Every readable string in the ` +
-        'site chrome comes from the `global-variables` plugin, and there is deliberately no ' +
-        'copy in the frontend to fall back to — a plausible default is exactly what ships to ' +
-        'production unnoticed. Check that the plugin is active, that the CMS is running ' +
-        '@sonicjs-cms/core >= 3.0.0-beta.26 (older versions never mounted the plugin routes), ' +
-        'and that CMS_URL points at it.',
+      `Could not read the site copy from the CMS (${detail}). Every readable string in the ` +
+        'site chrome comes from the `site_copy` collection, and there is deliberately no copy ' +
+        'in the frontend to fall back to — a plausible default is exactly what ships to ' +
+        'production unnoticed. Check that CMS_URL points at the CMS, that the collection has ' +
+        'documents (`npm run seed:site-copy` creates them), and that they are published: the ' +
+        'build reads anonymously, and core serves only published documents to anonymous ' +
+        'callers, so a draft-only edit reads as an empty collection.',
     );
     this.name = 'MissingSiteSettingsError';
   }
+}
+
+/**
+ * The flat key→value map the rest of this file is written against.
+ *
+ * Documents with no key are skipped rather than throwing: one malformed row
+ * should cost its own string, which then shows as a placeholder, not the whole
+ * build. A repeated key takes the last one — the collection does not enforce
+ * uniqueness, and picking silently is better than failing a deploy over it.
+ */
+export function toCopyMap(documents: SiteCopyDocument[]): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const doc of documents) {
+    const key = doc.data?.key;
+    if (!key) continue;
+    map[key] = doc.data?.value ?? '';
+  }
+  return map;
 }
 
 // An unfilled variable arrives as an empty string, not as a missing key, so
@@ -192,20 +216,26 @@ export function assertNoPlaceholders(settings: SiteSettings): void {
   if (found.length === 0) return;
   throw new Error(
     `${String(found.length)} unfilled site setting(s) would ship as placeholder text: ` +
-      `${found.join(', ')}. Fill these in the CMS at /admin/global-variables before ` +
-      'building for production.',
+      `${found.join(', ')}. Fill these in the CMS — the Site Copy collection under ` +
+      '/admin/content — and publish them, before building for production.',
   );
 }
 
 export function createSiteSettingsClient(transport: Transport) {
   async function getSiteSettings(): Promise<SiteSettings> {
-    const res = await transport.fetch(RESOLVE_PATH);
+    const res = await transport.fetch(`/api/${COLLECTION_PATH}?limit=${String(READ_LIMIT)}`);
     if (!res.ok) throw new MissingSiteSettingsError(`the CMS returned ${String(res.status)}`);
 
-    const body = (await res.json()) as ResolveResponse;
-    if (!body.success) throw new MissingSiteSettingsError('the CMS reported failure');
+    const body = (await res.json()) as CollectionResponse;
+    if (!Array.isArray(body.data)) throw new MissingSiteSettingsError('the CMS returned no list');
+    // An empty collection is a misconfiguration, not a site with no words in it.
+    // Assembling from nothing would produce a full set of placeholders, which
+    // reads as "unfilled copy" rather than "the CMS is wrong".
+    if (body.data.length === 0) {
+      throw new MissingSiteSettingsError('the site_copy collection came back empty');
+    }
 
-    return assembleSettings(body.data);
+    return assembleSettings(toCopyMap(body.data));
   }
 
   return { getSiteSettings };
