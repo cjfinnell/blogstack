@@ -31,12 +31,21 @@ const config: SonicJSConfig = {
         // the global-variables plugin, not the collection registry, so they are
         // not reachable over MCP and cannot be listed here.
         expose: ['blog_post'],
-        // Read-only on purpose. The core build ships the write tools enabled
-        // (create/update/publish/delete), which puts publishing one tool call
-        // away from an agent that was asked to read. Nothing we run needs MCP
-        // writes — seeding goes through scripts/seed-global-variables.ts — so
-        // this stays false until something does.
-        types: { blog_post: { read: true, write: false } },
+        // Writes are on: MCP is the intended path for getting posts in — a human
+        // writes the prose, an agent transports it. The body must be a lexical
+        // tree, so build it with markdownToLexicalJson() from
+        // @blogstack/blog-client and check it with assertLexicalShape(); nothing
+        // on the server side validates that field, and a malformed one renders
+        // as raw markup rather than failing.
+        //
+        // The write set includes publish and delete. Publishing over MCP does not
+        // rebuild the site — core dispatches content:after:publish only from its
+        // REST content routes, and MCP calls DocumentsService directly — so a post
+        // published this way sits in the database until something else triggers a
+        // deploy. Publish from the admin instead, which also keeps the decision to
+        // go live with a person. Mint the key under a limited user: its owner's
+        // document ACL is the entire blast radius.
+        types: { blog_post: { read: true, write: true } },
         listLimit: 50,
       }),
     ] as NonNullable<NonNullable<SonicJSConfig['plugins']>['register']>,
