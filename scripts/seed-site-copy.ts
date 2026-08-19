@@ -1,10 +1,13 @@
-// Creates the chrome's copy as `site_copy` documents, and carries over anything
-// already written into the old `global_variables` table.
+// Creates the chrome's copy as `site_copy` documents.
 //
-// Every value it writes is either a value migrated from the old store or a
-// brace-wrapped placeholder — it never invents copy. The point is that the ~60
-// documents exist to be edited, rather than having to be typed out by hand one
-// at a time.
+// Every value it writes is a brace-wrapped placeholder — it never invents copy.
+// The point is that the ~60 documents exist to be edited, rather than having to
+// be typed out by hand one at a time.
+//
+// There is no migration path from the old `global_variables` store: those tables
+// were dropped from every database, so nothing is left to carry over. The dev
+// CMS's copy was moved into its `site_copy` documents before that; every other
+// environment starts on placeholders and gets its words written in the admin.
 //
 // Opt-in. Nothing in CI runs this.
 //
@@ -91,36 +94,13 @@ async function existingKeys(): Promise<Set<string>> {
   return keys;
 }
 
-/**
- * Values from the old global-variables table, when it still has any.
- *
- * This is the migration: the copy on a live site was written there, and it has
- * to arrive in the collection rather than being replaced by placeholders. The
- * table is created by a plugin that may never have been installed here, so a
- * missing table is an ordinary outcome, not an error.
- */
-async function legacyValues(): Promise<Map<string, string>> {
-  const values = new Map<string, string>();
-  try {
-    const { results } = await db.prepare('SELECT key, value FROM global_variables').all();
-    for (const row of (results ?? []) as { key?: string; value?: string }[]) {
-      if (row.key && row.value) values.set(row.key, row.value);
-    }
-  } catch {
-    console.log('No global_variables table to migrate from — seeding placeholders only.');
-  }
-  return values;
-}
-
 const documents = new DocumentsService(db as unknown as ServiceDb, { tenantId: 'default' });
 
 let created = 0;
-let migrated = 0;
 let existing = 0;
 
 try {
   const have = await existingKeys();
-  const legacy = await legacyValues();
 
   for (const setting of SETTING_KEYS) {
     if (have.has(setting.key)) {
@@ -128,7 +108,6 @@ try {
       continue;
     }
 
-    const carried = legacy.get(setting.key);
     await documents.create({
       typeId: TYPE_ID,
       // The key doubles as the document title: it is what the admin list shows,
@@ -137,7 +116,7 @@ try {
       slug: setting.key.replace(/_/g, '-'),
       data: {
         key: setting.key,
-        value: carried ?? setting.placeholder,
+        value: setting.placeholder,
         description: setting.description,
         category: setting.category,
       },
@@ -151,7 +130,6 @@ try {
     });
 
     created++;
-    if (carried !== undefined) migrated++;
   }
 } catch (error) {
   console.error('Seeding failed:', error);
@@ -161,10 +139,7 @@ try {
 
 await dispose();
 
-console.log(
-  `${String(created)} created (${String(migrated)} carrying copy over from global variables), ` +
-    `${String(existing)} already present.`,
-);
+console.log(`${String(created)} created, ${String(existing)} already present.`);
 console.log(
   'Edit them in the admin under Site Copy. A production build refuses to ship while any ' +
     'value is still a {{ placeholder }}, and only published documents are visible to it.',

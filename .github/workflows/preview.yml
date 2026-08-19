@@ -103,9 +103,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
       # Also idempotent: a document is created only for a key that has none, and
-      # any copy still in the old global_variables table is carried over into it.
-      # The preview site builds read these, so the shared dev CMS has to have
-      # them before the matrix legs run.
+      # one that exists is never touched. The preview site builds read these, so
+      # the shared dev CMS has to have them before the matrix legs run.
       - name: Seed dev site copy
         if: needs.resolve.outputs.cms_changed == 'true'
         run: npm run seed:site-copy

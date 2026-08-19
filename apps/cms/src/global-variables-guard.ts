@@ -17,8 +17,10 @@
  *
  *   `POST /api/global-variables` and `PUT|DELETE /api/global-variables/:id`
  *   carry no auth middleware at all — the only thing in front of them is a
- *   check that the plugin is active. They are unreachable today, but only
- *   because core mounts `/api` and its `/:collection` wildcard before it mounts
+ *   check that the plugin is active, and that check fails open: it reads the
+ *   `plugins` table, which does not exist in any of these databases, and its
+ *   catch swallows the error and calls next(). They are unreachable today, but
+ *   only because core mounts `/api` and its `/:collection` wildcard before it mounts
  *   plugin routes, so the wildcard's own `requireAuth()` + `requireRole()`
  *   answers first. That is mount order, not a decision, and core has already
  *   started pre-mounting paths ahead of that wildcard.
@@ -35,9 +37,13 @@
  *   radius; that is true only while this holds.
  *
  * So: no writes, by anyone, by any credential. Reads are left alone — a `GET`
- * gets core's wildcard 404 and costs nothing to allow. If a variable ever needs
- * to exist again, `wrangler d1 execute` is the way in, and this comment is the
- * thing to reconsider first.
+ * gets core's wildcard 404 and costs nothing to allow.
+ *
+ * The `global_variables` table has been dropped from every database, dev and
+ * production alike, so there is nothing behind these routes to read or corrupt
+ * either. This stays because the plugin's install hook would recreate that
+ * table the moment someone activated it from /admin/plugins, and the routes
+ * above would then be live and unauthenticated again.
  *
  * This runs in front of the whole app, where it lands ahead of core's route
  * table. A plugin cannot do it: core registers the global-variables routes
