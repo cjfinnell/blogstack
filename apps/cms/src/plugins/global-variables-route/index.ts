@@ -21,7 +21,10 @@
  *
  * Read-only on purpose. The plugin's own POST/PUT/DELETE routes carry no auth
  * middleware; they are currently unreachable behind the same shadowing, and
- * nothing here should be the thing that changes that.
+ * nothing here should be the thing that changes that. Writes to both paths are
+ * now refused before the app router as well, so that unreachability is no
+ * longer just a consequence of core's mount order — see
+ * apps/cms/src/global-variables-guard.ts.
  */
 
 import { definePlugin } from '@sonicjs-cms/core';

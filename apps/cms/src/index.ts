@@ -2,6 +2,7 @@ import { createSonicJSApp, mcpPlugin, registerCollections } from '@sonicjs-cms/c
 import type { Bindings, SonicJSConfig } from '@sonicjs-cms/core';
 
 import blogPostsCollection from './collections/blog-posts.collection';
+import { guardGlobalVariables } from './global-variables-guard';
 import { hoistLexicalImportMap } from './lexical-importmap';
 import { globalVariablesRoutePlugin } from './plugins/global-variables-route';
 import { publishHookPlugin } from './plugins/publish-hook';
@@ -49,7 +50,11 @@ const config: SonicJSConfig = {
         // published this way sits in the database until something else triggers a
         // deploy. Publish from the admin instead, which also keeps the decision to
         // go live with a person. Mint the key under a limited user: its owner's
-        // document ACL is the entire blast radius.
+        // document ACL is the entire blast radius — but only because
+        // global-variables-guard.ts holds that line. Core authenticates API keys
+        // on `/admin/*` too, and its global-variables admin routes check no
+        // permission beyond portal access, so without the guard any key could
+        // write a variable and have it resolved into posts its user cannot edit.
         types: { blog_post: { read: true, write: true } },
         listLimit: 50,
       }),
@@ -61,6 +66,13 @@ const app = createSonicJSApp(config);
 
 export default {
   async fetch(request: Request, env: Bindings, ctx: ExecutionContext): Promise<Response> {
+    // Ahead of the app on purpose: core registers the global-variables plugin's
+    // routes before any user plugin, so a plugin-mounted middleware would never
+    // run. See global-variables-guard.ts for which writes this refuses and why
+    // a variable's value is effectively markup on the public site.
+    const refused = guardGlobalVariables(request);
+    if (refused) return refused;
+
     // See lexical-importmap.ts — without this the rich text editor never boots
     // in Firefox/Safari and every save fails with "Content is required".
     return hoistLexicalImportMap(request, await app.fetch(request, env, ctx));
