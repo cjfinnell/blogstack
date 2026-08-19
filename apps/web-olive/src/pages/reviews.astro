@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import { blog } from '@blogstack/astro-shared/blog';
+import { postType } from '@blogstack/blog-client';
+import { getSettings } from '../lib/settings';
+
+const allPosts = await blog.getPublishedPosts(100);
+const reviews = allPosts.filter((post) => postType(post) === 'review');
+const settings = await getSettings();
+---
+
+<BaseLayout title={`Reviews | ${settings.siteName}`} description={settings.tagline}>
+  <div class="wrap page">
+    <h1>Reviews</h1>
+    {reviews.length === 0 && <p>No reviews published yet.</p>}
+    {reviews.map((post) => <PostCard post={post} />)}
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: 3rem 5rem;
+  }
+</style>
