@@ -24,10 +24,29 @@ interface Props {
   description?: string | undefined;
   size?: 'home' | 'map' | 'review' | undefined;
   current?: string | undefined;
+  /** Absolute or root-relative. Food photos crop badly at 1.91:1 — pass a crop. */
+  ogImage?: string | undefined;
+  ogImageAlt?: string | undefined;
+  ogType?: 'website' | 'article' | undefined;
+  /** JSON-LD, emitted as a single @graph. */
+  jsonLd?: unknown;
 }
 
-const { title, description, size = 'home', current } = Astro.props;
+const {
+  title,
+  description,
+  size = 'home',
+  current,
+  ogImage,
+  ogImageAlt,
+  ogType = 'website',
+  jsonLd,
+} = Astro.props;
+
 const settings = await getSettings();
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const ogImageUrl = ogImage ? new URL(ogImage, Astro.site ?? Astro.url).toString() : undefined;
 ---
 
 <html lang="en">
@@ -36,9 +55,39 @@ const settings = await getSettings();
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
     {description && <meta name="description" content={description} />}
     <link rel="alternate" type="application/rss+xml" title={settings.siteName} href="/rss.xml" />
     <title>{title}</title>
+
+    {
+      /* Open Graph. None of this existed before; a bare link preview is a real
+        cost for a site whose readers arrive by sharing. */
+    }
+    <meta property="og:site_name" content={settings.siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    {description && <meta property="og:description" content={description} />}
+    {
+      ogImageUrl && (
+        <>
+          <meta property="og:image" content={ogImageUrl} />
+          {/* Declared dimensions let the preview reserve space before the
+              image loads. */}
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content={ogImageAlt ?? title} />
+        </>
+      )
+    }
+    {
+      /* Without an explicit card type you get the small square preview even
+        when a large image is supplied. */
+    }
+    <meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
+
+    {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 
     <Font cssVariable="--font-script" />
     <Font cssVariable="--font-display" />

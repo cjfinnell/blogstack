@@ -1,0 +1,160 @@
+---
+import { compositeScore, reviewAxes, SCORE_MAX } from '@blogstack/blog-client';
+import type { ReviewMeta } from '@blogstack/blog-client';
+
+/**
+ * The composite and the headline axes, as a full-width strip.
+ *
+ * This is the fix for the reported bug. The mockup parked the score in a 14rem
+ * left margin: `.marginalia` was pinned to column 1 and therefore occupied
+ * exactly one auto-placed row, so `position: sticky` could not travel, the
+ * score stranded at the top, and the column was dead from row 3 down — which is
+ * what "the text also goes over the what to order section" was describing. The
+ * margin column is gone and nothing here is sticky.
+ *
+ * It also serves the thing she actually praised — "I really like kind of this
+ * scorecard that's colourful and very easy to read" — better than a margin
+ * does.
+ *
+ * The number is always visible as a numeral. Never colour alone: that survives
+ * colourblindness, CSS failure and zoom, none of which a coloured bar does.
+ */
+
+interface Props {
+  review: ReviewMeta;
+  /** Where the rubric explainer lives. */
+  rubricHref?: string | undefined;
+}
+
+const { review, rubricHref = '/rubric' } = Astro.props;
+
+const composite = compositeScore(review);
+const axes = reviewAxes(review).filter((a) => a.value !== null);
+---
+
+<section class="scorecard">
+  <div class="headline">
+    {
+      composite === null ? (
+        <span class="unrated">Unrated</span>
+      ) : (
+        <span class="score tnum">{composite.toFixed(1)}</span>
+      )
+    }
+    <span class="denominator">
+      {composite === null ? 'Not enough visits to score' : `Composite out of ${String(SCORE_MAX)}`}
+      {' · '}
+      <a href={rubricHref}>how we score</a>
+    </span>
+  </div>
+
+  {
+    axes.length > 0 && (
+      <ul class="axes">
+        {axes.map((axis) => (
+          <li>
+            <span class="label">{axis.label}</span>
+            <span
+              class="bar"
+              role="img"
+              aria-label={`${axis.label}: ${String(axis.value)} out of ${String(SCORE_MAX)}`}
+            >
+              <i style={`width:${String(axis.percent)}%`} />
+            </span>
+            <span class="val tnum">{axis.value?.toFixed(1)}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</section>
+
+<style>
+  .scorecard {
+    display: grid;
+    grid-template-columns: minmax(9rem, auto) minmax(0, 1fr);
+    gap: 1.5rem 2.5rem;
+    align-items: start;
+    border-top: 1px solid var(--navy);
+    border-bottom: 1px solid var(--navy);
+    padding: 1.75rem 0;
+    margin: 0 0 2rem;
+  }
+
+  .score {
+    display: block;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 4.5rem;
+    line-height: 0.9;
+    color: var(--accent);
+  }
+  .unrated {
+    display: block;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 2.25rem;
+    line-height: 1;
+    color: var(--muted);
+  }
+  .denominator {
+    display: block;
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.5rem;
+  }
+
+  .axes {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.7rem;
+  }
+  .axes li {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr) 2.5rem;
+    gap: 1rem;
+    align-items: center;
+  }
+  .label {
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .bar {
+    height: 6px;
+    background: var(--rule);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+  }
+  .val {
+    text-align: right;
+    font-family: var(--display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  @media (max-width: 48rem) {
+    .scorecard {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.25rem;
+    }
+    .axes li {
+      grid-template-columns: minmax(0, 1fr) 2.5rem;
+    }
+    .bar {
+      grid-column: 1 / -1;
+      order: 3;
+    }
+  }
+</style>

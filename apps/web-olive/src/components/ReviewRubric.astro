@@ -1,0 +1,356 @@
+---
+import { compositeScore, reviewAxes, SCORE_MAX } from '@blogstack/blog-client';
+import type { ReviewMeta, Revisit } from '@blogstack/blog-client';
+
+/**
+ * "How this scored" — the full rubric, its explainer, the disclosures and the
+ * living-updates log.
+ *
+ * The explainer is what turns a number from an opinion into a measurement, so
+ * it sits inside the card rather than behind a link alone. The axis labels are
+ * the fixed terms of the published rubric and live in code with the scoring
+ * logic: if two reviews could label the same axis differently the rubric stops
+ * being comparable, which is the whole point of asking the same seven
+ * questions every time.
+ */
+
+interface Props {
+  review: ReviewMeta;
+  revisits: Revisit[];
+  rubricHref?: string | undefined;
+}
+
+const { review, revisits, rubricHref = '/rubric' } = Astro.props;
+
+const axes = reviewAxes(review);
+const composite = compositeScore(review);
+const scored = axes.filter((a) => a.value !== null);
+const disclosures = review.disclosures;
+
+// An unfilled CMS textarea arrives as an empty string, not as undefined, so
+// this checks for content rather than for presence — `??` would stop at the
+// first empty field and hide a block whose later entries are filled in.
+const hasDisclosures = [
+  disclosures?.howWeAte,
+  disclosures?.ownership,
+  disclosures?.supplyChain,
+  disclosures?.interview,
+].some((entry) => entry !== undefined && entry.trim() !== '');
+
+const dateFormat: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+---
+
+{
+  (scored.length > 0 || hasDisclosures || revisits.length > 0) && (
+    <section>
+      <h2 class="section-label">How this scored</h2>
+
+      <div class="rubric">
+        <header>
+          <div>
+            <h3>{review.restaurant}</h3>
+            {review.badges && review.badges.length > 0 && (
+              <p class="badges">
+                {review.badges.map((badge) => (
+                  <span class="badge">{badge}</span>
+                ))}
+              </p>
+            )}
+          </div>
+          <div class="overall">
+            {composite === null ? (
+              <b class="na">Unrated</b>
+            ) : (
+              <b class="tnum">{composite.toFixed(1)}</b>
+            )}
+            <span>{composite === null ? 'Not enough visits' : 'Composite'}</span>
+          </div>
+        </header>
+
+        {scored.length > 0 && (
+          <ul class="axes">
+            {axes.map((axis) => (
+              <li>
+                <span class="label">{axis.label}</span>
+                <span
+                  class="bar"
+                  role="img"
+                  aria-label={
+                    axis.value === null
+                      ? `${axis.label}: not scored`
+                      : `${axis.label}: ${String(axis.value)} out of ${String(SCORE_MAX)}`
+                  }
+                >
+                  <i style={`width:${String(axis.percent)}%`} />
+                </span>
+                {axis.value === null ? (
+                  <span class="val na">Not scored</span>
+                ) : (
+                  <span class="val tnum">{axis.value.toFixed(1)}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <p class="explainer">
+          <b>The same seven questions, every time</b>
+          Every review here is scored on these seven axes and nothing else, so two reviews can be
+          compared without reading both. The composite is the mean, unweighted — which means a
+          beautiful room cannot buy its way out of an opaque supply chain.{' '}
+          <a href={rubricHref}>The full rubric, with what each number means →</a>
+        </p>
+
+        {hasDisclosures && (
+          <div class="disclosures">
+            {disclosures?.howWeAte && (
+              <p>
+                <b>How we ate</b>
+                {disclosures.howWeAte}
+              </p>
+            )}
+            {disclosures?.ownership && (
+              <p>
+                <b>Ownership</b>
+                {disclosures.ownership}
+              </p>
+            )}
+            {disclosures?.supplyChain && (
+              <p>
+                <b>Supply chain</b>
+                {disclosures.supplyChain}
+              </p>
+            )}
+            {disclosures?.interview && (
+              <p>
+                <b>Interview</b>
+                {disclosures.interview}
+              </p>
+            )}
+          </div>
+        )}
+
+        {revisits.length > 0 && (
+          <div class="revisits">
+            <h4>Living updates — this review changes when the restaurant does</h4>
+            {revisits.map((revisit) => (
+              <div class="revisit">
+                <time datetime={revisit.date}>
+                  {new Date(revisit.date).toLocaleDateString('en-GB', dateFormat)}
+                  {revisit.visitNumber && ` · visit ${String(revisit.visitNumber)}`}
+                </time>
+                <p>{revisit.note}</p>
+              </div>
+            ))}
+            {review.nextRevisit && (
+              <p class="next">
+                Next scheduled revisit —{' '}
+                {new Date(review.nextRevisit).toLocaleDateString('en-GB', dateFormat)}. This page is
+                updated, not replaced.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .section-label {
+    font-family: var(--display);
+    font-size: 2rem;
+    margin: 3rem 0 1.25rem;
+  }
+  .rubric {
+    border: 1px solid var(--navy);
+    background: var(--surface);
+    padding: 1.75rem;
+  }
+  .rubric > header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  h3 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 1.75rem;
+    margin: 0;
+  }
+  .overall {
+    text-align: right;
+  }
+  .overall b {
+    display: block;
+    font-family: var(--display);
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .overall b.na {
+    font-size: 1.5rem;
+    color: var(--muted);
+  }
+  .overall span {
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.75rem 0 0;
+  }
+  .badge {
+    font-size: 0.625rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid var(--rule-strong);
+    color: var(--muted);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+  }
+
+  .axes {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.9rem;
+  }
+  .axes li {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr) 4rem;
+    gap: 1rem;
+    align-items: center;
+  }
+  .label {
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .bar {
+    height: 6px;
+    background: var(--rule);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+  }
+  .val {
+    text-align: right;
+    font-family: var(--display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .val.na {
+    font-family: var(--body);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .explainer {
+    margin: 1.5rem 0 0;
+    padding: 1.25rem;
+    border: 1px dashed var(--baby);
+    background: var(--cream);
+    font-size: 0.9375rem;
+    color: var(--muted);
+  }
+  .explainer b {
+    display: block;
+    color: var(--navy);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+  }
+
+  .disclosures {
+    margin: 1.5rem 0 0;
+    padding: 1rem 0 0;
+    border-top: 1px solid var(--rule);
+    display: grid;
+    gap: 0.6rem;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .disclosures b {
+    color: var(--navy);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.15rem;
+    font-weight: 600;
+  }
+  .disclosures p {
+    margin: 0;
+  }
+
+  .revisits {
+    margin: 2rem 0 0;
+    border-left: 2px solid var(--baby);
+    padding-left: 1.25rem;
+  }
+  .revisits h4 {
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 0.75rem;
+    font-weight: 600;
+  }
+  .revisit {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .revisit:last-of-type {
+    border-bottom: none;
+  }
+  .revisit time {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+  .revisit p {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--muted);
+  }
+  .next {
+    margin: 0.75rem 0 0;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 48rem) {
+    .axes li {
+      grid-template-columns: minmax(0, 1fr) 4rem;
+    }
+    .bar {
+      grid-column: 1 / -1;
+      order: 3;
+    }
+  }
+</style>

@@ -24,7 +24,33 @@ export type { HighlightOptions } from './highlight';
 export { monokaiLight } from './monokai-light-theme';
 export { httpTransport, serviceTransport } from './transport';
 export type { Transport } from './transport';
-export type { ContentResponse, NavLink, Post, PostType, ReviewMeta, SiteSettings } from './types';
+export type {
+  ContentResponse,
+  Dish,
+  NavLink,
+  Photo,
+  Post,
+  PostType,
+  ReviewAxes,
+  ReviewMeta,
+  Revisit,
+  SiteSettings,
+} from './types';
+export {
+  AXIS_LABELS,
+  AXIS_ORDER,
+  compositeScore,
+  heroPhoto,
+  isUnrated,
+  photosMissingAlt,
+  priceBand,
+  reviewAxes,
+  reviewDishes,
+  reviewPhotos,
+  reviewRevisits,
+  SCORE_MAX,
+} from './review';
+export type { AxisKey, ScoredAxis } from './review';
 export {
   assembleSettings,
   assertNoPlaceholders,
