@@ -25,7 +25,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "build:web-dev": "tsx scripts/build-web-dev-fixture.ts"
+    "build:web-dev": "tsx scripts/build-web-dev-fixture.ts",
+    "check:copy": "tsx scripts/check-no-placeholder-copy.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

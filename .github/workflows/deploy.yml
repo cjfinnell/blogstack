@@ -113,6 +113,11 @@ jobs:
         env:
           CMS_URL: https://${{ secrets.CMS_HOST }}
           SITE_URL: ${{ secrets.WEB_ORIGIN }}
+      # Second net under the placeholder guard. The build already refuses to
+      # render unfilled site settings; this catches a placeholder that reached
+      # the page by any other route. Nothing the site owner did not write ships.
+      - name: Check for placeholder copy
+        run: npm run check:copy -- apps/web-${{ matrix.site }}/dist
       - name: Deploy web
         run: npx wrangler deploy --env web_${{ matrix.site }}
         env:

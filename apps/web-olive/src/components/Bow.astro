@@ -1,0 +1,49 @@
+---
+import { brand } from '../brand.config';
+
+/**
+ * One instance of the bow, at a given width.
+ *
+ * Which symbol it points at is Maria's decision (DESIGN-SPEC.md §1, Q2), read
+ * from the config rather than hardcoded here — except below `flatBelow`, where
+ * the filters cost more than they show and the flat variant is used regardless.
+ *
+ * `bowSource: 'scan'` swaps in a photograph of her own painting at large sizes
+ * and keeps the drawn SVG for small ones. Until a scan exists the drawn version
+ * serves both, which is why the scan path is a graceful upgrade rather than a
+ * branch that can break.
+ */
+
+interface Props {
+  /** Rendered width in px. Height follows the 300×280 viewBox. */
+  width: number;
+  /** Below this width the unfiltered variant is used. */
+  flatBelow?: number | undefined;
+  class?: string | undefined;
+}
+
+const { width, flatBelow = 32, class: className } = Astro.props;
+
+const useFlat = width < flatBelow;
+const symbol = useFlat ? 'bowFlat' : brand.bowFinish === 'painted' ? 'bowPaint' : 'bowGrain';
+const height = Math.round((width * 280) / 300);
+---
+
+<svg
+  class:list={['bow', className]}
+  width={width}
+  height={height}
+  viewBox="0 0 300 280"
+  aria-hidden="true"
+  focusable="false"
+>
+  <use href={`#${symbol}`}></use>
+</svg>
+
+<style>
+  .bow {
+    display: block;
+    margin-inline: auto;
+    height: auto;
+  }
+</style>

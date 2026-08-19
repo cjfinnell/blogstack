@@ -1,22 +1,68 @@
 ---
-import SharedBaseLayout from '@blogstack/astro-shared/BaseLayout.astro';
-import { theme, brand, links, footerText } from '../site';
+import { Font } from 'astro:assets';
+import Masthead from '../components/Masthead.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import BowDefs from '../components/BowDefs.astro';
+import { tokenCss } from '../styles/tokens';
+import { getSettings } from '../lib/settings';
+
+/**
+ * Olive's own shell.
+ *
+ * It no longer wraps `@blogstack/astro-shared/BaseLayout`: that theme system
+ * carries five colours, one font and a left-aligned brand-plus-links header,
+ * and this design needs twelve tokens, three faces and a centred masthead with
+ * a bow. Bending it would have made it worse for the themes that do fit it.
+ *
+ * Every readable string arrives from the CMS via `getSettings()`, which is
+ * memoised for the build and refuses to render unfilled placeholder copy in a
+ * production build.
+ */
 
 interface Props {
   title: string;
-  description?: string;
+  description?: string | undefined;
+  size?: 'home' | 'map' | 'review' | undefined;
+  current?: string | undefined;
 }
 
-const { title, description = 'A personal blog.' } = Astro.props;
+const { title, description, size = 'home', current } = Astro.props;
+const settings = await getSettings();
 ---
 
-<SharedBaseLayout
-  title={title}
-  description={description}
-  theme={theme}
-  brand={brand}
-  links={links}
-  footerText={footerText}
->
-  <slot />
-</SharedBaseLayout>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {description && <meta name="description" content={description} />}
+    <link rel="alternate" type="application/rss+xml" title={settings.siteName} href="/rss.xml" />
+    <title>{title}</title>
+
+    <Font cssVariable="--font-script" />
+    <Font cssVariable="--font-display" />
+    {/* The body face is the one the reader waits on, so it is the one preloaded. */}
+    <Font cssVariable="--font-body" preload />
+
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme-mode');
+          var mode = stored === 'light' || stored === 'dark' ? stored : 'auto';
+          document.documentElement.setAttribute('data-theme', mode);
+        } catch (e) {}
+      })();
+    </script>
+    <style is:global set:html={tokenCss}></style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{title}</a>
+    <BowDefs />
+    <Masthead settings={settings} size={size} current={current} />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter settings={settings} />
+  </body>
+</html>

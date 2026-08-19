@@ -2,12 +2,13 @@ import { createSonicJSApp, mcpPlugin, registerCollections } from '@sonicjs-cms/c
 import type { Bindings, SonicJSConfig } from '@sonicjs-cms/core';
 
 import blogPostsCollection from './collections/blog-posts.collection';
+import siteSettingsCollection from './collections/site-settings.collection';
 import { hoistLexicalImportMap } from './lexical-importmap';
 import { globalVariablesRoutePlugin } from './plugins/global-variables-route';
 import { publishHookPlugin } from './plugins/publish-hook';
 
 // Trigger preview-cms: exercises the new PR-preview dev CMS deploy/migrate/seed path.
-registerCollections([blogPostsCollection]);
+registerCollections([blogPostsCollection, siteSettingsCollection]);
 
 const config: SonicJSConfig = {
   plugins: {

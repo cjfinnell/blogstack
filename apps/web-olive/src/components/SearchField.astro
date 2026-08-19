@@ -1,0 +1,139 @@
+---
+import type { NavLink } from '@blogstack/blog-client';
+
+/**
+ * Search, in the masthead of every page.
+ *
+ * This was Maria's one explicit gap in round 1: she wanted people to find a
+ * search bar immediately, so it is chrome rather than a page.
+ *
+ * The placeholder and the example queries are copy, so they arrive from the
+ * CMS. The examples are doing real work — they teach the shape of the archive
+ * in one line, which a bare box cannot.
+ */
+
+interface Props {
+  placeholder: string;
+  hints?: NavLink[] | undefined;
+  maxWidth?: string | undefined;
+}
+
+const { placeholder, hints, maxWidth = '34rem' } = Astro.props;
+---
+
+<div class="search" style={`--search-max:${maxWidth}`}>
+  <form role="search" action="/search" method="get">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="7"></circle>
+      <path d="M20 20l-4.5-4.5" stroke-linecap="round"></path>
+    </svg>
+    <label class="sr-only" for="site-search">{placeholder}</label>
+    <input id="site-search" name="q" type="search" placeholder={placeholder} />
+    <button type="submit">{placeholder}</button>
+  </form>
+
+  {
+    hints && hints.length > 0 && (
+      <p class="hints">
+        {hints.map((hint, i) => (
+          <>
+            {i > 0 && <span aria-hidden="true"> · </span>}
+            <a href={hint.href}>{hint.label}</a>
+          </>
+        ))}
+      </p>
+    )
+  }
+</div>
+
+<style>
+  .search {
+    max-width: var(--search-max);
+    margin: 0 auto 1rem;
+  }
+  form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1.5px solid var(--navy);
+    border-radius: 999px;
+    background: var(--cream);
+    padding: 0.15rem 0.35rem 0.15rem 1rem;
+  }
+  form:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--blue-wash);
+  }
+  svg {
+    width: 17px;
+    height: 17px;
+    color: var(--muted);
+    flex: none;
+  }
+  input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: none;
+    font-family: var(--body);
+    font-size: 1rem;
+    color: var(--ink);
+    padding: 0.7rem 0;
+  }
+  input::placeholder {
+    color: var(--muted);
+  }
+  input:focus {
+    outline: none;
+  }
+  button {
+    font-family: var(--body);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    background: var(--navy);
+    color: var(--cream);
+    cursor: pointer;
+    border-radius: 999px;
+    flex: none;
+    /* The button repeats the placeholder as its accessible name; the visible
+       text is the icon's job at this width. */
+    max-width: 8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  button:hover {
+    background: var(--accent);
+  }
+
+  .hints {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 0.7rem 0 0;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .hints a {
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--rule-strong);
+  }
+  .hints a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>
