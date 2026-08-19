@@ -5,7 +5,10 @@ import { blog } from '@blogstack/astro-shared/blog';
 import { renderPostHtml } from '@blogstack/astro-shared/post-html';
 import { theme } from '../../site';
 
+export const prerender = import.meta.env.RENDER_MODE !== 'ssr';
+
 export async function getStaticPaths() {
+  if (!prerender) return [];
   const posts = await blog.getPublishedPosts(100);
   return posts.map((post) => ({
     params: { slug: postSlug(post) },
@@ -13,10 +16,19 @@ export async function getStaticPaths() {
   }));
 }
 
-const { post } = Astro.props;
-const html = await renderPostHtml(post.data?.content, theme);
+const post = Astro.props.post ?? (await blog.getPostBySlug(Astro.params.slug));
+if (!post) Astro.response.status = 404;
+const html = post ? await renderPostHtml(post.data?.content, theme) : null;
 ---
 
-<PostLayout title={postTitle(post)} publishedAt={postPublishedAt(post)}>
-  <Fragment set:html={html} />
-</PostLayout>
+{
+  post ? (
+    <PostLayout title={postTitle(post)} publishedAt={postPublishedAt(post)}>
+      <Fragment set:html={html} />
+    </PostLayout>
+  ) : (
+    <PostLayout title="404 — not found" publishedAt={null}>
+      <p>$ cd: no such page</p>
+    </PostLayout>
+  )
+}

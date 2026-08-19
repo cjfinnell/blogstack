@@ -1,13 +1,14 @@
 // Parses the rendered wrangler.toml (against .env.example dummy values, so
-// this needs no secrets and runs on fork PRs) and asserts the 7 hand-authored
-// env blocks stay consistent with config/sites.ts and mise.toml. This is the
+// this needs no secrets and runs on fork PRs) and asserts the hand-authored
+// env blocks stay consistent with config/sites.ts, config/sites.ts's
+// draftSites, and mise.toml. This is the
 // highest-value test in the repo: duplicated env blocks are this design's
 // main failure mode. See PLAN.md#testing.
 
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parse as parseToml } from 'smol-toml';
-import { sites, deployedSiteIds } from '../config/sites.ts';
+import { sites, deployedSiteIds, draftSites, deployedDraftSiteIds } from '../config/sites.ts';
 
 const root = resolve(import.meta.dirname, '..');
 
@@ -48,6 +49,7 @@ function satisfiesMinNode(version: string, range: string): boolean {
 }
 
 interface WranglerEnvBlock {
+  main?: string;
   assets?: { directory?: string };
   d1_databases?: { database_name?: string }[];
   r2_buckets?: { bucket_name?: string }[];
@@ -172,6 +174,43 @@ export function checkConfigDrift(): string[] {
           `[env.${cmsKey}] r2 bucket_name is "${String(bucketName)}", expected "${expectedBucket}"`,
         );
       }
+    }
+  }
+
+  // Admin-draft targets: web-only, no cms_*/preview_* triplet — they reuse
+  // their parent site's already-checked CMS block above. The only new
+  // invariant is that the block is a real Worker (main set), not an
+  // assets-only clone of the static build, and that it declares no CMS-side
+  // resources of its own — a D1/R2 binding here would mean a draft target
+  // silently grew its own CMS deploy, which defeats the entire point of
+  // aiming it at the parent site's live content.
+  for (const draftId of deployedDraftSiteIds) {
+    const webKey = `web_${draftId}`;
+    const webBlock = doc.env?.[webKey];
+    if (!webBlock) {
+      errors.push(`missing [env.${webKey}] block for deployed draft site "${draftId}"`);
+      continue;
+    }
+
+    const expectedMain = `${draftSites[draftId].app}/dist/server/entry.mjs`;
+    if (webBlock.main !== expectedMain) {
+      errors.push(`[env.${webKey}] main is "${String(webBlock.main)}", expected "${expectedMain}"`);
+    }
+    const expectedAssetsDir = `${draftSites[draftId].app}/dist/client`;
+    if (webBlock.assets?.directory !== expectedAssetsDir) {
+      errors.push(
+        `[env.${webKey}] assets.directory is "${String(webBlock.assets?.directory)}", expected "${expectedAssetsDir}"`,
+      );
+    }
+    if (webBlock.preview_urls !== false) {
+      errors.push(
+        `[env.${webKey}] preview_urls is ${String(webBlock.preview_urls)}, expected false`,
+      );
+    }
+    if (webBlock.d1_databases || webBlock.r2_buckets) {
+      errors.push(
+        `[env.${webKey}] must not declare d1_databases or r2_buckets — draft targets reuse the parent site's CMS`,
+      );
     }
   }
 

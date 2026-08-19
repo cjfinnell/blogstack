@@ -3,6 +3,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
 import { blog } from '@blogstack/astro-shared/blog';
 
+export const prerender = import.meta.env.RENDER_MODE !== 'ssr';
+
 const posts = await blog.getPublishedPosts(100);
 ---
 

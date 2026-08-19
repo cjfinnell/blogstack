@@ -13,6 +13,10 @@
 // and every site (including CURRENT_SITE) gets the dummy. Requiring the flag
 // explicitly means a *deploy* job that is missing a real secret fails loudly
 // instead of silently rendering "unused.invalid" into a production route.
+//
+// WEB_DRAFT_HOST is the one exception to that fail-loud rule: it is optional,
+// not required, so a site can keep deploying its CMS/web Worker before
+// admin-draft is rolled out for it. See the WEB_DRAFT_HOST handling below.
 
 import { deployedSiteIds } from '../config/sites.ts';
 
@@ -23,7 +27,13 @@ const preview = process.env.PREVIEW === '1';
 const currentPrefix = currentSite.toUpperCase();
 
 if (preview) {
-  if (process.env.CMS_HOST || process.env.WEB_HOST || process.env.WEB_ORIGIN || process.env.D1_ID) {
+  if (
+    process.env.CMS_HOST ||
+    process.env.WEB_HOST ||
+    process.env.WEB_ORIGIN ||
+    process.env.D1_ID ||
+    process.env.WEB_DRAFT_HOST
+  ) {
     throw new Error(
       'ci-gen-wrangler: PREVIEW=1 but production host secrets are present. ' +
         'Preview jobs must not be scoped to a production GitHub Environment.',
@@ -44,6 +54,15 @@ if (preview) {
   process.env[`${currentPrefix}_WEB_HOST`] = process.env.WEB_HOST;
   process.env[`${currentPrefix}_WEB_ORIGIN`] = process.env.WEB_ORIGIN;
   process.env[`${currentPrefix}_D1_ID`] = process.env.D1_ID;
+  // WEB_DRAFT_HOST is deliberately NOT in the required list above: unlike
+  // the secrets checked there, a site missing it must still deploy its
+  // CMS/normal web Worker without failing the whole job — admin-draft rolls
+  // out per site, gradually, on top of an already-live production deploy.
+  // deploy.yml's draft build/deploy steps are separately gated on this same
+  // secret being present, so an unset one just skips the draft deploy.
+  if (process.env.WEB_DRAFT_HOST) {
+    process.env[`${currentPrefix}_WEB_DRAFT_HOST`] = process.env.WEB_DRAFT_HOST;
+  }
 }
 
 for (const site of deployedSiteIds) {
@@ -54,6 +73,7 @@ for (const site of deployedSiteIds) {
   // Never read by this job — other sites' cms_* blocks are rendered but not
   // deployed here — but gen-wrangler still needs every placeholder filled.
   process.env[`${prefix}_D1_ID`] ??= 'unused-invalid-d1-id';
+  process.env[`${prefix}_WEB_DRAFT_HOST`] ??= 'unused.invalid';
 }
 
 // env.dev is excluded from deployedSiteIds (config/sites.ts marks it

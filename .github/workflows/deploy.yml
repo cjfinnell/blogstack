@@ -72,6 +72,7 @@ jobs:
           WEB_HOST: ${{ secrets.WEB_HOST }}
           WEB_ORIGIN: ${{ secrets.WEB_ORIGIN }}
           D1_ID: ${{ secrets.D1_ID }}
+          WEB_DRAFT_HOST: ${{ secrets.WEB_DRAFT_HOST }}
 
       # CMS first: the web build reads content from it, so a schema change has
       # to land before the site that renders it.
@@ -107,6 +108,30 @@ jobs:
           SITE_URL: ${{ secrets.WEB_ORIGIN }}
       - name: Deploy web
         run: npx wrangler deploy --env web_${{ matrix.site }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+
+      # admin-draft: same app, same build just built above — rebuilt here
+      # with RENDER_MODE=ssr so it renders drafts+published on every request
+      # against the SAME cms_${{ matrix.site }} deployed above. No separate
+      # CMS/D1/R2, no separate GitHub Environment: WEB_DRAFT_HOST is the only
+      # secret this needs beyond what the job already has from CMS_HOST.
+      #
+      # Gated on WEB_DRAFT_HOST being set (not required — see
+      # ci-gen-wrangler.ts) so a site can keep deploying its CMS/web Worker
+      # normally before admin-draft is rolled out for it; rolling it out for
+      # one site must not require touching the other two.
+      - name: Build web (draft)
+        if: secrets.WEB_DRAFT_HOST != ''
+        run: npm run build --workspace apps/web-${{ matrix.site }}
+        env:
+          CMS_URL: https://${{ secrets.CMS_HOST }}
+          SITE_URL: ${{ secrets.WEB_DRAFT_ORIGIN }}
+          RENDER_MODE: ssr
+      - name: Deploy web (draft)
+        if: secrets.WEB_DRAFT_HOST != ''
+        run: npx wrangler deploy --env web_${{ matrix.site }}_draft
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
