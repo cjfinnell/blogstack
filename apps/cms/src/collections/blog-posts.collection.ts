@@ -26,6 +26,21 @@ export default {
         type: 'lexical',
         title: 'Content',
         required: true,
+        // This description is the only thing standing between an API client and
+        // an unrenderable post. @sonicjs-cms/core's MCP schema converter has no
+        // case for `lexical`, so the field is advertised to agents as a plain
+        // string with no hint of what belongs in it, and nothing on the write
+        // path validates the value. `description` is one of the two FieldConfig
+        // keys the converter copies into the emitted JSON Schema, so it reaches
+        // the client verbatim. Keep it exact.
+        description:
+          'A JSON-encoded lexical editor tree, NOT prose. Shape: {"root":{"type":"root","children":[…]}}. ' +
+          'Node types: paragraph, heading (tag h1–h6), quote, list (listType "bullet" or "number"), listitem, ' +
+          'link (url), image (src, altText), text (text, format bitfield: 1 bold, 2 italic, 4 strikethrough, ' +
+          '8 underline, 16 code), linebreak. Code fences and `backticks` are typed as literal text, not code ' +
+          'nodes. Build this with markdownToLexicalJson() from @blogstack/blog-client rather than by hand, and ' +
+          'check it with assertLexicalShape(); plain text written here is passed through as raw markup and ' +
+          'will look correct while being wrong.',
       },
       author: {
         type: 'user',
