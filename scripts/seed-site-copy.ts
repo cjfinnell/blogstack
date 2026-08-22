@@ -32,6 +32,7 @@
 import { DocumentsService } from '@sonicjs-cms/core';
 import { getPlatformProxy } from 'wrangler';
 
+import siteCopyCollection from '../apps/cms/src/collections/site-copy.collection.ts';
 import { SETTING_KEYS } from '../packages/blog-client/src/placeholders.ts';
 
 // Must match apps/cms/src/collections/site-copy.collection.ts, and the
@@ -53,7 +54,10 @@ if (dryRun) {
 // has no @cloudflare/workers-types.
 interface SeedDb {
   prepare: (query: string) => {
-    bind: (...values: (string | number)[]) => { all: () => Promise<{ results?: unknown[] }> };
+    bind: (...values: (string | number)[]) => {
+      all: () => Promise<{ results?: unknown[] }>;
+      run: () => Promise<unknown>;
+    };
     all: () => Promise<{ results?: unknown[] }>;
   };
 }
@@ -74,6 +78,33 @@ if (!binding) {
   process.exit(1);
 }
 const db: SeedDb = binding;
+
+// documents.type_id is a FK into document_types. Core normally fills that row
+// itself — autoRegisterCollectionDocumentTypes(), run from bootstrapMiddleware
+// on the deployed Worker's first HTTP request. This script never sends the
+// Worker a request; it writes to D1 directly, the same as core's own
+// SettingsService.saveSettingsDocument() does for `site_settings` (see
+// @sonicjs-cms/core src/services/settings.ts). On a freshly migrated
+// database the FK insert below fails until that row exists, so seed it here
+// too, the same way.
+await db
+  .prepare(
+    `INSERT OR IGNORE INTO document_types (id, name, display_name, description, schema, source, is_system, is_active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+  .bind(
+    TYPE_ID,
+    TYPE_ID,
+    siteCopyCollection.displayName,
+    siteCopyCollection.description,
+    '{}',
+    'system',
+    0,
+    1,
+    Math.floor(Date.now() / 1000),
+    Math.floor(Date.now() / 1000),
+  )
+  .run();
 
 /** The keys that already have a document, so re-running skips them. */
 async function existingKeys(): Promise<Set<string>> {
