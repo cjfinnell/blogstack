@@ -36,7 +36,7 @@ import { DocumentsService } from '@sonicjs-cms/core';
 import { getPlatformProxy } from 'wrangler';
 
 import siteCopyCollection from '../apps/cms/src/collections/site-copy.collection.ts';
-import { SETTING_KEYS } from '../packages/blog-client/src/placeholders.ts';
+import { PLACEHOLDER_MARKER, SETTING_KEYS } from '../packages/blog-client/src/placeholders.ts';
 
 // Must match apps/cms/src/collections/site-copy.collection.ts, and the
 // collection blog-client reads. apps/cms/test/site-copy-collection.test.ts
@@ -109,36 +109,68 @@ await db
   )
   .run();
 
-/** The keys that already have a document, so re-running skips them. */
-async function existingKeys(): Promise<Set<string>> {
+interface ExistingDocument {
+  id: string;
+  value: string;
+}
+
+/**
+ * The documents that already exist, by key, so re-running skips them — except
+ * a document whose value still carries `PLACEHOLDER_MARKER`, which means
+ * nobody has ever edited it. That case is repaired below rather than left
+ * alone, because a document created before the seed defaults changed from
+ * `{{ braced }}` text to an upper-cased key would otherwise ship the old
+ * brace-wrapped default forever: it reads as unfilled either way, but only
+ * the old format still trips `assertNoPlaceholders` and blocks the build.
+ */
+async function existingDocuments(): Promise<Map<string, ExistingDocument>> {
   const { results } = await db
-    .prepare('SELECT data FROM documents WHERE type_id = ? AND deleted_at IS NULL')
+    .prepare('SELECT id, data FROM documents WHERE type_id = ? AND deleted_at IS NULL')
     .bind(TYPE_ID)
     .all();
-  const keys = new Set<string>();
-  for (const row of (results ?? []) as { data?: string }[]) {
+  const map = new Map<string, ExistingDocument>();
+  for (const row of (results ?? []) as { id?: string; data?: string }[]) {
     try {
-      const parsed = JSON.parse(row.data ?? '{}') as { key?: string };
-      if (parsed.key) keys.add(parsed.key);
+      const parsed = JSON.parse(row.data ?? '{}') as { key?: string; value?: string };
+      if (parsed.key && row.id) map.set(parsed.key, { id: row.id, value: parsed.value ?? '' });
     } catch {
       // A document whose data will not parse is not one we can key off. Leave
       // it: seeding around it is better than failing the whole run over one row.
     }
   }
-  return keys;
+  return map;
 }
 
 const documents = new DocumentsService(db as unknown as ServiceDb, { tenantId: 'default' });
 
 let created = 0;
 let existing = 0;
+let repaired = 0;
 
 try {
-  const have = await existingKeys();
+  const have = await existingDocuments();
 
   for (const setting of SETTING_KEYS) {
-    if (have.has(setting.key)) {
-      existing++;
+    const existingDoc = have.get(setting.key);
+    if (existingDoc) {
+      if (existingDoc.value.includes(PLACEHOLDER_MARKER)) {
+        await db
+          .prepare('UPDATE documents SET data = ?, updated_at = ? WHERE id = ?')
+          .bind(
+            JSON.stringify({
+              key: setting.key,
+              value: setting.placeholder,
+              description: setting.description,
+              category: setting.category,
+            }),
+            Math.floor(Date.now() / 1000),
+            existingDoc.id,
+          )
+          .run();
+        repaired++;
+      } else {
+        existing++;
+      }
       continue;
     }
 
@@ -173,7 +205,9 @@ try {
 
 await dispose();
 
-console.log(`${String(created)} created, ${String(existing)} already present.`);
+console.log(
+  `${String(created)} created, ${String(existing)} already present, ${String(repaired)} repaired.`,
+);
 console.log(
   'Edit them in the admin under Site Copy. Unfilled ones ship as their upper-cased key ' +
     '(e.g. SITE_NAME) — visible on the live site, and only published documents are visible to it.',
