@@ -53,7 +53,7 @@ export default {
         title: 'Value',
         maxLength: 2000,
         helpText:
-          'The words a reader sees. Left empty, the site renders a {{ placeholder }} instead — and a production build refuses to ship while any placeholder is still standing.',
+          'The words a reader sees. Left unedited, the site ships the seeded default — an upper-cased version of the key, e.g. SITE_NAME — so an unfilled string is obvious on the live page.',
       },
       description: {
         type: 'textarea',

@@ -31,6 +31,17 @@ function filledVariables(): Record<string, string> {
   );
 }
 
+/**
+ * Seeded defaults are now upper-cased keys (SITE_NAME), not `{{ braced }}`
+ * text, precisely so they no longer trip this guard — see
+ * placeholders.ts. This fixture exercises the guard's actual detection
+ * logic (a literal `{{` in a value) independent of what the seed script
+ * currently writes.
+ */
+function bracedVariables(): Record<string, string> {
+  return Object.fromEntries(SETTING_KEYS.map((k) => [k.key, `{{ ${k.key} }}`]));
+}
+
 describe('createSiteSettingsClient', () => {
   it('reads the site_copy collection in one request', async () => {
     const { fetchSpy, transport } = transportReturning(documentsFor(PLACEHOLDER_VARIABLES));
@@ -190,7 +201,7 @@ describe('assembleSettings', () => {
 
 describe('findPlaceholders', () => {
   it('reports every unfilled field as a dotted path, including inside arrays', () => {
-    const found = findPlaceholders(assembleSettings(PLACEHOLDER_VARIABLES));
+    const found = findPlaceholders(assembleSettings(bracedVariables()));
 
     expect(found).toContain('siteName');
     expect(found).toContain('philosophy.heading');
@@ -204,16 +215,24 @@ describe('findPlaceholders', () => {
 });
 
 describe('assertNoPlaceholders', () => {
-  it('throws for a production build that would ship placeholder text', () => {
+  it('throws for a value that still carries the {{ marker', () => {
     expect(() => {
-      assertNoPlaceholders(assembleSettings(PLACEHOLDER_VARIABLES));
+      assertNoPlaceholders(assembleSettings(bracedVariables()));
     }).toThrow(/would ship as placeholder text/);
   });
 
   it('points the reader at the admin page to fix it', () => {
     expect(() => {
-      assertNoPlaceholders(assembleSettings(PLACEHOLDER_VARIABLES));
+      assertNoPlaceholders(assembleSettings(bracedVariables()));
     }).toThrow(/Site Copy collection under \/admin\/content/);
+  });
+
+  it('does not throw for the seeded upper-cased defaults', () => {
+    // The whole point of the new default format: it ships and shows on the
+    // live site rather than blocking the build. See placeholders.ts.
+    expect(() => {
+      assertNoPlaceholders(assembleSettings(PLACEHOLDER_VARIABLES));
+    }).not.toThrow();
   });
 
   it('passes once every variable is filled', () => {

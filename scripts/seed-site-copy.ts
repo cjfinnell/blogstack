@@ -1,15 +1,18 @@
 // Creates the chrome's copy as `site_copy` documents.
 //
-// Every value it writes is a brace-wrapped placeholder — it never invents copy.
+// Every value it writes is the key itself, upper-cased — it never invents copy.
 // The point is that the ~60 documents exist to be edited, rather than having to
-// be typed out by hand one at a time.
+// be typed out by hand one at a time. An upper-cased default does not block the
+// build: it ships and shows on the live site, so an editor can see exactly
+// what to fill in instead of guessing at copy before ever seeing the page.
 //
 // There is no migration path from the old `global_variables` store: those tables
 // were dropped from every database, so nothing is left to carry over. The dev
 // CMS's copy was moved into its `site_copy` documents before that; every other
 // environment starts on placeholders and gets its words written in the admin.
 //
-// Opt-in. Nothing in CI runs this.
+// Opt-in for local use. deploy.yml also runs this for olive, on every deploy
+// where the CMS changed — see the "Seed site copy" step there.
 //
 //   npm run seed:site-copy                                  # local D1
 //   SEED_REMOTE=1 SEED_ENV=cms_olive npm run seed:site-copy  # a deployed site
@@ -172,6 +175,6 @@ await dispose();
 
 console.log(`${String(created)} created, ${String(existing)} already present.`);
 console.log(
-  'Edit them in the admin under Site Copy. A production build refuses to ship while any ' +
-    'value is still a {{ placeholder }}, and only published documents are visible to it.',
+  'Edit them in the admin under Site Copy. Unfilled ones ship as their upper-cased key ' +
+    '(e.g. SITE_NAME) — visible on the live site, and only published documents are visible to it.',
 );

@@ -21,9 +21,13 @@
  *   JSON in a textarea is not. The reader below is data-driven, so adding
  *   `nav_5_label` and `nav_5_href` adds a fifth nav item with no code change.
  *
- * Every default is wrapped in double braces. That is the point of this file: a
- * missing value has to be unmistakable on sight, because none of this text was
- * written by the person whose site it is and none of it may reach a reader.
+ * Every default is the key itself, upper-cased — `site_name` ships as
+ * `SITE_NAME`. That is the point of this file: a missing value has to be
+ * unmistakable on sight, on the live deployed site, because none of this text
+ * was written by the person whose site it is. Unlike the old `{{ braced }}`
+ * convention, an upper-cased default does not block the build — the site
+ * ships with it showing, so an editor can see exactly what needs filling in
+ * without having to guess at copy before ever seeing the page live.
  *
  * These same values are the CI fixture and the test expectations — one object,
  * imported in all three places, because a second hand-written copy would drift
@@ -55,19 +59,19 @@ export const SETTING_KEYS: SettingKey[] = [
     key: 'site_name',
     description: 'The wordmark, the page titles, and every link preview.',
     category: 'identity',
-    placeholder: '{{ site name }}',
+    placeholder: 'SITE_NAME',
   },
   {
     key: 'tagline',
     description: 'One line under the homepage masthead. Seven words can do the whole job.',
     category: 'identity',
-    placeholder: '{{ tagline }}',
+    placeholder: 'TAGLINE',
   },
   {
     key: 'footer_mission',
     description: 'Sits beside the bow in the footer, on every page.',
     category: 'identity',
-    placeholder: '{{ footer mission line }}',
+    placeholder: 'FOOTER_MISSION',
   },
 
   ...indexed(4, (n) => [
@@ -75,7 +79,7 @@ export const SETTING_KEYS: SettingKey[] = [
       key: `nav_${String(n)}_label`,
       description: `Primary navigation item ${String(n)} — the text.`,
       category: 'navigation',
-      placeholder: `{{ nav ${String(n)} }}`,
+      placeholder: `NAV_${String(n)}_LABEL`,
     },
     {
       key: `nav_${String(n)}_href`,
@@ -88,7 +92,7 @@ export const SETTING_KEYS: SettingKey[] = [
     key: 'tip_jar_label',
     description: 'The pill at the end of the navigation.',
     category: 'navigation',
-    placeholder: '{{ tip jar }}',
+    placeholder: 'TIP_JAR_LABEL',
   },
   {
     key: 'tip_jar_href',
@@ -101,20 +105,20 @@ export const SETTING_KEYS: SettingKey[] = [
     key: 'search_placeholder',
     description: 'Grey text inside the search box on most pages.',
     category: 'search',
-    placeholder: '{{ search placeholder }}',
+    placeholder: 'SEARCH_PLACEHOLDER',
   },
   {
     key: 'search_placeholder_map',
     description: 'Grey text inside the search box on the map page.',
     category: 'search',
-    placeholder: '{{ search placeholder, map }}',
+    placeholder: 'SEARCH_PLACEHOLDER_MAP',
   },
   ...indexed(3, (n) => [
     {
       key: `search_hint_${String(n)}_label`,
       description: `Example search ${String(n)} under the homepage search box. These teach the archive in one line.`,
       category: 'search',
-      placeholder: `{{ example search ${String(n)} }}`,
+      placeholder: `SEARCH_HINT_${String(n)}_LABEL`,
     },
     {
       key: `search_hint_${String(n)}_href`,
@@ -139,32 +143,32 @@ export const SETTING_KEYS: SettingKey[] = [
     key: `tag_${tag}`,
     description: `Display name for the "${tag}" tag. Renaming it here changes nothing about the posts filed under it.`,
     category: 'tags',
-    placeholder: `{{ tag: ${tag} }}`,
+    placeholder: `TAG_${tag.toUpperCase()}`,
   })),
 
   {
     key: 'philosophy_rail_label',
     description: 'Small uppercase label above the philosophy block.',
     category: 'philosophy',
-    placeholder: '{{ philosophy rail label }}',
+    placeholder: 'PHILOSOPHY_RAIL_LABEL',
   },
   {
     key: 'philosophy_heading',
     description: 'Heading of the philosophy block on the homepage.',
     category: 'philosophy',
-    placeholder: '{{ philosophy heading }}',
+    placeholder: 'PHILOSOPHY_HEADING',
   },
   {
     key: 'philosophy_body',
     description: 'The paragraph in the philosophy block.',
     category: 'philosophy',
-    placeholder: '{{ philosophy body }}',
+    placeholder: 'PHILOSOPHY_BODY',
   },
   {
     key: 'philosophy_cta_label',
     description: 'Link text at the foot of the philosophy block.',
     category: 'philosophy',
-    placeholder: '{{ philosophy link }}',
+    placeholder: 'PHILOSOPHY_CTA_LABEL',
   },
   {
     key: 'philosophy_cta_href',
@@ -177,25 +181,25 @@ export const SETTING_KEYS: SettingKey[] = [
     key: 'pledge_statement',
     description: 'The no-ads, no-sponsors statement above the newsletter form.',
     category: 'pledge',
-    placeholder: '{{ pledge statement }}',
+    placeholder: 'PLEDGE_STATEMENT',
   },
   {
     key: 'pledge_byline',
     description: 'The smaller line under the pledge — who writes it, who pays the bills.',
     category: 'pledge',
-    placeholder: '{{ pledge byline }}',
+    placeholder: 'PLEDGE_BYLINE',
   },
   {
     key: 'newsletter_button',
     description: 'Text on the newsletter sign-up button.',
     category: 'pledge',
-    placeholder: '{{ newsletter button }}',
+    placeholder: 'NEWSLETTER_BUTTON',
   },
   {
     key: 'newsletter_placeholder',
     description: 'Grey text inside the newsletter email box.',
     category: 'pledge',
-    placeholder: '{{ email placeholder }}',
+    placeholder: 'NEWSLETTER_PLACEHOLDER',
   },
 
   ...indexed(3, (n) => [
@@ -203,13 +207,13 @@ export const SETTING_KEYS: SettingKey[] = [
       key: `tip_${String(n)}_amount`,
       description: `Tip tier ${String(n)} — the amount, as you want it written.`,
       category: 'tip-jar',
-      placeholder: `{{ amount ${String(n)} }}`,
+      placeholder: `TIP_${String(n)}_AMOUNT`,
     },
     {
       key: `tip_${String(n)}_description`,
       description: `Tip tier ${String(n)} — what it buys.`,
       category: 'tip-jar',
-      placeholder: `{{ tier ${String(n)} }}`,
+      placeholder: `TIP_${String(n)}_DESCRIPTION`,
     },
     {
       key: `tip_${String(n)}_href`,
@@ -224,14 +228,14 @@ export const SETTING_KEYS: SettingKey[] = [
       key: `footer_${String(col)}_heading`,
       description: `Footer column ${String(col)} — the heading.`,
       category: 'footer',
-      placeholder: `{{ footer column ${String(col)} }}`,
+      placeholder: `FOOTER_${String(col)}_HEADING`,
     },
     ...indexed(2, (link) => [
       {
         key: `footer_${String(col)}_link_${String(link)}_label`,
         description: `Footer column ${String(col)}, link ${String(link)} — the text.`,
         category: 'footer',
-        placeholder: `{{ footer link ${String(col)}.${String(link)} }}`,
+        placeholder: `FOOTER_${String(col)}_LINK_${String(link)}_LABEL`,
       },
       {
         key: `footer_${String(col)}_link_${String(link)}_href`,
