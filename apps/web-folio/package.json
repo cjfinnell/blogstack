@@ -13,7 +13,7 @@
     "typecheck": "astro check"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "14.1.0",
+    "@astrojs/cloudflare": "14.2.3",
     "@blogstack/astro-shared": "*",
     "@blogstack/blog-client": "*",
     "astro": "^7.1.6"
