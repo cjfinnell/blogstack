@@ -5,7 +5,10 @@ import { blog } from '@blogstack/astro-shared/blog';
 import { renderPostHtml } from '@blogstack/astro-shared/post-html';
 import { theme } from '../../site';
 
+export const prerender = import.meta.env.RENDER_MODE !== 'ssr';
+
 export async function getStaticPaths() {
+  if (!prerender) return [];
   const posts = await blog.getPublishedPosts(100);
   return posts.map((post) => ({
     params: { slug: postSlug(post) },
