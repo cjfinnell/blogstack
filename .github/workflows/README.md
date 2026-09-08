@@ -4,7 +4,7 @@
 | ----------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | `ci.yml`                | pull request, push to `main`                                                              | lint, format-check, typecheck, test, build (via Makefile targets) |
 | `deploy.yml`            | push to `main`, CMS publish webhook (`repository_dispatch`), manual (`workflow_dispatch`) | Deploys production sites                                          |
-| `preview.yml`           | pull request opened/synced/closed                                                         | Builds/tears down per-PR preview Workers                          |
+| `preview.yml`           | `preview` label added, then synced/reopened/closed                                        | Builds/tears down per-PR preview Workers                          |
 | `preview-reconcile.yml` | nightly schedule                                                                          | Sweeps orphaned preview Workers/Environments                      |
 
 ## Deploying
@@ -34,6 +34,12 @@ npm run release -- --site terminal_draft
 ```
 
 ## Previews
+
+Preview builds are opt-in: applying the `preview` label to a PR triggers the
+first build; every push after that (`synchronize`) rebuilds automatically as
+long as the label is still on the PR. Removing the label doesn't tear the
+preview down — only closing the PR does that (or the nightly reconcile, if
+the `closed` webhook is dropped).
 
 Each PR gets its own Worker per site in `vars.PREVIEW_SITES`, named
 `blogstack-web-<site>-pr-<N>`, on workers.dev with no route and no custom
