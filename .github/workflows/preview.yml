@@ -4,14 +4,25 @@ name: Preview
 # aren't exposed to fork-originated pull_request runs, but this condition is
 # the explicit belt-and-suspenders check called out in PLAN.md#github-actions).
 #
+# Preview builds are opt-in, not automatic on every push: `labeled` starts
+# the build/rebuild cycle only once someone applies the `preview` label, and
+# each job below also checks `contains(...labels...)` so later `synchronize`
+# pushes on an already-labeled PR keep rebuilding. Removing the label doesn't
+# tear anything down — only `closed` does that, so it stays unconditional
+# here and just relies on the per-job label check (or none) downstream.
+#
 # `closed` is in the trigger list so the cleanup job can tear the preview down.
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [labeled, synchronize, reopened, closed]
 
 jobs:
   resolve:
-    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    if: >
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      ((github.event.action == 'labeled' && github.event.label.name == 'preview') ||
+       contains(github.event.pull_request.labels.*.name, 'preview'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -48,7 +59,9 @@ jobs:
     needs: resolve
     if: >
       github.event.action != 'closed' &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      ((github.event.action == 'labeled' && github.event.label.name == 'preview') ||
+       contains(github.event.pull_request.labels.*.name, 'preview'))
     runs-on: ubuntu-latest
     concurrency:
       # NOT per-PR: migrations from different PRs must serialize against each
@@ -162,7 +175,9 @@ jobs:
       always() &&
       github.event.action != 'closed' &&
       (needs.preview-cms.result == 'success' || needs.preview-cms.result == 'skipped') &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      ((github.event.action == 'labeled' && github.event.label.name == 'preview') ||
+       contains(github.event.pull_request.labels.*.name, 'preview'))
     strategy:
       matrix:
         site: ${{ fromJSON(vars.PREVIEW_SITES) }}
