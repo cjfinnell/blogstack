@@ -19,10 +19,10 @@
     "@blogstack/blog-client": "*"
   },
   "peerDependencies": {
-    "astro": "^7.1.6"
+    "astro": "^7.2.10"
   },
   "devDependencies": {
-    "astro": "^7.1.6",
+    "astro": "^7.2.10",
     "typescript": "^6.0.3"
   }
 }

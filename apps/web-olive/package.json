@@ -16,7 +16,7 @@
     "@astrojs/cloudflare": "14.3.1",
     "@blogstack/astro-shared": "*",
     "@blogstack/blog-client": "*",
-    "astro": "^7.1.6"
+    "astro": "^7.2.10"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
