@@ -16,6 +16,13 @@ workers_dev = true
 vars = { ENVIRONMENT = "development", SITE_ID = "dev", CORS_ORIGINS = "http://localhost:4321,http://localhost:4322,http://localhost:4323,http://localhost:4324" }
 d1_databases = [{ binding = "DB", database_name = "blogstack-dev-db", database_id = "${DEV_D1_ID}", migrations_dir = "./node_modules/@sonicjs-cms/core/migrations", remote = true }]
 r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-dev-media" }]
+# Lets SonicJS core's bootstrapMiddleware skip its full cold-boot DB path
+# (schema check, document-type registration, RBAC init, menu-plugin
+# reconcile writes) on every isolate after the first — see
+# bootstrapMiddleware's CACHE_KV check in @sonicjs-cms/core. Without this,
+# every fresh isolate re-runs that path against D1 directly; on low/bursty
+# traffic that's most requests, not just the first-ever one.
+kv_namespaces = [{ binding = "CACHE_KV", id = "${DEV_KV_ID}" }]
 
 [env.web_dev]
 name = "blogstack-web-dev"
@@ -31,6 +38,8 @@ routes = [{ pattern = "${TERMINAL_CMS_HOST}", custom_domain = true }]
 vars = { ENVIRONMENT = "production", SITE_ID = "terminal", CORS_ORIGINS = "${TERMINAL_WEB_ORIGIN}", GITHUB_REPO = "cjfinnell/blogstack" }
 d1_databases = [{ binding = "DB", database_name = "blogstack-terminal-db", database_id = "${TERMINAL_D1_ID}", migrations_dir = "./node_modules/@sonicjs-cms/core/migrations", remote = true }]
 r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-terminal-media" }]
+# See env.dev's kv_namespaces comment.
+kv_namespaces = [{ binding = "CACHE_KV", id = "${TERMINAL_KV_ID}" }]
 
 [env.web_terminal]
 name = "blogstack-web-terminal"
@@ -70,6 +79,8 @@ routes = [{ pattern = "${FOLIO_CMS_HOST}", custom_domain = true }]
 vars = { ENVIRONMENT = "production", SITE_ID = "folio", CORS_ORIGINS = "${FOLIO_WEB_ORIGIN}", GITHUB_REPO = "cjfinnell/blogstack" }
 d1_databases = [{ binding = "DB", database_name = "blogstack-folio-db", database_id = "${FOLIO_D1_ID}", migrations_dir = "./node_modules/@sonicjs-cms/core/migrations", remote = true }]
 r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-folio-media" }]
+# See env.dev's kv_namespaces comment.
+kv_namespaces = [{ binding = "CACHE_KV", id = "${FOLIO_KV_ID}" }]
 
 [env.web_folio]
 name = "blogstack-web-folio"
@@ -96,6 +107,8 @@ routes = [{ pattern = "${OLIVE_CMS_HOST}", custom_domain = true }]
 vars = { ENVIRONMENT = "production", SITE_ID = "olive", CORS_ORIGINS = "${OLIVE_WEB_ORIGIN}", GITHUB_REPO = "cjfinnell/blogstack" }
 d1_databases = [{ binding = "DB", database_name = "blogstack-olive-db", database_id = "${OLIVE_D1_ID}", migrations_dir = "./node_modules/@sonicjs-cms/core/migrations", remote = true }]
 r2_buckets = [{ binding = "MEDIA_BUCKET", bucket_name = "blogstack-olive-media" }]
+# See env.dev's kv_namespaces comment.
+kv_namespaces = [{ binding = "CACHE_KV", id = "${OLIVE_KV_ID}" }]
 
 [env.web_olive]
 name = "blogstack-web-olive"

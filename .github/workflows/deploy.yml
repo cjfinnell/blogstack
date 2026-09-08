@@ -79,6 +79,7 @@ jobs:
           WEB_HOST: ${{ secrets.WEB_HOST }}
           WEB_ORIGIN: ${{ secrets.WEB_ORIGIN }}
           D1_ID: ${{ secrets.D1_ID }}
+          KV_ID: ${{ secrets.KV_ID }}
           WEB_DRAFT_HOST: ${{ secrets.WEB_DRAFT_HOST }}
 
       # CMS first: the web build reads content from it, so a schema change has

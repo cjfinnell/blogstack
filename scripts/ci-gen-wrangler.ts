@@ -32,6 +32,7 @@ if (preview) {
     process.env.WEB_HOST ||
     process.env.WEB_ORIGIN ||
     process.env.D1_ID ||
+    process.env.KV_ID ||
     process.env.WEB_DRAFT_HOST
   ) {
     throw new Error(
@@ -40,7 +41,7 @@ if (preview) {
     );
   }
 } else {
-  const missing = (['CMS_HOST', 'WEB_HOST', 'WEB_ORIGIN', 'D1_ID'] as const).filter(
+  const missing = (['CMS_HOST', 'WEB_HOST', 'WEB_ORIGIN', 'D1_ID', 'KV_ID'] as const).filter(
     (k) => !process.env[k],
   );
   if (missing.length > 0) {
@@ -54,6 +55,7 @@ if (preview) {
   process.env[`${currentPrefix}_WEB_HOST`] = process.env.WEB_HOST;
   process.env[`${currentPrefix}_WEB_ORIGIN`] = process.env.WEB_ORIGIN;
   process.env[`${currentPrefix}_D1_ID`] = process.env.D1_ID;
+  process.env[`${currentPrefix}_KV_ID`] = process.env.KV_ID;
   // WEB_DRAFT_HOST is deliberately NOT in the required list above: unlike
   // the secrets checked there, a site missing it must still deploy its
   // CMS/normal web Worker without failing the whole job — admin-draft rolls
@@ -73,16 +75,18 @@ for (const site of deployedSiteIds) {
   // Never read by this job — other sites' cms_* blocks are rendered but not
   // deployed here — but gen-wrangler still needs every placeholder filled.
   process.env[`${prefix}_D1_ID`] ??= 'unused-invalid-d1-id';
+  process.env[`${prefix}_KV_ID`] ??= 'unused-invalid-kv-id';
   process.env[`${prefix}_WEB_DRAFT_HOST`] ??= 'unused.invalid';
 }
 
 // env.dev is excluded from deployedSiteIds (config/sites.ts marks it
 // deployed: false — it's the shared dev CMS, not a per-site deploy target),
-// so the loop above never fills DEV_D1_ID. Every job that renders the full
-// template needs it anyway. Only the preview-cms job's CURRENT_SITE=dev
-// branch above sets it for real; everyone else (deploy.yml's per-site
-// matrix, preview.yml's per-site preview matrix) gets the dummy, since none
-// of them ever deploy --env dev.
+// so the loop above never fills DEV_D1_ID/DEV_KV_ID. Every job that renders
+// the full template needs them anyway. Only the preview-cms job's
+// CURRENT_SITE=dev branch above sets them for real; everyone else
+// (deploy.yml's per-site matrix, preview.yml's per-site preview matrix) gets
+// the dummy, since none of them ever deploy --env dev.
 process.env.DEV_D1_ID ??= 'unused-invalid-d1-id';
+process.env.DEV_KV_ID ??= 'unused-invalid-kv-id';
 
 await import('./gen-wrangler.ts');
