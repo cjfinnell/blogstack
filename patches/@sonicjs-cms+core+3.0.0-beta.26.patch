@@ -1,0 +1,18 @@
+diff --git a/node_modules/@sonicjs-cms/core/dist/chunk-EEA476CJ.js b/node_modules/@sonicjs-cms/core/dist/chunk-EEA476CJ.js
+index ba59399..de4a58b 100644
+--- a/node_modules/@sonicjs-cms/core/dist/chunk-EEA476CJ.js
++++ b/node_modules/@sonicjs-cms/core/dist/chunk-EEA476CJ.js
+@@ -462,6 +462,13 @@ function bootstrapMiddleware(config = {}, allPlugins) {
+     setBranchLabel(isLocalhost && gitBranch ? gitBranch : void 0);
+     try {
+       console.log("[Bootstrap] Starting system initialization...");
++      try {
++        const cacheKv = c.env.CACHE_KV;
++        if (cacheKv) {
++          await cacheKv.put(BOOTSTRAP_KV_KEY(), "1", { expirationTtl: 86400 });
++        }
++      } catch {
++      }
+       console.log("[Bootstrap] Checking schema compatibility...");
+       const migrationService = new MigrationService(c.env.DB);
+       await migrationService.ensureSchemaCompatibility();
