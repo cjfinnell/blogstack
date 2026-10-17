@@ -136,6 +136,27 @@ const placeholder = size === 'map' ? settings.searchPlaceholderMap : settings.se
     gap: 0.25rem;
   }
 
+  /* The toggle is shared, and its own hover colours name tokens this site
+     does not define, so it gets olive's palette here: a soft wash and the
+     accent on hover, the same as the drawer links. */
+  .utility :global(.theme-toggle) {
+    border: none;
+    border-radius: 999px;
+    padding: 0.5rem;
+    color: var(--navy);
+    transition:
+      color 0.15s,
+      background-color 0.15s;
+  }
+  .utility :global(.theme-toggle:hover) {
+    color: var(--accent);
+    background: var(--blue-wash);
+  }
+  .utility :global(.theme-toggle:focus-visible) {
+    outline: 1.5px solid var(--accent);
+    outline-offset: 2px;
+  }
+
   /* The drawer is a <details>, so the secondary nav works with no JavaScript.
      It only appears once the inline nav no longer fits. */
   .menu {
