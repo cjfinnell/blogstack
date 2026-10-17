@@ -236,10 +236,19 @@ const placeholder = size === 'map' ? settings.searchPlaceholderMap : settings.se
     border: 1px solid var(--rule-strong);
     border-radius: 999px;
     padding: 0.3rem 0.8rem;
+    transition:
+      color 0.15s,
+      background-color 0.15s,
+      border-color 0.15s;
   }
   nav.primary a.tip:hover {
     border-color: var(--accent);
     color: var(--accent);
+    background: var(--blue-wash);
+  }
+  nav.primary a.tip:focus-visible {
+    outline: 1.5px solid var(--accent);
+    outline-offset: 2px;
   }
 
   /* Home hero: fills the first screen under the bar. */
