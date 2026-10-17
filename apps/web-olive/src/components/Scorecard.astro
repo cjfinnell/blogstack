@@ -1,6 +1,6 @@
 ---
-import { compositeScore, reviewAxes, SCORE_MAX } from '@blogstack/blog-client';
-import type { ReviewMeta } from '@blogstack/blog-client';
+import { compositeScore, ownRating, reviewAxes, SCORE_MAX } from '@blogstack/blog-client';
+import type { ReviewMeta, ReviewRating, ReviewScaleStep } from '@blogstack/blog-client';
 
 /**
  * The composite and the headline axes, as a full-width strip.
@@ -24,29 +24,81 @@ interface Props {
   review: ReviewMeta;
   /** Where the rubric explainer lives. */
   rubricHref?: string | undefined;
+  /** The rating as the review states it ("2.3 / 4. It was good…"), if it does. */
+  rating?: ReviewRating | null | undefined;
+  /** The review's own scale legend ("1 - Bad · 2 - Good · …"). */
+  scale?: ReviewScaleStep[] | undefined;
 }
 
-const { review, rubricHref = '/rubric' } = Astro.props;
+const { review, rubricHref = '/rubric', rating = null, scale = [] } = Astro.props;
 
-const composite = compositeScore(review);
 const axes = reviewAxes(review).filter((a) => a.value !== null);
+
+// With no axes scored, the review's own scale replaces the composite and its
+// rubric link. See ownRating.
+const own = ownRating(review, rating);
+const tier = own ? scale.findLast((step) => step.value <= own.value) : undefined;
+const composite = own ? null : compositeScore(review);
+// The legend's steps are spread end to end, first step at the left edge, so
+// the bar runs from the lowest step rather than from zero.
+const low = scale[0]?.value ?? 0;
+const fill = own ? Math.min(100, Math.max(0, ((own.value - low) / (own.max - low)) * 100)) : 0;
 ---
 
-<section class="scorecard">
+<section class:list={['scorecard', { own }]}>
   <div class="headline">
     {
-      composite === null ? (
+      own ? (
+        <span class="score tnum">
+          {own.value}
+          <span class="of">/ {own.max}</span>
+        </span>
+      ) : composite === null ? (
         <span class="unrated">Unrated</span>
       ) : (
         <span class="score tnum">{composite.toFixed(1)}</span>
       )
     }
-    <span class="denominator">
-      {composite === null ? 'Not enough visits to score' : `Composite out of ${String(SCORE_MAX)}`}
-      {' · '}
-      <a href={rubricHref}>how we score</a>
-    </span>
+    {
+      own ? (
+        tier && <span class="tier">{tier.label}</span>
+      ) : (
+        <span class="denominator">
+          {composite === null
+            ? 'Not enough visits to score'
+            : `Composite out of ${String(SCORE_MAX)}`}
+          {' · '}
+          <a href={rubricHref}>how we score</a>
+        </span>
+      )
+    }
   </div>
+
+  {
+    own && (
+      <div class="own-rating">
+        {own.html && <p class="note" set:html={own.html} />}
+        {scale.length > 0 && (
+          <div class="scale">
+            <span
+              class="bar"
+              role="img"
+              aria-label={`${String(own.value)} out of ${String(own.max)}`}
+            >
+              <i style={`width:${String(fill)}%`} />
+            </span>
+            <ol>
+              {scale.map((step) => (
+                <li class:list={{ on: step === tier }}>
+                  <span class="tnum">{step.value}</span> {step.label}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   {
     axes.length > 0 && (
@@ -88,6 +140,44 @@ const axes = reviewAxes(review).filter((a) => a.value !== null);
     font-size: 4.5rem;
     line-height: 0.9;
     color: var(--accent);
+  }
+  .score .of {
+    font-size: 1.75rem;
+    color: var(--muted);
+    margin-left: 0.15em;
+  }
+  .tier {
+    display: block;
+    font-family: var(--display);
+    font-size: 1.5rem;
+    color: var(--navy);
+    margin-top: 0.4rem;
+  }
+  .note {
+    margin: 0 0 1.1rem;
+    font-family: var(--display);
+    font-size: 1.3rem;
+    line-height: 1.35;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+  .scale .bar {
+    display: block;
+  }
+  .scale ol {
+    display: flex;
+    justify-content: space-between;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .scale li.on {
+    color: var(--accent);
+    font-weight: 600;
   }
   .unrated {
     display: block;

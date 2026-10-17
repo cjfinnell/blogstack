@@ -2,10 +2,13 @@
 import BaseLayout from './BaseLayout.astro';
 import Scorecard from '../components/Scorecard.astro';
 import DishRundown from '../components/DishRundown.astro';
+import ReviewFacts from '../components/ReviewFacts.astro';
 import ReviewRubric from '../components/ReviewRubric.astro';
 import {
   compositeScore,
+  extractReviewFacts,
   heroPhoto,
+  ownRating,
   photosMissingAlt,
   priceBand,
   reviewDishes,
@@ -52,7 +55,12 @@ const band = priceBand(review);
 // section, so neither gets one.
 const SECTION_BOW =
   '<svg class="section-bow" width="30" height="28" viewBox="0 0 300 280" aria-hidden="true" focusable="false"><use href="#bowFlat"></use></svg>';
-const body = await Astro.slots.render('default');
+const rendered = await Astro.slots.render('default');
+// The run of labelled facts near the top ("Rating: …", "Best occasion: …")
+// becomes its own card, and its rating feeds the scorecard.
+const FACTS_MARK = '<!--review-facts-->';
+const extracted = extractReviewFacts(rendered, FACTS_MARK);
+const body = extracted?.html ?? rendered;
 let headings = 0;
 const prose = body
   .replace(/(<section class="footnotes">)?<h2>/g, (match, footnotes) =>
@@ -64,6 +72,8 @@ const prose = body
     /<figure>.*?<\/figure>(?:\s*<figure>.*?<\/figure>)+/g,
     '<div class="figure-row">$&</div>',
   );
+const own = ownRating(review, extracted?.rating);
+const [proseBefore = '', proseAfter = ''] = extracted ? prose.split(FACTS_MARK) : [prose];
 
 // Alt text cannot be generated, so a gap is reported rather than filled. This
 // is a build-time warning and not a failure: an existing review should not stop
@@ -95,14 +105,23 @@ const jsonLd = {
       name: title,
       ...(publishedAt && { datePublished: publishedAt }),
       ...(review.updatedAt && { dateModified: review.updatedAt }),
-      ...(composite !== null && {
-        reviewRating: {
-          '@type': 'Rating',
-          ratingValue: composite,
-          bestRating: SCORE_MAX,
-          worstRating: 0,
-        },
-      }),
+      ...(own
+        ? {
+            reviewRating: {
+              '@type': 'Rating',
+              ratingValue: own.value,
+              bestRating: own.max,
+              worstRating: extracted?.scale[0]?.value ?? 0,
+            },
+          }
+        : composite !== null && {
+            reviewRating: {
+              '@type': 'Rating',
+              ratingValue: composite,
+              bestRating: SCORE_MAX,
+              worstRating: 0,
+            },
+          }),
       itemReviewed: {
         '@type': 'Restaurant',
         name: review.restaurant ?? title,
@@ -177,7 +196,7 @@ const jsonLd = {
       </div>
     </header>
 
-    <Scorecard review={review} />
+    <Scorecard review={review} rating={extracted?.rating} scale={extracted?.scale} />
 
     {
       hero && (
@@ -214,7 +233,15 @@ const jsonLd = {
       )
     }
 
-    <div class="prose" set:html={prose} />
+    <div class="prose" set:html={proseBefore} />
+    {
+      extracted && (
+        <>
+          <ReviewFacts facts={extracted.facts} />
+          <div class="prose" set:html={proseAfter} />
+        </>
+      )
+    }
 
     <DishRundown dishes={dishes} heading="What we ordered" />
 
