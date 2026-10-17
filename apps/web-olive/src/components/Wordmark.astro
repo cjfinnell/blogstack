@@ -66,9 +66,10 @@ const { size, siteName, href = '/' } = Astro.props;
 
   /* Height is reserved from the same clamp that sets the size, so the swap from
      fallback to script face cannot shift the page below it. */
+  /* Home: the full-screen hero. */
   .is-home {
-    font-size: clamp(3rem, 7vw, 4.5rem);
-    min-height: calc(clamp(3rem, 7vw, 4.5rem) * 1.13);
+    font-size: clamp(4rem, 11vw, 8rem);
+    min-height: calc(clamp(4rem, 11vw, 8rem) * 1.13);
   }
   /* Map and review share the compact header bar, where the mark sits left. */
   .is-map,

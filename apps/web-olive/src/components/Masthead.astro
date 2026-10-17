@@ -13,10 +13,15 @@ import type { SiteSettings } from '@blogstack/blog-client';
  * reason is the correct one: it makes things less confusing, especially for
  * people who are less tech savvy.
  *
- * Inner pages get one compact row: wordmark and bow, nav, search, utilities.
- * Home gives the brand its own centred line above that row, and the tagline
- * below it; the search hints sit under the search pill. Below 68rem the nav
- * folds into the drawer. Every string comes from the CMS.
+ * Every page gets the same compact bar, sticky at the top: wordmark and bow,
+ * nav, search, utilities. Below 68rem the nav folds into the drawer.
+ *
+ * Home adds a full-screen hero under it: the large wordmark, bow, tagline and
+ * search. As the reader scrolls, the hero shrinks away and the bar's furniture
+ * fades in, so the brand reads as moving up into the bar. That is a CSS
+ * scroll-driven animation, no JavaScript; browsers without it, and readers who
+ * ask for reduced motion, get the bar fully shown from the start. Every string
+ * comes from the CMS.
  */
 
 interface Props {
@@ -28,15 +33,14 @@ interface Props {
 
 const { settings, size, current } = Astro.props;
 
-const bowWidth = size === 'home' ? 96 : 34;
 const placeholder = size === 'map' ? settings.searchPlaceholderMap : settings.searchPlaceholder;
 ---
 
 <header class:list={['masthead', `is-${size}`]}>
   <div class="wrap-wide bar">
     <div class="brand">
-      <Wordmark size={size} siteName={settings.siteName} />
-      <Bow width={bowWidth} />
+      <Wordmark size={size === 'home' ? 'review' : size} siteName={settings.siteName} />
+      <Bow width={34} />
     </div>
 
     <nav class="primary">
@@ -55,11 +59,7 @@ const placeholder = size === 'map' ? settings.searchPlaceholderMap : settings.se
     </nav>
 
     <div class="search-slot">
-      <SearchField
-        placeholder={placeholder}
-        hints={size === 'home' ? settings.searchHints : undefined}
-        compact
-      />
+      <SearchField placeholder={placeholder} compact />
     </div>
 
     <div class="utility">
@@ -75,23 +75,38 @@ const placeholder = size === 'map' ? settings.searchPlaceholderMap : settings.se
       </details>
     </div>
   </div>
-
-  {
-    size === 'home' && (
-      <div class="wrap home-extra">
-        <p class="tagline">{settings.tagline}</p>
-      </div>
-    )
-  }
   <hr class="rule-full" />
 </header>
 
+{
+  size === 'home' && (
+    <section class="hero">
+      <div class="hero-inner">
+        <Wordmark size="home" siteName={settings.siteName} />
+        <Bow width={168} />
+        <p class="tagline">{settings.tagline}</p>
+        <div class="hero-search">
+          <SearchField id="home-search" placeholder={placeholder} hints={settings.searchHints} />
+        </div>
+      </div>
+      <span class="cue" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+    </section>
+  )
+}
+
 <style>
   .masthead {
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--cream);
   }
 
-  /* Inner pages: one row. Brand left, nav centre, search and utilities right. */
+  /* One row. Brand left, nav centre, search and utilities right. */
   .bar {
     display: grid;
     grid-template-columns: auto 1fr auto auto;
@@ -119,30 +134,6 @@ const placeholder = size === 'map' ? settings.searchPlaceholderMap : settings.se
     display: flex;
     align-items: center;
     gap: 0.25rem;
-  }
-
-  /* Home: the brand gets its own centred line, nav and search share the next. */
-  .is-home .bar {
-    grid-template-columns: 1fr auto auto;
-    grid-template-areas:
-      'brand brand brand'
-      'nav search utility';
-    row-gap: 1rem;
-    padding-top: 1.5rem;
-    /* The hints hang below the pill, so the row lines up on the pill, not the
-       pill-plus-hints box. */
-    align-items: start;
-  }
-  .is-home nav.primary,
-  .is-home .utility {
-    min-height: 2.3rem;
-  }
-  .is-home .brand {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-  .is-home .search-slot {
-    width: 20rem;
   }
 
   /* The drawer is a <details>, so the secondary nav works with no JavaScript.
@@ -198,9 +189,6 @@ const placeholder = size === 'map' ? settings.searchPlaceholderMap : settings.se
     flex-wrap: nowrap;
     gap: 1.5rem;
   }
-  .is-home nav.primary {
-    justify-content: flex-start;
-  }
   nav.primary a {
     font-size: 0.75rem;
     letter-spacing: 0.14em;
@@ -233,15 +221,79 @@ const placeholder = size === 'map' ? settings.searchPlaceholderMap : settings.se
     color: var(--accent);
   }
 
-  .home-extra {
-    text-align: center;
+  /* Home hero: fills the first screen under the bar. */
+  .hero {
+    position: relative;
+    min-height: calc(100svh - 4.5rem);
+    display: grid;
+    place-items: center;
+    padding: 2rem var(--gutter) 4rem;
+  }
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 36rem;
   }
   .tagline {
     font-family: var(--display);
     font-style: italic;
-    font-size: 1.125rem;
+    font-size: 1.375rem;
     color: var(--muted);
-    margin: 0.75rem 0 1.25rem;
+    margin: 0.5rem 0 1rem;
+    text-align: center;
+  }
+  .hero-search {
+    width: 100%;
+  }
+  .cue {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 50%;
+    width: 28px;
+    margin-left: -14px;
+    color: var(--muted);
+  }
+
+  /* The collapse. Only where the browser can tie animation to scroll, and only
+     for readers who have not asked for less motion; everyone else keeps the
+     static layout above, bar fully shown. */
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .is-home .bar > :not(.utility),
+      .is-home .rule-full {
+        animation: bar-in linear both;
+        animation-timeline: scroll(root);
+        animation-range: 35svh 70svh;
+      }
+      .hero-inner,
+      .cue {
+        animation: hero-out linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 65svh;
+        transform-origin: 50% 0;
+      }
+    }
+  }
+  @keyframes bar-in {
+    from {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+  }
+  @keyframes hero-out {
+    to {
+      opacity: 0;
+      transform: translateY(-12svh) scale(0.55);
+    }
   }
 
   /* Narrower: the inline nav folds into the drawer. */
@@ -252,19 +304,11 @@ const placeholder = size === 'map' ? settings.searchPlaceholderMap : settings.se
     .menu {
       display: block;
     }
-    .bar,
-    .is-home .bar {
+    .bar {
       grid-template-columns: auto 1fr auto;
       grid-template-areas: 'brand search utility';
     }
-    .is-home .bar {
-      grid-template-areas:
-        'brand brand brand'
-        'search search utility';
-    }
-    .search-slot,
-    .is-home .search-slot {
-      width: auto;
+    .search-slot {
       justify-self: end;
       max-width: 20rem;
       width: 100%;
@@ -280,14 +324,15 @@ const placeholder = size === 'map' ? settings.searchPlaceholderMap : settings.se
         'search search';
       row-gap: 0.75rem;
     }
-    .is-home .bar {
-      grid-template-areas:
-        'brand brand'
-        'search utility';
-    }
-    .search-slot,
-    .is-home .search-slot {
+    .search-slot {
       max-width: none;
+    }
+    /* On home the hero already carries the search, so the bar stays one row. */
+    .is-home .search-slot {
+      display: none;
+    }
+    .is-home .bar {
+      grid-template-areas: 'brand utility';
     }
   }
 </style>

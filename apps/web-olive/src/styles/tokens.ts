@@ -86,6 +86,10 @@ export const tokenCss = `
 
   * { box-sizing: border-box; }
 
+  /* The masthead is sticky, so in-page jumps (footnotes, skip link) must land
+     below it rather than under it. */
+  html { scroll-padding-top: 6rem; }
+
   body {
     margin: 0;
     background: var(--cream);
