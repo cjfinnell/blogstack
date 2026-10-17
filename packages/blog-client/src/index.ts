@@ -34,6 +34,7 @@ export type {
   ReviewAxes,
   ReviewMeta,
   Revisit,
+  ReviewBackdrop,
   SiteSettings,
 } from './types';
 export {
@@ -60,6 +61,7 @@ export {
   createSiteSettingsClient,
   findPlaceholders,
   MissingSiteSettingsError,
+  reviewBackdrop,
   toCopyMap,
 } from './site-settings';
 export type { SiteSettingsClient } from './site-settings';

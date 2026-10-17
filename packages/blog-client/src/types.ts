@@ -192,4 +192,16 @@ export interface SiteSettings {
   tipTiers: { amount: string; description: string; href: string }[];
 
   footerColumns: { heading: string; links: NavLink[] }[];
+
+  /**
+   * Images laid behind a review's card, keyed by city key (`denver`). Optional
+   * on purpose: a city with no entry gets the plain backdrop colour, so these
+   * have no placeholders and never block a build.
+   */
+  reviewBackdrops: Record<string, ReviewBackdrop>;
+}
+
+export interface ReviewBackdrop {
+  light: string;
+  dark: string;
 }

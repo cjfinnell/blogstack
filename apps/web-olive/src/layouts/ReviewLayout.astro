@@ -3,7 +3,6 @@ import BaseLayout from './BaseLayout.astro';
 import Scorecard from '../components/Scorecard.astro';
 import DishRundown from '../components/DishRundown.astro';
 import ReviewFacts from '../components/ReviewFacts.astro';
-import { cityBackdrop } from '../backdrops';
 import ReviewRubric from '../components/ReviewRubric.astro';
 import {
   compositeScore,
@@ -13,11 +12,14 @@ import {
   photosMissingAlt,
   priceBand,
   reviewDishes,
+  reviewBackdrop,
   reviewRevisits,
   SCORE_MAX,
 } from '@blogstack/blog-client';
 import type { ReviewMeta } from '@blogstack/blog-client';
 import { codeBlockCss } from '@blogstack/astro-shared/themes';
+import { getImage } from 'astro:assets';
+import { getSettings } from '../lib/settings';
 
 /**
  * A review page.
@@ -49,7 +51,19 @@ const dishes = reviewDishes(review);
 const revisits = reviewRevisits(review) ?? [];
 const composite = compositeScore(review);
 const band = priceBand(review);
-const backdrop = cityBackdrop(review.city);
+// The map behind the card is site copy: uploaded to the CMS's media library
+// and named by `review_backdrop_<city>_light` / `_dark`. The static build
+// copies it onto the blog's own domain, as it does body images; the draft
+// Worker links the CMS original.
+const cityMap = reviewBackdrop(await getSettings(), review.city);
+const localImage = async (src: string) =>
+  import.meta.env.RENDER_MODE === 'ssr'
+    ? src
+    : (await getImage({ src, inferSize: true, format: 'webp' })).src;
+const backdrop = cityMap && {
+  light: await localImage(cityMap.light),
+  dark: await localImage(cityMap.dark),
+};
 
 // A small flat bow above each section heading, in place of a plain gap, so
 // a long review is punctuated by her mark rather than reading as one strip.
@@ -153,7 +167,7 @@ const jsonLd = {
       <div
         class="map-backdrop"
         aria-hidden="true"
-        style={`--map-light: url(${backdrop.light}); --map-dark: url(${backdrop.dark});`}
+        style={`--map-light: url("${backdrop.light}"); --map-dark: url("${backdrop.dark}");`}
       />
     )
   }
