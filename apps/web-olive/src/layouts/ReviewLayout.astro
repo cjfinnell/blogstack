@@ -250,8 +250,11 @@ const jsonLd = {
 </BaseLayout>
 
 <style>
+  /* One centred reading column under the centred masthead: header, score,
+     rules, prose and photos all share the measure, rather than a wide stage
+     with the prose pinned to its left edge. */
   .stage {
-    max-width: var(--stage);
+    max-width: calc(42rem + 2 * var(--gutter));
     margin: 0 auto;
     padding: 0 var(--gutter);
   }
@@ -393,7 +396,7 @@ const jsonLd = {
   }
 
   .prose {
-    max-width: 64ch;
+    max-width: none;
   }
   .prose :global(p) {
     margin: 0 0 1.35em;
