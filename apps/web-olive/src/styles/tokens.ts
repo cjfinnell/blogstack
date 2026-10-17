@@ -151,7 +151,7 @@ export const tokenCss = `
 
   hr.rule-full { border: none; border-top: 1px solid var(--navy); margin: 0; }
 
-  img { max-width: 100%; }
+  img { max-width: 100%; height: auto; }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {

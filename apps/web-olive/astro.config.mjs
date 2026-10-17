@@ -29,10 +29,20 @@ const DEFAULT_WORDMARK = 'Monsieur La Doulaise';
 const wordmarkFace = process.env.PUBLIC_WORDMARK_FACE ?? '';
 const wordmarkFamily = WORDMARK_FAMILY[wordmarkFace] ?? DEFAULT_WORDMARK;
 
+// Post bodies embed images uploaded to the CMS. The static build optimizes
+// them with getImage() (see optimizePostImages), which only fetches remote
+// hosts listed here. Read from CMS_URL, never hardcoded, for the same
+// anonymity reason as SITE_URL.
+const cmsHost = process.env.CMS_URL ? new URL(process.env.CMS_URL).hostname : null;
+
 export default defineConfig({
   site: process.env.SITE_URL ?? 'http://localhost:4324',
   output: ssr ? 'server' : 'static',
-  ...(ssr ? { adapter: cloudflare() } : {}),
+  // `compile` keeps the draft Worker off the Cloudflare Images binding the
+  // adapter otherwise defaults to: drafts render body images as the CMS
+  // originals, and only the static build resizes them.
+  ...(ssr ? { adapter: cloudflare({ imageService: 'compile' }) } : {}),
+  image: { domains: cmsHost ? [cmsHost] : [] },
   // The workspace packages ship raw TypeScript with extensionless imports.
   // Externalized, `astro dev` hands them to Node's resolver, which cannot
   // follow `./client` to `client.ts`; Vite has to transform them instead.
