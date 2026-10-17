@@ -5,6 +5,6 @@ import { createBlogClient, httpTransport } from '@blogstack/blog-client';
 // per wrangler env, not passed as an argument at any call site. Every page
 // keeps calling blog.getPublishedPosts()/getPostBySlug() verbatim either way.
 export const blog = createBlogClient(
-  httpTransport(import.meta.env.CMS_URL ?? 'http://localhost:8787'),
+  httpTransport(import.meta.env.CMS_URL ?? 'http://localhost:8787', import.meta.env.CMS_TOKEN),
   { includeDrafts: import.meta.env.RENDER_MODE === 'ssr' },
 );
