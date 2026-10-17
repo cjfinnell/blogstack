@@ -42,14 +42,16 @@ const composite = own ? null : compositeScore(review);
 // The legend's steps are spread end to end, first step at the left edge, so
 // the bar runs from the lowest step rather than from zero.
 const low = scale[0]?.value ?? 0;
-const fill = own ? Math.min(100, Math.max(0, ((own.value - low) / (own.max - low)) * 100)) : 0;
+const stepAt = (value: number): number =>
+  own ? Math.min(100, Math.max(0, ((value - low) / (own.max - low)) * 100)) : 0;
+const fill = own ? stepAt(own.value) : 0;
 ---
 
 <section class:list={['scorecard', { own }]}>
   <div class="headline">
     {
       own ? (
-        <span class="score tnum">
+        <span class="score">
           {own.value}
           <span class="of">/ {own.max}</span>
         </span>
@@ -80,17 +82,26 @@ const fill = own ? Math.min(100, Math.max(0, ((own.value - low) / (own.max - low
         {own.html && <p class="note" set:html={own.html} />}
         {scale.length > 0 && (
           <div class="scale">
-            <span
-              class="bar"
+            <div
+              class="meter"
               role="img"
               aria-label={`${String(own.value)} out of ${String(own.max)}`}
             >
-              <i style={`width:${String(fill)}%`} />
-            </span>
-            <ol>
+              <span class="track">
+                <i style={`width:${String(fill)}%`} />
+              </span>
               {scale.map((step) => (
-                <li class:list={{ on: step === tier }}>
-                  <span class="tnum">{step.value}</span> {step.label}
+                <span class="tick" style={`left:${String(stepAt(step.value))}%`} />
+              ))}
+              <span class="marker" style={`left:${String(fill)}%`} />
+            </div>
+            <ol aria-hidden="true">
+              {scale.map((step) => (
+                <li
+                  class:list={{ on: step === tier }}
+                  style={`left:${String(stepAt(step.value))}%`}
+                >
+                  {step.value} {step.label}
                 </li>
               ))}
             </ol>
@@ -161,13 +172,48 @@ const fill = own ? Math.min(100, Math.max(0, ((own.value - low) / (own.max - low
     color: var(--navy);
     text-wrap: pretty;
   }
-  .scale .bar {
+  /* A meter on her own scale. The track is a lighter step of the fill's
+     blue, so the whole bar reads as one scale; the fill has a rounded data
+     end and a square start; the value carries a ringed marker; hairline
+     ticks sit at each step of the legend, labelled underneath. */
+  .meter {
+    position: relative;
+    height: 12px;
+  }
+  .track {
+    position: absolute;
+    inset: 3px 0;
+    background: var(--blue-wash);
+    border-radius: 0 4px 4px 0;
+  }
+  .track i {
     display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 0 4px 4px 0;
+  }
+  .tick {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 12px;
+    margin-left: -0.5px;
+    background: var(--rule-strong);
+  }
+  .marker {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 2px var(--cream);
   }
   .scale ol {
-    display: flex;
-    justify-content: space-between;
-    margin: 0.5rem 0 0;
+    position: relative;
+    height: 1rem;
+    margin: 0.6rem 0 0;
     padding: 0;
     list-style: none;
     font-size: 0.6875rem;
@@ -175,8 +221,20 @@ const fill = own ? Math.min(100, Math.max(0, ((own.value - low) / (own.max - low
     text-transform: uppercase;
     color: var(--muted);
   }
+  .scale li {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .scale li:first-child {
+    transform: none;
+  }
+  .scale li:last-child {
+    transform: translateX(-100%);
+  }
   .scale li.on {
-    color: var(--accent);
+    color: var(--navy);
     font-weight: 600;
   }
   .unrated {
