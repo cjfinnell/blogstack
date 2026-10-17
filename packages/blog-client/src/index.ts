@@ -34,6 +34,7 @@ export type {
   ReviewAxes,
   ReviewMeta,
   Revisit,
+  ReviewBackdrop,
   SiteSettings,
 } from './types';
 export {
@@ -42,6 +43,7 @@ export {
   compositeScore,
   heroPhoto,
   isUnrated,
+  ownRating,
   photosMissingAlt,
   priceBand,
   reviewAxes,
@@ -51,12 +53,15 @@ export {
   SCORE_MAX,
 } from './review';
 export type { AxisKey, ScoredAxis } from './review';
+export { extractReviewFacts } from './review-facts';
+export type { ReviewFact, ReviewFacts, ReviewRating, ReviewScaleStep } from './review-facts';
 export {
   assembleSettings,
   assertNoPlaceholders,
   createSiteSettingsClient,
   findPlaceholders,
   MissingSiteSettingsError,
+  reviewBackdrop,
   toCopyMap,
 } from './site-settings';
 export type { SiteSettingsClient } from './site-settings';

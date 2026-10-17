@@ -17,7 +17,8 @@ let cached: SiteSettings | null = null;
  *
  * Every page renders the masthead and the footer, so without memoising this
  * every route would refetch the same row. Astro builds in a single process, so
- * a module-level cache is the whole of it.
+ * a module-level cache is the whole of it. `astro dev` skips the memo, so copy
+ * edited in the CMS shows on the next page refresh instead of after a restart.
  *
  * A production build refuses to render unfilled settings. `ALLOW_PLACEHOLDER_COPY`
  * exists for exactly one caller — the CI fixture build, which has no live CMS
@@ -26,7 +27,7 @@ let cached: SiteSettings | null = null;
  * was written by the site's owner.
  */
 export async function getSettings(): Promise<SiteSettings> {
-  if (cached) return cached;
+  if (cached && import.meta.env.PROD) return cached;
 
   const settings = await client.getSiteSettings();
 

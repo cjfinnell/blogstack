@@ -2,18 +2,24 @@
 import BaseLayout from './BaseLayout.astro';
 import Scorecard from '../components/Scorecard.astro';
 import DishRundown from '../components/DishRundown.astro';
+import ReviewFacts from '../components/ReviewFacts.astro';
 import ReviewRubric from '../components/ReviewRubric.astro';
 import {
   compositeScore,
+  extractReviewFacts,
   heroPhoto,
+  ownRating,
   photosMissingAlt,
   priceBand,
   reviewDishes,
+  reviewBackdrop,
   reviewRevisits,
   SCORE_MAX,
 } from '@blogstack/blog-client';
 import type { ReviewMeta } from '@blogstack/blog-client';
 import { codeBlockCss } from '@blogstack/astro-shared/themes';
+import { getImage } from 'astro:assets';
+import { getSettings } from '../lib/settings';
 
 /**
  * A review page.
@@ -45,6 +51,45 @@ const dishes = reviewDishes(review);
 const revisits = reviewRevisits(review) ?? [];
 const composite = compositeScore(review);
 const band = priceBand(review);
+// The map behind the card is site copy: uploaded to the CMS's media library
+// and named by `review_backdrop_<city>_light` / `_dark`. The static build
+// copies it onto the blog's own domain, as it does body images; the draft
+// Worker links the CMS original.
+const cityMap = reviewBackdrop(await getSettings(), review.city);
+const localImage = async (src: string) =>
+  import.meta.env.RENDER_MODE === 'ssr'
+    ? src
+    : (await getImage({ src, inferSize: true, format: 'webp' })).src;
+const backdrop = cityMap && {
+  light: await localImage(cityMap.light),
+  dark: await localImage(cityMap.dark),
+};
+
+// A small flat bow above each section heading, in place of a plain gap, so
+// a long review is punctuated by her mark rather than reading as one strip.
+// The first heading opens the essay and the footnotes' heading is not a
+// section, so neither gets one.
+const SECTION_BOW =
+  '<svg class="section-bow" width="30" height="28" viewBox="0 0 300 280" aria-hidden="true" focusable="false"><use href="#bowFlat"></use></svg>';
+const rendered = await Astro.slots.render('default');
+// The run of labelled facts near the top ("Rating: …", "Best occasion: …")
+// becomes its own card, and its rating feeds the scorecard.
+const FACTS_MARK = '<!--review-facts-->';
+const extracted = extractReviewFacts(rendered, FACTS_MARK);
+const body = extracted?.html ?? rendered;
+let headings = 0;
+const prose = body
+  .replace(/(<section class="footnotes">)?<h2>/g, (match, footnotes) =>
+    footnotes || headings++ === 0 ? match : SECTION_BOW + match,
+  )
+  // Back-to-back photographs sit side by side as one spread rather than a
+  // stack of phone-shaped portraits.
+  .replace(
+    /<figure>.*?<\/figure>(?:\s*<figure>.*?<\/figure>)+/g,
+    '<div class="figure-row">$&</div>',
+  );
+const own = ownRating(review, extracted?.rating);
+const [proseBefore = '', proseAfter = ''] = extracted ? prose.split(FACTS_MARK) : [prose];
 
 // Alt text cannot be generated, so a gap is reported rather than filled. This
 // is a build-time warning and not a failure: an existing review should not stop
@@ -76,14 +121,23 @@ const jsonLd = {
       name: title,
       ...(publishedAt && { datePublished: publishedAt }),
       ...(review.updatedAt && { dateModified: review.updatedAt }),
-      ...(composite !== null && {
-        reviewRating: {
-          '@type': 'Rating',
-          ratingValue: composite,
-          bestRating: SCORE_MAX,
-          worstRating: 0,
-        },
-      }),
+      ...(own
+        ? {
+            reviewRating: {
+              '@type': 'Rating',
+              ratingValue: own.value,
+              bestRating: own.max,
+              worstRating: extracted?.scale[0]?.value ?? 0,
+            },
+          }
+        : composite !== null && {
+            reviewRating: {
+              '@type': 'Rating',
+              ratingValue: composite,
+              bestRating: SCORE_MAX,
+              worstRating: 0,
+            },
+          }),
       itemReviewed: {
         '@type': 'Restaurant',
         name: review.restaurant ?? title,
@@ -108,6 +162,15 @@ const jsonLd = {
   ogImageAlt={hero?.alt}
   jsonLd={jsonLd}
 >
+  {
+    backdrop && (
+      <div
+        class="map-backdrop"
+        aria-hidden="true"
+        style={`--map-light: url("${backdrop.light}"); --map-dark: url("${backdrop.dark}");`}
+      />
+    )
+  }
   <article class="stage">
     <header class="identity">
       <p class="kicker">
@@ -118,6 +181,7 @@ const jsonLd = {
       {
         review.restaurant && (
           <p class="restaurant">
+            <span class="label">Dining at: </span>
             {review.restaurant}
             {review.address && (
               <>
@@ -157,7 +221,7 @@ const jsonLd = {
       </div>
     </header>
 
-    <Scorecard review={review} />
+    <Scorecard review={review} rating={extracted?.rating} scale={extracted?.scale} />
 
     {
       hero && (
@@ -194,9 +258,15 @@ const jsonLd = {
       )
     }
 
-    <div class="prose">
-      <slot />
-    </div>
+    <div class="prose" set:html={proseBefore} />
+    {
+      extracted && (
+        <>
+          <ReviewFacts facts={extracted.facts} />
+          <div class="prose" set:html={proseAfter} />
+        </>
+      )
+    }
 
     <DishRundown dishes={dishes} heading="What we ordered" />
 
@@ -250,10 +320,65 @@ const jsonLd = {
 </BaseLayout>
 
 <style>
+  /* One centred reading column under the centred masthead: header, score,
+     rules, prose and photos all share the measure, rather than a wide stage
+     with the prose pinned to its left edge. */
+  .map-backdrop {
+    display: none;
+  }
+  /* In dark mode the backdrop has to sit darker than the card, so the wash
+     is heavier and the map's pale linework is all that comes through. */
+  :global(html[data-theme='dark']) .map-backdrop {
+    background-image: var(--map-dark);
+    --map-wash: 0.72;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(html:not([data-theme='light'])) .map-backdrop {
+      background-image: var(--map-dark);
+      --map-wash: 0.72;
+    }
+  }
   .stage {
-    max-width: var(--stage);
+    max-width: calc(42rem + 2 * var(--gutter));
     margin: 0 auto;
     padding: 0 var(--gutter);
+  }
+  /* Once the screen is wide enough to leave real margins, the column lifts
+     off the page as a cream card on a deeper backdrop, so the empty space
+     either side reads as background rather than more of the same flat
+     cream. The measure inside is unchanged. */
+  @media (min-width: 54rem) {
+    :global(body:has(.stage)) {
+      background: var(--backdrop);
+    }
+    /* Where the review's city has a map, it lies under the backdrop colour:
+       blurred, held still while the card scrolls over it, and washed with
+       --backdrop so it stays texture rather than competing with the card. */
+    .map-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: var(--map-light) left center / cover no-repeat;
+    }
+    .map-backdrop::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--backdrop);
+      opacity: var(--map-wash, 0.62);
+    }
+    .stage {
+      max-width: calc(42rem + 2 * 3.5rem);
+      margin: 2.5rem auto 0;
+      padding: 0 3.5rem 3rem;
+      background: var(--cream);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      box-shadow:
+        0 1px 2px var(--card-shadow),
+        0 18px 40px -12px var(--card-shadow);
+    }
   }
 
   .identity {
@@ -280,6 +405,14 @@ const jsonLd = {
     font-size: 1.5rem;
     margin: 0 0 1rem;
     color: var(--navy);
+  }
+  .restaurant .label {
+    font-family: var(--body);
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
   }
   .restaurant .slash {
     color: var(--baby);
@@ -329,10 +462,21 @@ const jsonLd = {
     color: var(--navy);
     padding: 0.5rem 1rem;
     border-radius: 999px;
+    transition:
+      color 0.15s,
+      background-color 0.15s,
+      border-color 0.15s;
   }
+  /* Same wash as the masthead's theme toggle, so every pill reads as a
+     button on hover. A colour shift alone was too faint to notice. */
   .btn:hover {
     border-color: var(--accent);
     color: var(--accent);
+    background: var(--blue-wash);
+  }
+  .btn:focus-visible {
+    outline: 1.5px solid var(--accent);
+    outline-offset: 2px;
   }
   .btn--primary {
     background: var(--navy);
@@ -393,7 +537,7 @@ const jsonLd = {
   }
 
   .prose {
-    max-width: 64ch;
+    max-width: none;
   }
   .prose :global(p) {
     margin: 0 0 1.35em;
@@ -412,6 +556,58 @@ const jsonLd = {
   }
   .prose :global(figure) {
     margin: 1.5em 0;
+  }
+  .prose :global(.section-bow) {
+    display: block;
+    margin: 3.5rem auto 0.75rem;
+  }
+  .prose :global(.section-bow + h2) {
+    text-align: center;
+    font-size: 2rem;
+    margin-top: 0;
+  }
+  /* The essay opens on a drop cap in the accent blue: one decisive mark at
+     the start instead of the same grey texture from the first line. */
+  .prose > :global(p:first-of-type::first-letter) {
+    float: left;
+    font-family: var(--display);
+    font-size: 5.6em;
+    line-height: 0.78;
+    padding: 0.08em 0.1em 0 0;
+    color: var(--accent);
+  }
+  /* Photographs break out of the text measure and past the card's edges, so
+     the page changes width as you read instead of scrolling one strip. Only
+     where there is backdrop to spare either side. */
+  @media (min-width: 68rem) {
+    .prose :global(figure),
+    .prose :global(.figure-row) {
+      margin: 3rem -7rem;
+    }
+    .prose :global(.figure-row) {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+      gap: 1rem;
+      align-items: start;
+    }
+    .prose :global(.figure-row figure) {
+      margin: 0;
+    }
+    .prose :global(figure img) {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      max-height: 80vh;
+      margin: 0 auto;
+      border-radius: 4px;
+      box-shadow: 0 18px 40px -16px var(--card-shadow);
+    }
+    .prose :global(figure > figcaption) {
+      padding: 0 7rem;
+    }
+    .prose :global(.figure-row figcaption) {
+      padding: 0;
+    }
   }
   .prose :global(figcaption) {
     color: var(--muted);

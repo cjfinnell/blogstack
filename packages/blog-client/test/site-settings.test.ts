@@ -5,6 +5,7 @@ import {
   createSiteSettingsClient,
   findPlaceholders,
   MissingSiteSettingsError,
+  reviewBackdrop,
   toCopyMap,
 } from '../src/site-settings';
 import { PLACEHOLDER_VARIABLES, SETTING_KEYS } from '../src/placeholders';
@@ -196,6 +197,51 @@ describe('assembleSettings', () => {
 
     expect(settings.footerColumns[0]?.heading).toBe('Read');
     expect(settings.footerColumns[0]?.links[0]).toEqual({ label: 'Food', href: '/food' });
+  });
+});
+
+describe('reviewBackdrops', () => {
+  const light = 'https://cms.example/files/backdrops/a.webp';
+  const dark = 'https://cms.example/files/backdrops/b.webp';
+
+  it('pairs light and dark images by city', () => {
+    const settings = assembleSettings({
+      ...filledVariables(),
+      review_backdrop_denver_light: light,
+      review_backdrop_denver_dark: dark,
+    });
+
+    expect(settings.reviewBackdrops).toEqual({ denver: { light, dark } });
+    expect(reviewBackdrop(settings, ' Denver ')).toEqual({ light, dark });
+    expect(reviewBackdrop(settings, 'Boulder')).toBeUndefined();
+  });
+
+  it('matches multi-word cities to underscored keys', () => {
+    const settings = assembleSettings({
+      ...filledVariables(),
+      review_backdrop_fort_collins_light: light,
+      review_backdrop_fort_collins_dark: dark,
+    });
+
+    expect(reviewBackdrop(settings, 'Fort Collins')).toEqual({ light, dark });
+  });
+
+  it('skips a city with only one half or a value that is not an http(s) URL', () => {
+    const settings = assembleSettings({
+      ...filledVariables(),
+      review_backdrop_denver_light: light,
+      review_backdrop_boulder_light: light,
+      review_backdrop_boulder_dark: 'javascript:alert(1)',
+    });
+
+    expect(settings.reviewBackdrops).toEqual({});
+  });
+
+  it('is empty, not a placeholder, when nothing is configured', () => {
+    const settings = assembleSettings(filledVariables());
+
+    expect(settings.reviewBackdrops).toEqual({});
+    expect(findPlaceholders(settings)).toEqual([]);
   });
 });
 

@@ -1,8 +1,47 @@
 ---
+interface Props {
+  // Show a sun / moon / half-disc symbol instead of the word. The word stays
+  // in the markup, visually hidden, so screen readers still hear the mode.
+  icons?: boolean;
+}
 
+const { icons = false } = Astro.props;
 ---
 
-<button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle color theme">
+<button
+  type="button"
+  class:list={['theme-toggle', { 'theme-toggle-icons': icons }]}
+  data-theme-toggle
+  aria-label="Toggle color theme"
+>
+  {
+    icons && (
+      <svg
+        class="theme-icon"
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <g class="theme-icon-auto">
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor" />
+        </g>
+        <g class="theme-icon-light">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+        </g>
+        <g class="theme-icon-dark">
+          <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />
+        </g>
+      </svg>
+    )
+  }
   <span class="theme-toggle-label"></span>
 </button>
 
@@ -30,6 +69,32 @@
   }
   html[data-theme='dark'] .theme-toggle-label::before {
     content: 'Dark';
+  }
+
+  .theme-toggle-icons {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35em;
+  }
+  .theme-toggle-icons .theme-toggle-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .theme-icon-light,
+  .theme-icon-dark {
+    display: none;
+  }
+  html[data-theme='light'] .theme-icon-auto,
+  html[data-theme='dark'] .theme-icon-auto {
+    display: none;
+  }
+  html[data-theme='light'] .theme-icon-light,
+  html[data-theme='dark'] .theme-icon-dark {
+    display: inline;
   }
 </style>
 
