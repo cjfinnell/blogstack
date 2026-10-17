@@ -74,6 +74,9 @@ export async function optimizePostImages(
         alt: attrs.alt ?? '',
         loading: attrs.loading ?? 'lazy',
         decoding: 'async',
+        // The marker <Image> sets. The dev toolbar audit only looks for it,
+        // and this tag is getImage() output just as <Image>'s would be.
+        'data-image-component': 'true',
       };
       const attrHtml = Object.entries(out)
         .map(([name, value]) => `${name}="${escapeAttr(String(value))}"`)
