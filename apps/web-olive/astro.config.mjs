@@ -33,6 +33,10 @@ export default defineConfig({
   site: process.env.SITE_URL ?? 'http://localhost:4324',
   output: ssr ? 'server' : 'static',
   ...(ssr ? { adapter: cloudflare() } : {}),
+  // The workspace packages ship raw TypeScript with extensionless imports.
+  // Externalized, `astro dev` hands them to Node's resolver, which cannot
+  // follow `./client` to `client.ts`; Vite has to transform them instead.
+  vite: { ssr: { noExternal: [/^@blogstack\//] } },
   fonts: [
     {
       // The script mark. One weight, one style — it sets two words and nothing
