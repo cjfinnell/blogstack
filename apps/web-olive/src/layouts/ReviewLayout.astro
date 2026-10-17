@@ -118,6 +118,7 @@ const jsonLd = {
       {
         review.restaurant && (
           <p class="restaurant">
+            <span class="label">Dining at: </span>
             {review.restaurant}
             {review.address && (
               <>
@@ -283,6 +284,14 @@ const jsonLd = {
     font-size: 1.5rem;
     margin: 0 0 1rem;
     color: var(--navy);
+  }
+  .restaurant .label {
+    font-family: var(--body);
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
   }
   .restaurant .slash {
     color: var(--baby);
