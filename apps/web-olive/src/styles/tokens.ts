@@ -50,6 +50,10 @@ export const tokenCss = `
     --on-accent:    light-dark(#FBF9F4, #0E1826);
     --rule:         light-dark(#E2E6EC, #23364F);
     --rule-strong:  light-dark(#7F8B9B, #7793B0);
+    /* behind the floating reading card on wide screens: a step down from
+       cream in both modes, so the cream card reads as nearer */
+    --backdrop:     light-dark(#EBF0F5, #08101A);
+    --card-shadow:  light-dark(rgb(22 38 63 / 0.14), rgb(0 0 0 / 0.5));
 
     /* the painted ribbon, lit for each mode rather than punched out */
     --rib-a1: light-dark(#C6D6EE, #8FA9D2);
