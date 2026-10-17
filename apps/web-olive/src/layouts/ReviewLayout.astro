@@ -46,6 +46,25 @@ const revisits = reviewRevisits(review) ?? [];
 const composite = compositeScore(review);
 const band = priceBand(review);
 
+// A small flat bow above each section heading, in place of a plain gap, so
+// a long review is punctuated by her mark rather than reading as one strip.
+// The first heading opens the essay and the footnotes' heading is not a
+// section, so neither gets one.
+const SECTION_BOW =
+  '<svg class="section-bow" width="30" height="28" viewBox="0 0 300 280" aria-hidden="true" focusable="false"><use href="#bowFlat"></use></svg>';
+const body = await Astro.slots.render('default');
+let headings = 0;
+const prose = body
+  .replace(/(<section class="footnotes">)?<h2>/g, (match, footnotes) =>
+    footnotes || headings++ === 0 ? match : SECTION_BOW + match,
+  )
+  // Back-to-back photographs sit side by side as one spread rather than a
+  // stack of phone-shaped portraits.
+  .replace(
+    /<figure>.*?<\/figure>(?:\s*<figure>.*?<\/figure>)+/g,
+    '<div class="figure-row">$&</div>',
+  );
+
 // Alt text cannot be generated, so a gap is reported rather than filled. This
 // is a build-time warning and not a failure: an existing review should not stop
 // deploying because it predates the field.
@@ -195,9 +214,7 @@ const jsonLd = {
       )
     }
 
-    <div class="prose">
-      <slot />
-    </div>
+    <div class="prose" set:html={prose} />
 
     <DishRundown dishes={dishes} heading="What we ordered" />
 
@@ -455,6 +472,58 @@ const jsonLd = {
   }
   .prose :global(figure) {
     margin: 1.5em 0;
+  }
+  .prose :global(.section-bow) {
+    display: block;
+    margin: 3.5rem auto 0.75rem;
+  }
+  .prose :global(.section-bow + h2) {
+    text-align: center;
+    font-size: 2rem;
+    margin-top: 0;
+  }
+  /* The essay opens on a drop cap in the accent blue: one decisive mark at
+     the start instead of the same grey texture from the first line. */
+  .prose > :global(p:first-of-type::first-letter) {
+    float: left;
+    font-family: var(--display);
+    font-size: 5.6em;
+    line-height: 0.78;
+    padding: 0.08em 0.1em 0 0;
+    color: var(--accent);
+  }
+  /* Photographs break out of the text measure and past the card's edges, so
+     the page changes width as you read instead of scrolling one strip. Only
+     where there is backdrop to spare either side. */
+  @media (min-width: 68rem) {
+    .prose :global(figure),
+    .prose :global(.figure-row) {
+      margin: 3rem -7rem;
+    }
+    .prose :global(.figure-row) {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+      gap: 1rem;
+      align-items: start;
+    }
+    .prose :global(.figure-row figure) {
+      margin: 0;
+    }
+    .prose :global(figure img) {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      max-height: 80vh;
+      margin: 0 auto;
+      border-radius: 4px;
+      box-shadow: 0 18px 40px -16px var(--card-shadow);
+    }
+    .prose :global(figure > figcaption) {
+      padding: 0 7rem;
+    }
+    .prose :global(.figure-row figcaption) {
+      padding: 0;
+    }
   }
   .prose :global(figcaption) {
     color: var(--muted);
