@@ -1,6 +1,6 @@
 ---
-import { compositeScore, reviewAxes, SCORE_MAX } from '@blogstack/blog-client';
-import type { ReviewMeta } from '@blogstack/blog-client';
+import { compositeScore, ownRating, reviewAxes, SCORE_MAX } from '@blogstack/blog-client';
+import type { ReviewMeta, ReviewRating, ReviewScaleStep } from '@blogstack/blog-client';
 
 /**
  * The composite and the headline axes, as a full-width strip.
@@ -24,29 +24,92 @@ interface Props {
   review: ReviewMeta;
   /** Where the rubric explainer lives. */
   rubricHref?: string | undefined;
+  /** The rating as the review states it ("2.3 / 4. It was good…"), if it does. */
+  rating?: ReviewRating | null | undefined;
+  /** The review's own scale legend ("1 - Bad · 2 - Good · …"). */
+  scale?: ReviewScaleStep[] | undefined;
 }
 
-const { review, rubricHref = '/rubric' } = Astro.props;
+const { review, rubricHref = '/rubric', rating = null, scale = [] } = Astro.props;
 
-const composite = compositeScore(review);
 const axes = reviewAxes(review).filter((a) => a.value !== null);
+
+// With no axes scored, the review's own scale replaces the composite and its
+// rubric link. See ownRating.
+const own = ownRating(review, rating);
+const tier = own ? scale.findLast((step) => step.value <= own.value) : undefined;
+const composite = own ? null : compositeScore(review);
+// The legend's steps are spread end to end, first step at the left edge, so
+// the bar runs from the lowest step rather than from zero.
+const low = scale[0]?.value ?? 0;
+const stepAt = (value: number): number =>
+  own ? Math.min(100, Math.max(0, ((value - low) / (own.max - low)) * 100)) : 0;
+const fill = own ? stepAt(own.value) : 0;
 ---
 
-<section class="scorecard">
+<section class:list={['scorecard', { own }]}>
   <div class="headline">
     {
-      composite === null ? (
+      own ? (
+        <span class="score">
+          {own.value}
+          <span class="of">/ {own.max}</span>
+        </span>
+      ) : composite === null ? (
         <span class="unrated">Unrated</span>
       ) : (
         <span class="score tnum">{composite.toFixed(1)}</span>
       )
     }
-    <span class="denominator">
-      {composite === null ? 'Not enough visits to score' : `Composite out of ${String(SCORE_MAX)}`}
-      {' · '}
-      <a href={rubricHref}>how we score</a>
-    </span>
+    {
+      own ? (
+        tier && <span class="tier">{tier.label}</span>
+      ) : (
+        <span class="denominator">
+          {composite === null
+            ? 'Not enough visits to score'
+            : `Composite out of ${String(SCORE_MAX)}`}
+          {' · '}
+          <a href={rubricHref}>how we score</a>
+        </span>
+      )
+    }
   </div>
+
+  {
+    own && (
+      <div class="own-rating">
+        {own.html && <p class="note" set:html={own.html} />}
+        {scale.length > 0 && (
+          <div class="scale">
+            <div
+              class="meter"
+              role="img"
+              aria-label={`${String(own.value)} out of ${String(own.max)}`}
+            >
+              <span class="track">
+                <i style={`width:${String(fill)}%`} />
+              </span>
+              {scale.map((step) => (
+                <span class="tick" style={`left:${String(stepAt(step.value))}%`} />
+              ))}
+              <span class="marker" style={`left:${String(fill)}%`} />
+            </div>
+            <ol aria-hidden="true">
+              {scale.map((step) => (
+                <li
+                  class:list={{ on: step === tier }}
+                  style={`left:${String(stepAt(step.value))}%`}
+                >
+                  {step.value} {step.label}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   {
     axes.length > 0 && (
@@ -88,6 +151,91 @@ const axes = reviewAxes(review).filter((a) => a.value !== null);
     font-size: 4.5rem;
     line-height: 0.9;
     color: var(--accent);
+  }
+  .score .of {
+    font-size: 1.75rem;
+    color: var(--muted);
+    margin-left: 0.15em;
+  }
+  .tier {
+    display: block;
+    font-family: var(--display);
+    font-size: 1.5rem;
+    color: var(--navy);
+    margin-top: 0.4rem;
+  }
+  .note {
+    margin: 0 0 1.1rem;
+    font-family: var(--display);
+    font-size: 1.3rem;
+    line-height: 1.35;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+  /* A meter on her own scale. The track is a lighter step of the fill's
+     blue, so the whole bar reads as one scale; the fill has a rounded data
+     end and a square start; the value carries a ringed marker; hairline
+     ticks sit at each step of the legend, labelled underneath. */
+  .meter {
+    position: relative;
+    height: 12px;
+  }
+  .track {
+    position: absolute;
+    inset: 3px 0;
+    background: var(--blue-wash);
+    border-radius: 0 4px 4px 0;
+  }
+  .track i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 0 4px 4px 0;
+  }
+  .tick {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 12px;
+    margin-left: -0.5px;
+    background: var(--rule-strong);
+  }
+  .marker {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 2px var(--cream);
+  }
+  .scale ol {
+    position: relative;
+    height: 1rem;
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .scale li {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .scale li:first-child {
+    transform: none;
+  }
+  .scale li:last-child {
+    transform: translateX(-100%);
+  }
+  .scale li.on {
+    color: var(--navy);
+    font-weight: 600;
   }
   .unrated {
     display: block;

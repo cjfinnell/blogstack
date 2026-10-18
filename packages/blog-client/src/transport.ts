@@ -6,9 +6,19 @@ export interface Transport {
   fetch(path: string, init?: RequestInit): Promise<Response>;
 }
 
-export function httpTransport(baseUrl: string): Transport {
+// The CMS answers anonymous reads with published rows only, whatever the
+// filter asks for, so a drafts-included client also needs a token. Optional:
+// the static builds read published rows and run without one.
+export function httpTransport(baseUrl: string, token?: string): Transport {
   const base = baseUrl.replace(/\/$/, '');
-  return { fetch: (path, init) => fetch(`${base}${path}`, init) };
+  if (!token) return { fetch: (path, init) => fetch(`${base}${path}`, init) };
+  return {
+    fetch: (path, init) => {
+      const headers = new Headers(init?.headers);
+      headers.set('Authorization', `Bearer ${token}`);
+      return fetch(`${base}${path}`, { ...init, headers });
+    },
+  };
 }
 
 interface WorkerFetcher {

@@ -1,0 +1,118 @@
+---
+import type { ReviewFact } from '@blogstack/blog-client';
+
+/**
+ * The review's labelled facts — Recommendation, Best occasion, Best dishes,
+ * Reservations and whatever else Maria leads with a bold label — as one card
+ * in place of the paragraphs she typed them as. See extractReviewFacts for how
+ * the run is found.
+ *
+ * The labels are hers, read from the post, so a new label needs no code. Long
+ * entries take the full width and short ones pair up, so a one-line
+ * "Reservations" does not get a whole row to itself.
+ */
+
+interface Props {
+  facts: ReviewFact[];
+}
+
+const { facts } = Astro.props;
+
+// Rough character count of the rendered text, markup excluded. Long entries
+// take two of the three columns; short ones take one.
+const WIDE_AT = 220;
+const textLength = (html: string): number => html.replace(/<[^>]+>/g, '').length;
+---
+
+<dl class="review-facts">
+  {
+    facts.map((fact, i) => (
+      <div class:list={['fact', { lead: i === 0, wide: i > 0 && textLength(fact.html) > WIDE_AT }]}>
+        <dt>{fact.label}</dt>
+        <dd set:html={fact.html} />
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  /* Drawn in the scorecard's language — navy hairlines above and below, no
+     fills, no shadows — so it reads as part of the review's furniture rather
+     than a widget dropped into it. The first fact (her recommendation, in
+     practice) leads across the full width in the display face; the rest sit
+     in three columns under hairlines. */
+  .review-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-flow: row dense;
+    gap: 1.5rem 2.25rem;
+    margin: 2.5rem 0 3rem;
+    padding: 1.75rem 0 2rem;
+    border-top: 1px solid var(--navy);
+    border-bottom: 1px solid var(--navy);
+  }
+  .fact {
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rule);
+  }
+  .fact.lead {
+    grid-column: 1 / -1;
+    padding-top: 0;
+    border-top: none;
+  }
+  .fact.wide {
+    grid-column: span 2;
+  }
+  dt {
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 0 0 0.4rem;
+  }
+  dd {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+  .lead dd {
+    font-family: var(--display);
+    font-size: 1.6rem;
+    line-height: 1.3;
+    color: var(--navy);
+    max-width: 40ch;
+  }
+  /* Her sentences start lower-case after the label; standing alone they read
+     better capitalised. */
+  dd::first-letter {
+    text-transform: uppercase;
+  }
+
+  /* Breaks out of the text measure and past the card's edges, the same as the
+     photographs. */
+  @media (min-width: 68rem) {
+    /* Out past the card it needs the card's own surface, or the card's edge
+       runs through the text. Cream and the card's shadow make it the card
+       pushed outward, not a new kind of object. */
+    .review-facts {
+      margin: 3rem -7rem 3.5rem;
+      padding: 1.75rem 3.5rem 2rem;
+      background: var(--cream);
+      border-radius: 6px;
+      box-shadow:
+        0 1px 2px var(--card-shadow),
+        0 18px 40px -12px var(--card-shadow);
+    }
+  }
+  @media (max-width: 40rem) {
+    .review-facts {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .fact.wide {
+      grid-column: auto;
+    }
+  }
+</style>

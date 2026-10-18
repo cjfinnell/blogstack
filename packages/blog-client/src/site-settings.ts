@@ -1,5 +1,5 @@
 import type { Transport } from './transport';
-import type { NavLink, SiteSettings } from './types';
+import type { NavLink, ReviewBackdrop, SiteSettings } from './types';
 import { PLACEHOLDER_MARKER, PLACEHOLDER_VARIABLES } from './placeholders';
 
 // The chrome's copy is the `site_copy` collection: one document per string,
@@ -94,6 +94,53 @@ function navLink(vars: Record<string, string>, prefix: string): NavLink {
   return { label: text(vars, `${prefix}_label`), href: text(vars, `${prefix}_href`) };
 }
 
+const BACKDROP_KEY = /^review_backdrop_([a-z0-9_]+)_(light|dark)$/;
+
+// An image URL that ends up inside a CSS `url()`, so only an absolute http(s)
+// URL is taken, and in its serialised form: `URL` percent-encodes quotes and
+// whitespace, so the value cannot close the string it is quoted in.
+function imageUrl(value: string | undefined): string | undefined {
+  if (!value || !URL.canParse(value.trim())) return undefined;
+  const url = new URL(value.trim());
+  return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : undefined;
+}
+
+/**
+ * `review_backdrop_<city>_light` / `_dark` pairs, keyed by city.
+ *
+ * Images are uploaded to the CMS's media library and their URLs pasted here, so
+ * a new city is an upload and two documents, not a deploy. A city needs both
+ * halves: one theme with a map and the other without would read as a bug.
+ */
+function reviewBackdrops(vars: Record<string, string>): Record<string, ReviewBackdrop> {
+  const halves: Record<string, Partial<ReviewBackdrop>> = {};
+  for (const [key, value] of Object.entries(vars)) {
+    const match = BACKDROP_KEY.exec(key);
+    const url = imageUrl(value);
+    if (!match?.[1] || !match[2] || !url) continue;
+    (halves[match[1]] ??= {})[match[2] as keyof ReviewBackdrop] = url;
+  }
+  const backdrops: Record<string, ReviewBackdrop> = {};
+  for (const [city, { light, dark }] of Object.entries(halves)) {
+    if (light && dark) backdrops[city] = { light, dark };
+  }
+  return backdrops;
+}
+
+/** The backdrop for a review's city, matched the way the copy keys are written. */
+export function reviewBackdrop(
+  settings: SiteSettings,
+  city: string | undefined,
+): ReviewBackdrop | undefined {
+  if (!city) return undefined;
+  const key = city
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '');
+  return settings.reviewBackdrops[key];
+}
+
 const TAG_KEYS = [
   'reviews',
   'recipes',
@@ -176,6 +223,8 @@ export function assembleSettings(vars: Record<string, string>): SiteSettings {
       }),
       3,
     ),
+
+    reviewBackdrops: reviewBackdrops(vars),
   };
 }
 

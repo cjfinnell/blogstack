@@ -50,6 +50,10 @@ export const tokenCss = `
     --on-accent:    light-dark(#FBF9F4, #0E1826);
     --rule:         light-dark(#E2E6EC, #23364F);
     --rule-strong:  light-dark(#7F8B9B, #7793B0);
+    /* behind the floating reading card on wide screens: a step down from
+       cream in both modes, so the cream card reads as nearer */
+    --backdrop:     light-dark(#EBF0F5, #08101A);
+    --card-shadow:  light-dark(rgb(22 38 63 / 0.14), rgb(0 0 0 / 0.5));
 
     /* the painted ribbon, lit for each mode rather than punched out */
     --rib-a1: light-dark(#C6D6EE, #8FA9D2);
@@ -85,6 +89,10 @@ export const tokenCss = `
   :root[data-theme='dark']  { color-scheme: dark; }
 
   * { box-sizing: border-box; }
+
+  /* The masthead is sticky, so in-page jumps (footnotes, skip link) must land
+     below it rather than under it. */
+  html { scroll-padding-top: 6rem; }
 
   body {
     margin: 0;
@@ -147,7 +155,7 @@ export const tokenCss = `
 
   hr.rule-full { border: none; border-top: 1px solid var(--navy); margin: 0; }
 
-  img { max-width: 100%; }
+  img { max-width: 100%; height: auto; }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {

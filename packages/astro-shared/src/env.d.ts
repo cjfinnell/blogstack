@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly CMS_URL?: string;
+  readonly CMS_TOKEN?: string;
   readonly RENDER_MODE?: string;
 }
 

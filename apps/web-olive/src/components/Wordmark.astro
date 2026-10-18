@@ -66,17 +66,17 @@ const { size, siteName, href = '/' } = Astro.props;
 
   /* Height is reserved from the same clamp that sets the size, so the swap from
      fallback to script face cannot shift the page below it. */
+  /* Home: the full-screen hero. */
   .is-home {
-    font-size: clamp(3.5rem, 10vw, 6rem);
-    min-height: calc(clamp(3.5rem, 10vw, 6rem) * 1.13);
+    font-size: clamp(4rem, 11vw, 8rem);
+    min-height: calc(clamp(4rem, 11vw, 8rem) * 1.13);
   }
-  .is-map {
-    font-size: clamp(3rem, 8vw, 4.75rem);
-    min-height: calc(clamp(3rem, 8vw, 4.75rem) * 1.13);
-  }
+  /* Map and review share the compact header bar, where the mark sits left. */
+  .is-map,
   .is-review {
-    font-size: clamp(2.5rem, 6vw, 3.75rem);
-    min-height: calc(clamp(2.5rem, 6vw, 3.75rem) * 1.13);
+    font-size: clamp(1.9rem, 3vw, 2.4rem);
+    min-height: calc(clamp(1.9rem, 3vw, 2.4rem) * 1.13);
+    text-align: left;
   }
 
   /* F3 only: the flourish sweeps under the whole name, never into the M. */

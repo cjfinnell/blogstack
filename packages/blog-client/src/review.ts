@@ -1,3 +1,4 @@
+import type { ReviewRating } from './review-facts';
 import type { Dish, Photo, ReviewAxes, ReviewMeta } from './types';
 
 /**
@@ -87,6 +88,22 @@ export function compositeScore(review: ReviewMeta): number | null {
   }
 
   return round1(scored.reduce((sum, value) => sum + value, 0) / scored.length);
+}
+
+/**
+ * The rating on the writer's own scale, for a review with no axes scored.
+ *
+ * Such a review is rated the way the writer rated it ("2.3 / 4"), not as the
+ * seven-axis composite: rescaling it to "5.8 out of 10" shows a number she
+ * never gave. The rating the post itself states wins over the structured
+ * field, which is the fallback. Null once any axis is scored.
+ */
+export function ownRating(review: ReviewMeta, stated?: ReviewRating | null): ReviewRating | null {
+  if (review.scoreState === 'unrated') return null;
+  if (reviewAxes(review).some((axis) => axis.value !== null)) return null;
+  if (stated) return stated;
+  if (typeof review.rating !== 'number') return null;
+  return { value: review.rating, max: review.ratingScaleMax ?? 4, html: '' };
 }
 
 function round1(value: number): number {

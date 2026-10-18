@@ -4,6 +4,7 @@ import {
   compositeScore,
   heroPhoto,
   isUnrated,
+  ownRating,
   photosMissingAlt,
   priceBand,
   reviewAxes,
@@ -200,5 +201,25 @@ describe('priceBand', () => {
 
   it('is null for a nonsense spend rather than showing a band', () => {
     expect(priceBand({ pricePerPerson: 0 })).toBeNull();
+  });
+});
+
+describe('ownRating', () => {
+  const stated = { value: 2.3, max: 4, html: 'It was good.' };
+
+  it('prefers the rating the post states over the structured field', () => {
+    expect(ownRating({ rating: 3, ratingScaleMax: 4 }, stated)).toBe(stated);
+  });
+
+  it('falls back to the structured field on its own scale, not rescaled', () => {
+    expect(ownRating({ rating: 2.3, ratingScaleMax: 4 })).toEqual({ value: 2.3, max: 4, html: '' });
+  });
+
+  it('gives way to the composite once any axis is scored', () => {
+    expect(ownRating({ rating: 2.3, axes: { food: 8 } }, stated)).toBeNull();
+  });
+
+  it('is null for a deliberately unrated review', () => {
+    expect(ownRating({ scoreState: 'unrated', rating: 2.3 }, stated)).toBeNull();
   });
 });

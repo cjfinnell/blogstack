@@ -3,7 +3,7 @@ import PostLayout from '../../layouts/PostLayout.astro';
 import ReviewLayout from '../../layouts/ReviewLayout.astro';
 import { postPublishedAt, postSlug, postTitle, reviewMeta } from '@blogstack/blog-client';
 import { blog } from '@blogstack/astro-shared/blog';
-import { renderPostHtml } from '@blogstack/astro-shared/post-html';
+import { optimizePostImages, renderPostHtml } from '@blogstack/astro-shared/post-html';
 import { theme } from '../../site';
 
 export const prerender = import.meta.env.RENDER_MODE !== 'ssr';
@@ -19,8 +19,20 @@ export async function getStaticPaths() {
 
 const post = Astro.props.post ?? (await blog.getPostBySlug(Astro.params.slug));
 if (!post) Astro.response.status = 404;
-const html = post ? await renderPostHtml(post.data?.content, theme) : null;
 const review = post ? reviewMeta(post) : null;
+const rendered = post ? await renderPostHtml(post.data?.content, theme) : null;
+// Only the static build resizes body images. The draft Worker would refetch
+// every upload on every request to infer its size, so drafts keep the CMS
+// originals.
+const html =
+  rendered && prerender
+    ? await optimizePostImages(rendered, {
+        cmsUrl: import.meta.env.CMS_URL ?? 'http://localhost:8787',
+        // The rendered column: the review reading column is 42rem, a plain
+        // post fills the 64rem wrap.
+        sizes: review ? '(min-width: 42rem) 42rem, 100vw' : '(min-width: 64rem) 64rem, 100vw',
+      })
+    : rendered;
 ---
 
 {
